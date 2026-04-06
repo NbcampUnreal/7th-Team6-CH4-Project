@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -14,4 +14,14 @@ class CH4_TEAMPROJECT_API ACH4PlayerController : public APlayerController
 {
 	GENERATED_BODY()
 	
+
+public:
+	ACH4PlayerController();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	TSubclassOf<UUserWidget> HUDWidgetClass;
+
+protected:
+	virtual void BeginPlay() override;
+
 };
