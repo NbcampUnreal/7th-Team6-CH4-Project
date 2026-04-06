@@ -16,4 +16,7 @@ class CH4_TEAMPROJECT_API ACH4GameMode : public AGameMode
 
 
 	
+
+public:
+	ACH4GameMode();//생성자
 };

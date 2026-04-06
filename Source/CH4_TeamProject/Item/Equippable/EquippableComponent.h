@@ -15,13 +15,8 @@ class CH4_TEAMPROJECT_API UEquippableComponent : public UActorComponent
 public:
 	// Sets default values for this component's properties
 	UEquippableComponent();
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	TMap<int32,class URangedGunDataAsset*> DataAsset;
 
-protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
-
-public:
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
-	                           FActorComponentTickFunction* ThisTickFunction) override;
 };
