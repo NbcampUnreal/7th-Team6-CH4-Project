@@ -4,7 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "InputActionValue.h"
 #include "CH4Character.generated.h"
+
 
 UCLASS()
 class CH4_TEAMPROJECT_API ACH4Character : public ACharacter
@@ -12,18 +14,56 @@ class CH4_TEAMPROJECT_API ACH4Character : public ACharacter
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this character's properties
+	
 	ACH4Character();
 
 protected:
-	// Called when the game starts or when spawned
+	
 	virtual void BeginPlay() override;
 
 public:	
-	// Called every frame
+	
 	virtual void Tick(float DeltaTime) override;
 
-	// Called to bind functionality to input
+	
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+protected:
+	//카메라쪽
+	UPROPERTY(EditAnywhere)
+	class USpringArmComponent* SpringArm;
+
+	UPROPERTY(EditAnywhere)
+	class UCameraComponent* Camera;
+
+	//함수모음
+private:
+	void InitializationPlayerMesh();//메쉬 함수
+
+	void InitializationCamera();//카메라 함수
+
+	void InitializationInput();//인풋 함수
+
+	void Move(const FInputActionValue& Value);//무브함수
+	
+	void Look(const FInputActionValue& Value);//시점 함수
+
+
+	//입력값(움직임,시점)
+private:
+	UPROPERTY(VisibleAnywhere, Category = "Input")
+	class UInputMappingContext* DefaultContext;
+
+	UPROPERTY(VisibleAnywhere, Category = "Input")
+	class UInputAction* MoveAction;
+
+	UPROPERTY(VisibleAnywhere, Category = "Input")
+	class UInputAction* LookAction;
+
+public:
+	UPROPERTY(EditAnywhere)
+	float mouseSpeed = 45.0f;
+
+	UPROPERTY(EditAnywhere)
+	float PlayerMoveSpeed = 350.0f;
 };
