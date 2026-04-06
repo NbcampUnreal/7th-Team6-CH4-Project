@@ -4,7 +4,7 @@
 #include "RangedWeaponDataAsset.h"
 
 
-FPrimaryAssetId URangedWeaponDataAsset::GetPrimaryAssetId() const
+FPrimaryAssetId URangedGunDataAsset::GetPrimaryAssetId() const
 {
 	return FPrimaryAssetId(TEXT("Weapon"), GetFName());
 }
