@@ -11,15 +11,15 @@
  * 
  */
 UCLASS()
-class CH4_TEAMPROJECT_API URangedWeaponDataAsset : public UPrimaryDataAsset
+class CH4_TEAMPROJECT_API URangedGunDataAsset : public UPrimaryDataAsset
 {
 	GENERATED_BODY()
 public:
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Equip_Gun_Weapon")
-	int32 Damage;
+	int32 Damage =20;
 	
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Equip_Gun_Weapon")
-	int32 MaxAmmo;
+	int32 MaxAmmo = 60;
 	
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Equip_Gun_Weapon")
 	TSubclassOf<class ARangedWeapons> WeaponClass;

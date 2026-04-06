@@ -18,7 +18,6 @@ ARPCTestActor::ARPCTestActor()
 void ARPCTestActor::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame

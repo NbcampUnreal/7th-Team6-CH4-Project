@@ -5,6 +5,8 @@
 #include "DrawDebugHelpers.h"
 #include "Components/StaticMeshComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "RangedWeaponDataAsset.h"
+#include "CH4_TeamProject/Item/Equippable/EquippableComponent.h"
 #include "Net/UnrealNetwork.h"
 
 // Sets default values
@@ -18,12 +20,9 @@ ARangedWeapons::ARangedWeapons()
 	WeaponMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WeaponMesh"));
 	
 	SetRootComponent(WeaponMesh);
+	WeaponComponent = CreateDefaultSubobject<UEquippableComponent>(TEXT("WeaponComponent"));
 	
 	WeaponMesh->SetCollisionProfileName(TEXT("NoCollision"));
-	
-	DataAsset = CreateDefaultSubobject<URangedWeaponDataAsset>(TEXT("DataAsset"));
-	
-	CurrentAmmo = DataAsset->MaxAmmo;
 }
 
 
@@ -47,7 +46,7 @@ void ARangedWeapons::ProcessDamage(AActor* TargetActor)
 		// 중요: ApplyDamage를 호출하면 피격자의 TakeDamage가 서버에서 자동 호출됨
 		UGameplayStatics::ApplyDamage(
 			TargetActor,           
-			DataAsset->Damage,          
+			GunDataAsset->Damage,          
 			GetInstigatorController(), 
 			this,                  
 			UDamageType::StaticClass() 
@@ -58,24 +57,14 @@ void ARangedWeapons::ProcessDamage(AActor* TargetActor)
 void ARangedWeapons::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ARangedWeapons, CurrentAmmo);
+	DOREPLIFETIME(ARangedWeapons, MaxClip); 
 }
 
-// float ARangedWeapons::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
-// 	class AController* EventInstigator, AActor* DamageCauser)
-// {
-// 	return Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-// 	
-// 	if (HasAuthority())
-// 	{
-// 		
-// 	}
-// 	
-// }
-
-// Called when the game starts or when spawned
 void ARangedWeapons::BeginPlay()
 {
 	Super::BeginPlay();
+	CurrentAmmo = GunDataAsset->MaxAmmo;
 }
 
 // Called every frame
@@ -89,6 +78,11 @@ void ARangedWeapons::Server_Fire_Implementation()
 	UE_LOG(LogTemp, Warning, TEXT("3. Server_Fire_Implementation"));
 	TraceShoot();
 	Multicast_PlayEffects();
+	if (CurrentAmmo >0)
+	{
+		CurrentAmmo --;
+	}
+	GEngine->AddOnScreenDebugMessage(-1,10,FColor::Red,FString::Printf(TEXT("남은 총알 %d"),CurrentAmmo),false);
 	// 총알 감소및
 	// 쿨타임 초기화 등등
 }
@@ -116,15 +110,38 @@ void ARangedWeapons::Fire()
 		return;
 	}
 	UE_LOG(LogTemp, Warning, TEXT("1. Fire Called on Client"));
-	// 서버에 사격요청및 로컬에서만 이펙트 사운드 재생
-	
-	// if (IsLocallyControlled())
-	// {
-	// 	Multicast_PlayEffects(); 
-	// }
 	
 	Server_Fire();	
 }
+
+void ARangedWeapons::ProcessReload()
+{
+	if (!GunDataAsset || CurrentAmmo >= GunDataAsset->MaxAmmo) return;
+	if (MaxClip <= 0){ return; }
+	int32 AmmoNeeded = GunDataAsset->MaxAmmo - CurrentAmmo;
+	int32 AmmoToFill = FMath::Min(AmmoNeeded, MaxClip);
+	
+	if (HasAuthority()&&GunDataAsset)
+	{
+		CurrentAmmo += AmmoToFill;
+		MaxClip -= AmmoToFill;
+	}
+}
+
+void ARangedWeapons::Server_ReLoad_Implementation()
+{
+	ProcessReload();
+}
+
+bool ARangedWeapons::Server_ReLoad_Validate()
+{
+	if (MaxClip >=0)
+	{
+		return true;
+	}
+	return false;
+}
+
 
 void ARangedWeapons::TraceShoot()
 {
@@ -160,4 +177,12 @@ void ARangedWeapons::TraceShoot()
 			Server_ApplyDamageToTarget(Hit.GetActor());
 		}
 	}
+}
+int32 ARangedWeapons::GetMaxAmmo () const
+{
+	if (GunDataAsset)
+	{
+		return GunDataAsset->MaxAmmo;
+	}
+	return 0;
 }

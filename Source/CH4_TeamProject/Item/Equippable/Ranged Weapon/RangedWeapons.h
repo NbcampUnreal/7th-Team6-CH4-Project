@@ -3,10 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "RangedWeaponDataAsset.h"
 #include "../Equippable.h"
 #include "RangedWeapons.generated.h"
 
+class URangedGunDataAsset;
 UCLASS()
 class CH4_TEAMPROJECT_API ARangedWeapons : public AEquippable
 {
@@ -14,6 +14,8 @@ class CH4_TEAMPROJECT_API ARangedWeapons : public AEquippable
 
 public:
 	// Sets default values for this actor's properties
+	UPROPERTY(BlueprintReadWrite, EditAnywhere,Category="DataComponent")
+	TObjectPtr<class UEquippableComponent> WeaponComponent;
 	
 	ARangedWeapons();
 	
@@ -33,25 +35,23 @@ public:
 		return CurrentAmmo; 
 	} 
 	
-	int32 GetMaxAmmo () const
-	{
-		if (DataAsset)
-		{
-			return DataAsset->MaxAmmo;
-		}
-		return 0;
-	}
+	int32 GetMaxAmmo () const;
 	
-	// Called every frame
+	int32 GetMaxClip()const
+	{
+		return MaxClip;
+	}
 	virtual void Tick(float DeltaTime) override;
 	
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	
 	UPROPERTY(Replicated)
 	int32 CurrentAmmo;
 
+	UPROPERTY(Replicated)
+	int32 MaxClip = 300;
+	
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_Fire();
 	
@@ -63,7 +63,11 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	virtual void Fire();
 	
-	UPROPERTY(Replicated)
-	TObjectPtr<URangedWeaponDataAsset> DataAsset;
+	UPROPERTY(EditAnywhere,Category="DataAsset")
+	URangedGunDataAsset* GunDataAsset;
 	
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_ReLoad();
+	
+	void ProcessReload();
 };
