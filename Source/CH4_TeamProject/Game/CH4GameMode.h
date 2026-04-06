@@ -14,4 +14,7 @@ class CH4_TEAMPROJECT_API ACH4GameMode : public AGameMode
 {
 	GENERATED_BODY()
 	
+
+public:
+	ACH4GameMode();//생성자
 };
