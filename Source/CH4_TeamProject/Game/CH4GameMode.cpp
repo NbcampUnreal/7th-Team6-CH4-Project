@@ -39,17 +39,6 @@ void ACH4GameMode::StartPlay()
 		0.f);
 }
 
-void ACH4GameMode::SetGamePhase(EGamePhase NewPhase)
-{
-	GamePhase = NewPhase;
-	
-	ACH4GameState* GS = Cast<ACH4GameState>(GetWorld()->GetGameState());
-	if (GS)
-	{
-		GS->OnRep_GamePhase();
-	}
-}
-
 void ACH4GameMode::OnPlayerDowned(ACH4PlayerState* PlayerState)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Player Downed"));
@@ -104,12 +93,17 @@ void ACH4GameMode::CheckLoseCondition()
 	// 게임 종료 함수 호출
 }
 
-void ACH4GameMode::OnWaveCleared()
+void ACH4GameMode::StartFinalDefenseWave()
 {
-	// 웨이브 클리어
+	// 웨이브 시작 명령
 }
 
-void ACH4GameMode::UpdateServerTime() const
+void ACH4GameMode::OnWaveCleared()
+{
+	// 웨이브 중지, 플레이어컨트롤러 입력x, UI 변경 명령 
+}
+
+void ACH4GameMode::UpdateMainServerTime() const
 {
 	if (ACH4GameState* GS = GetGameState<ACH4GameState>())
 	{

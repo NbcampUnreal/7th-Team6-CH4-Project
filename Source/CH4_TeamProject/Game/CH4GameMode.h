@@ -23,9 +23,7 @@ public:
 protected:
 	virtual void StartPlay() override;
 	
-public:
-	void SetGamePhase(EGamePhase NewPhase);
-	
+public:	
     // 플레이어 관리
     void OnPlayerDowned(ACH4PlayerState* PlayerState);   // 다운 발생 시
     void OnPlayerRevived(ACH4PlayerState* PlayerState);  // 소생 시
@@ -35,10 +33,11 @@ public:
     void CheckLoseCondition();  // 전원 다운
 
     // 웨이브 제어 -> 웨이브 매니저?
+    void StartFinalDefenseWave();
     void OnWaveCleared();
 	
 private:
-	void UpdateServerTime() const;
+	void UpdateMainServerTime() const;
 	void StartFinalDefenseTimer() const;
 	void EndGame();
 
