@@ -7,6 +7,7 @@
 #include "Engine/Engine.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Perception/AIPerceptionStimuliSourceComponent.h"
 
 ACH4Character::ACH4Character()
 {
@@ -16,6 +17,8 @@ ACH4Character::ACH4Character()
 	InitializationPlayerMesh();//메쉬 함수 호출
 	InitializationCamera();//카메라 함수 호출
 	InitializationInput();//인풋 함수
+	
+	StimuliSource = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("StimuliSource"));
 }
 
 void ACH4Character::BeginPlay()

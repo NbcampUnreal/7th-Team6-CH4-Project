@@ -8,6 +8,8 @@ UBTTask_Attack::UBTTask_Attack()
 
 EBTNodeResult::Type UBTTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
+	bNotifyTick = true;
+	
 	AAIController* Owner = OwnerComp.GetAIOwner();
 	if (Owner == nullptr)
 	{

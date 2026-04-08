@@ -57,7 +57,17 @@ void AZombieBase::OnDeath()
 	UAnimInstance* DeathMontageInstance = GetMesh()->GetAnimInstance();
 	if (DeathMontageInstance && DeathMontage)
 	{
-		DeathMontageInstance->Montage_Play(DeathMontage);
+		float PlayLength = DeathMontageInstance->Montage_Play(DeathMontage);
+		
+		float Delay = FMath::Max(0.f, PlayLength - 0.3f);
+		
+		GetWorldTimerManager().SetTimer(
+		DestroyTimerHandle,
+		this,
+		&AZombieBase::DestroyZombie,
+		Delay,
+		false
+		);
 	}
 	
 	// 지금 움직이고 있는 좀비를 즉시 정지 (속도만 0으로, 입력이 다시 들어오면 움직임)
@@ -69,4 +79,9 @@ void AZombieBase::OnDeath()
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);\
 	// 메쉬 콜리전 지움
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
+void AZombieBase::DestroyZombie()
+{
+	Destroy();
 }

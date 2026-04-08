@@ -6,7 +6,7 @@ ANormalZombie::ANormalZombie()
 {
 	MaxHP = 100;
 	CurrentHP = MaxHP;
-	MoveSpeed = 40.f;
+	MoveSpeed = 60.f;
 	Damage = 30.f;
 }
 
@@ -21,7 +21,7 @@ float ANormalZombie::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	
 	// 체력이 0보다 작아지면 OnDeath 함수 실행
-	if (CurrentHP < 0)
+	if (CurrentHP <= 0)
 	{
 		OnDeath();
 	}
@@ -32,6 +32,4 @@ float ANormalZombie::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 void ANormalZombie::OnDeath()
 {
 	Super::OnDeath();
-	
-	Destroy();
 }
