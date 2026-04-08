@@ -22,7 +22,7 @@ public:
 
 protected:
 	virtual void StartPlay() override;
-	void EndGame(EGamePhase GP);
+	void EndGame(EGamePhase GP) const;
 	
 public:
     // 플레이어 관리
@@ -39,6 +39,8 @@ public:
 private:
 	void UpdateMainServerTime() const;
 	// void StartFinalDefenseTimer() const;
-
+	
 	FTimerHandle ServerTimeTimerHandle;
+	
+	void MoveToLobby() const;
 };

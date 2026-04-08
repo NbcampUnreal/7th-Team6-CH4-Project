@@ -38,6 +38,7 @@ public:
 	void OnRep_LifeState();
 
 	void SetLifeState(EPlayerLifeState NewState);
+	void SetCurrentHP(float Damage);
 	
 	UFUNCTION()
 	void OnRep_IsDowned(); // 다운 연출 (팀원 화면에도 표시)

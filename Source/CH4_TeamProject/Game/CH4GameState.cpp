@@ -11,8 +11,6 @@ ACH4GameState::ACH4GameState()
 	
 	GamePhase = EGamePhase::StartStage;
 	GearPartsCount = 0;
-	TotalGearPartsCount = 3;
-	
 	
 	// 기본값 초기화 (예: Score 초기화)
 	Score = 0;
@@ -47,7 +45,7 @@ void ACH4GameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	DOREPLIFETIME(ACH4GameState, ServerTime);
 	DOREPLIFETIME(ACH4GameState, GamePhase);
 	DOREPLIFETIME(ACH4GameState, PhaseRemainingTime);
-	DOREPLIFETIME(ACH4GameState, GearPartsCollected);
+	DOREPLIFETIME(ACH4GameState, GearPartsCount);
 }
 
 // 변수 복제 시 UI 갱신
@@ -59,7 +57,7 @@ void ACH4GameState::OnRep_CurrentPhase()
 
 void ACH4GameState::OnRep_GearParts()
 {
-	UE_LOG(LogTemp, Warning, TEXT("GearParts Count: %d/%d"), GearPartsCount, TotalGearPartsCount);
+	UE_LOG(LogTemp, Warning, TEXT("GearParts Count: %d"), GearPartsCount);
 	// UI : Collected GearParts 갱신
 }
 

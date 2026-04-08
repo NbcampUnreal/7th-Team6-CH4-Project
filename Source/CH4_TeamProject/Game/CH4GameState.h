@@ -41,9 +41,6 @@ public:
 	UPROPERTY(Replicated)
 	float PhaseRemainingTime;
 	
-	UPROPERTY(ReplicatedUsing = OnRep_GearParts)
-	int32 GearPartsCollected;
-	
 	UPROPERTY(Replicated)
 	int32 AlivePlayerCount = 4;
 	
@@ -56,8 +53,8 @@ public:
 	UPROPERTY(ReplicatedUsing = OnRep_GamePhase)
 	EGamePhase GamePhase;
 	
+	UPROPERTY(ReplicatedUsing = OnRep_GearParts)
 	int32 GearPartsCount;
-	int32 TotalGearPartsCount;
 	
 	UFUNCTION()
 	void OnRep_CurrentPhase();
@@ -72,12 +69,13 @@ public:
 	int32 GetAlivePlayerCount() const{ return AlivePlayerCount; }
 	void AddAlivePlayerCount() { AlivePlayerCount++; }
 	void SubtractAlivePlayerCount() { AlivePlayerCount--; }
-	void AddGearPartsCount() { GearPartsCollected++; }
+	void AddGearPartsCount() { GearPartsCount++; }
 	
-	bool CheckAlivePlayerIsZero(); 
+	bool CheckAlivePlayerIsZero();
 	
 	void SetGamePhase(EGamePhase NewPhase);
 	
 	float GetFinalDefenceTime() const { return FinalDefenceTime; }
 	
+	// 좀비들 정보를 저장하는 구조체를 만들어서 좀비 체력 감소도 기록할 필요가 있을 듯.
 };

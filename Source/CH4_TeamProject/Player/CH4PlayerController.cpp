@@ -20,5 +20,39 @@ void ACH4PlayerController::BeginPlay()
             HUDWidget->AddToViewport();
         }
     }
+}
 
+void ACH4PlayerController::Client_HandlePlayerDowned_Implementation()
+{
+    // 다운 애니메이션 재생 명령(Client RPC), 컨트롤 무력화, 회색 UI 명령
+    
+    SetIgnoreMoveInput(true);
+    SetIgnoreLookInput(true);
+    // SetIgnoreJumpInput(true); -> 점프 구현 시 주석 풀기
+    
+    // ACH4Character* MyChar = Cast<ACH4Character>(GetPawn());  -> 다운 애니메이션 찾으면 주석 풀기
+    // if (MyChar)
+    // {
+    //     MyChar->PlayDownAnimation();
+    // }
+    
+    // ShowDownedUI(); 회색 화면 등 -> 구현 필요
+}
+
+void ACH4PlayerController::Client_HandlePlayerRevived_Implementation()
+{
+    // 애니메이션 원래대로, 조작 가능하도록 변경, UI 원상복구
+    
+    SetIgnoreMoveInput(false);
+    SetIgnoreLookInput(false);
+    // SetIgnoreJumpInput(false); -> 점프 구현 시 주석 풀기
+    
+    // ACH4Character* MyChar = Cast<ACH4Character>(GetPawn());  -> 소생 애니메이션 찾으면 주석 풀기
+    // if (MyChar)
+    // {
+    //     MyChar->PlayReviveAnimation();
+    // }
+    
+    // UI 복구
+    // HideDownedUI(); -> UI 구현 시 주석 풀기
 }

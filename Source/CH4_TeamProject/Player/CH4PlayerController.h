@@ -23,5 +23,13 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-
+	
+public:
+	// 서버 -> 해당 클라에서만 실행
+	UFUNCTION(Client, Reliable)
+	void Client_HandlePlayerDowned();
+	
+	UFUNCTION(Client, Reliable)
+	void Client_HandlePlayerRevived();
+	
 };

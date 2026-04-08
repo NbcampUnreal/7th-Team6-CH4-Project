@@ -5,7 +5,10 @@
 
 #include "CH4GameMode.h"
 
-ACH4PlayerState::ACH4PlayerState() : CurrentHP(MaxHP), MaxHP(100.f) // SpawnPointIndex()
+ACH4PlayerState::ACH4PlayerState() : 
+		CurrentHP(MaxHP), 
+		MaxHP(100.f) 
+		// SpawnPointIndex()
 {
 }
 
@@ -26,6 +29,19 @@ void ACH4PlayerState::SetLifeState(EPlayerLifeState NewState)
 {
 	LifeState = NewState;
 	OnRep_LifeState(); // 서버에 반영
+}
+
+void ACH4PlayerState::SetCurrentHP(float Damage)
+{
+	CurrentHP -= Damage;
+	if (CurrentHP <= 0)
+	{
+		ACH4GameMode* GM = GetWorld()->GetAuthGameMode<ACH4GameMode>();
+		if (GM)
+		{
+			GM->OnPlayerDowned(this);
+		}
+	}
 }
 
 void ACH4PlayerState::OnRep_IsDowned()
