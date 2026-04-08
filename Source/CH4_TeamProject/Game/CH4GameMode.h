@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameMode.h"
 #include "CH4_TeamProject/DataBase/DataBase.h"
+#include "CH4_TeamProject/Game/CH4PlayerState.h"
 #include "CH4GameMode.generated.h"
 
 /**

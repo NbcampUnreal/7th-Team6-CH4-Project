@@ -17,5 +17,3 @@ enum class EGamePhase : uint8
 	Clear UMETA(DisplayName = "Clear"),
 	Lose UMETA(DisplayName = "Lose")
 };
-
-FORCEINLINE float DefenceTimer = 300.f;

@@ -10,7 +10,6 @@ ACH4GameState::ACH4GameState()
 	bReplicates = true;
 	
 	GamePhase = EGamePhase::StartStage;
-	GameResult = EGameResult::None;
 	GearPartsCount = 0;
 	TotalGearPartsCount = 3;
 	
@@ -44,8 +43,9 @@ int32 ACH4GameState::GetScore() const
 void ACH4GameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
 	DOREPLIFETIME(ACH4GameState, ServerTime);
-	DOREPLIFETIME(ACH4GameState, CurrentPhase);
+	DOREPLIFETIME(ACH4GameState, GamePhase);
 	DOREPLIFETIME(ACH4GameState, PhaseRemainingTime);
 	DOREPLIFETIME(ACH4GameState, GearPartsCollected);
 }
