@@ -10,8 +10,10 @@ ACH4GameState::ACH4GameState()
 	bReplicates = true;
 	
 	GamePhase = EGamePhase::StartStage;
+	GameResult = EGameResult::None;
 	GearPartsCount = 0;
 	TotalGearPartsCount = 3;
+	
 	
 	// 기본값 초기화 (예: Score 초기화)
 	Score = 0;
@@ -75,38 +77,37 @@ void ACH4GameState::OnRep_GamePhase()
 		// UI : 디펜스 시작 메세지
 		break;
 		
-		case EGamePhase::Clear :
+	case EGamePhase::Clear :
 		// UI : 스테이지 클리어
 		break;
-	}
-}
-
-void ACH4GameState::OnRep_GameResult()
-{
-	UE_LOG(LogTemp, Warning, TEXT("Game Result Changed"));
-	
-	switch (GameResult)
-	{
-	case EGameResult::None:
-		break;
 		
-	case EGameResult::Win:
-		// 승리 UI
-		break;
-
-	case EGameResult::Lose:
+	case EGamePhase::Lose:
 		// 패배 UI
 		break;
 	}
 }
 
-void ACH4GameState::SetGameResult(EGameResult NewResult)
+bool ACH4GameState::CheckAlivePlayerIsZero()
 {
-	if (GameResult == NewResult) return;
-	
-	GameResult = NewResult;
-	OnRep_GameResult(); // 서버에서도 실행
+	bool AlivePlayerIsZero;
+	if (AlivePlayerCount > 0)
+	{
+		AlivePlayerIsZero = false;
+	}
+	else
+	{
+		AlivePlayerIsZero = true;
+		SetGamePhase(EGamePhase::Lose);
+	}
+	return AlivePlayerIsZero;
+}
 
+void ACH4GameState::SetGamePhase(EGamePhase NewPhase)
+{
+	if (GamePhase == NewPhase) return;
+	
+	GamePhase = NewPhase;
+	OnRep_GamePhase(); // 서버에서도 실행
 }
 
 

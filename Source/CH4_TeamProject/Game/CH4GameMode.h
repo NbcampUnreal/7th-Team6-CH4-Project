@@ -22,6 +22,7 @@ public:
 
 protected:
 	virtual void StartPlay() override;
+	void EndGame(EGamePhase GP);
 	
 public:	
     // 플레이어 관리
@@ -29,9 +30,8 @@ public:
     void OnPlayerRevived(ACH4PlayerState* PlayerState);  // 소생 시
 
     // 승패 판정
-    void CheckWinCondition();   // 웨이브 클리어
-    void CheckLoseCondition();  // 전원 다운
-
+    void CheckCondition();
+	
     // 웨이브 제어 -> 웨이브 매니저?
     void StartFinalDefenseWave();
     void OnWaveCleared();
@@ -39,7 +39,6 @@ public:
 private:
 	void UpdateMainServerTime() const;
 	void StartFinalDefenseTimer() const;
-	void EndGame();
 
 	FTimerHandle ServerTimeTimerHandle;
 };

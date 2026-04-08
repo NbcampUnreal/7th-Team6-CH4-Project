@@ -37,10 +37,7 @@ public:
 	FORCEINLINE float GetServerTime() const { return ServerTime(); }
 	FORCEINLINE void SetServerTime(const float NewTime) { ServerTime = NewTime; }
 
-public:
-	UPROPERTY(Replicated)
-	EGamePhase CurrentPhase; // 생존, 최종 디펜스
-	
+public:	
 	UPROPERTY(Replicated)
 	float PhaseRemainingTime;
 	
@@ -48,16 +45,16 @@ public:
 	int32 GearPartsCollected;
 	
 	UPROPERTY(Replicated)
-	int32 AlivePlayerCount;
+	int32 AlivePlayerCount = 4;
 	
 	UPROPERTY(Replicated)
 	float ServerTime = 0.f;
 	
+	UPROPERTY(Replicated)
+	float FinalDefenceTime = 5.f * 60.f;
+	
 	UPROPERTY(ReplicatedUsing = OnRep_GamePhase)
 	EGamePhase GamePhase;
-	
-	UPROPERTY(ReplicatedUsing = OnRep_GameResult)
-	EGameResult GameResult;
 	
 	int32 GearPartsCount;
 	int32 TotalGearPartsCount;
@@ -70,14 +67,17 @@ public:
 	
 	UFUNCTION()
 	void OnRep_GamePhase();
-	
-	UFUNCTION()
-	void OnRep_GameResult();
 
+	// 함수 끝의 const 의미 : 이 함수는 멤버 변수를 바꾸지 않는다.
 	int32 GetAlivePlayerCount() const{ return AlivePlayerCount; }
 	void AddAlivePlayerCount() { AlivePlayerCount++; }
 	void SubtractAlivePlayerCount() { AlivePlayerCount--; }
 	void AddGearPartsCount() { GearPartsCollected++; }
 	
-	void SetGameResult(EGameResult NewResult);
+	bool CheckAlivePlayerIsZero(); 
+	
+	void SetGamePhase(EGamePhase NewPhase);
+	
+	float GetFinalDefenceTime() const { return FinalDefenceTime; }
+	
 };

@@ -14,15 +14,8 @@ enum class EGamePhase : uint8
 {
 	StartStage UMETA(DisplayName = "StartStage"),
 	FinalDefense UMETA(DisplayName = "FinalDefense"),
-	Clear UMETA(DisplayName = "Clear")
+	Clear UMETA(DisplayName = "Clear"),
+	Lose UMETA(DisplayName = "Lose")
 };
 
 FORCEINLINE float DefenceTimer = 300.f;
-
-UENUM(BlueprintType)
-enum class EGameResult : uint8
-{
-	None,
-	Win,
-	Lose
-};
