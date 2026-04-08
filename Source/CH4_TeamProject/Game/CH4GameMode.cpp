@@ -104,10 +104,10 @@ void ACH4GameMode::CheckCondition() // 플레이어가 다운될 때마다 체�
 	// 게임 종료 함수 호출
 }
 
-void ACH4GameMode::StartFinalDefenseWave()
-{
-	// 웨이브 시작 명령
-}
+// void ACH4GameMode::StartFinalDefenseWave()
+// {
+// 	웨이브 시작 명령
+// }
 
 void ACH4GameMode::OnWaveCleared()
 {
@@ -123,8 +123,8 @@ void ACH4GameMode::UpdateMainServerTime() const
 	}
 }
 
-void ACH4GameMode::StartFinalDefenseTimer() const
-{
-	// 구조 신호 발생 -> 디펜스 타이머 시작 (DataBase::DefenceTimer)
-}
+// void ACH4GameMode::StartFinalDefenseTimer() const
+// {
+// 	// 구조 신호 발생 -> 디펜스 타이머 시작 (DataBase::DefenceTimer)
+// }
 

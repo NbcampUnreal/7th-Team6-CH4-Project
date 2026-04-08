@@ -31,23 +31,3 @@ void ACH4PlayerState::SetLifeState(EPlayerLifeState NewState)
 void ACH4PlayerState::OnRep_IsDowned()
 {
 }
-
-void ACH4PlayerState::ApplyDamage(float DamageAmount)
-{
-	// 캐릭터에서 이 함수 호출 예정
-	if (!HasAuthority()) return;
-	
-	CurrentHP -= DamageAmount;
-	if (CurrentHP <= 0.f)
-	{
-		CurrentHP = 0.f;
-		SetLifeState(EPlayerLifeState::Downed);
-		
-		ACH4GameMode* GM = GetWorld()->GetAuthGameMode<ACH4GameMode>();
-		if (GM)
-		{
-			GM->OnPlayerDowned(this);
-		}
-		// 전체 상태 갱신
-	}
-}

@@ -41,8 +41,4 @@ public:
 	
 	UFUNCTION()
 	void OnRep_IsDowned(); // 다운 연출 (팀원 화면에도 표시)
-	
-	UFUNCTION()
-	void ApplyDamage(float DamageAmount); // PlayerCharacter와 상의
-	// Third Person 프로젝트에서 데미지 처리를 어떻게 하는지 참고해서
 };

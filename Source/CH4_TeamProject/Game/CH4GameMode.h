@@ -1,5 +1,4 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
-// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -24,7 +23,7 @@ protected:
 	virtual void StartPlay() override;
 	void EndGame(EGamePhase GP);
 	
-public:	
+public:
     // 플레이어 관리
     void OnPlayerDowned(ACH4PlayerState* PlayerState);   // 다운 발생 시
     void OnPlayerRevived(ACH4PlayerState* PlayerState);  // 소생 시
@@ -33,12 +32,12 @@ public:
     void CheckCondition();
 	
     // 웨이브 제어 -> 웨이브 매니저?
-    void StartFinalDefenseWave();
-    void OnWaveCleared();
+    // void StartFinalDefenseWave();
+    // void OnWaveCleared();
 	
 private:
 	void UpdateMainServerTime() const;
-	void StartFinalDefenseTimer() const;
+	// void StartFinalDefenseTimer() const;
 
 	FTimerHandle ServerTimeTimerHandle;
 };
