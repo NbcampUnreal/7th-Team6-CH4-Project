@@ -28,19 +28,12 @@ void AEquippable::Tick(float DeltaTime)
 
 void AEquippable::Equip(ACharacter* TargetCharacter)
 {
-	if (TargetCharacter && HasAuthority())
+	if (TargetCharacter)
 	{
-		// 1. 소유자 설정 (이전에 했던 Owner 설정!)
 		SetOwner(TargetCharacter);
-
-		// 2. 물리 시뮬레이션 등이 있다면 끄기
-		// Mesh->SetSimulatePhysics(false);
-
-		// 3. 캐릭터 소켓에 부착
 		AttachToComponent(
 			TargetCharacter->GetMesh(), 
-			FAttachmentTransformRules::SnapToTargetIncludingScale
-			//
+			FAttachmentTransformRules::SnapToTargetIncludingScale,FName(TEXT("Weapon_r"))
 		);
         
 		UE_LOG(LogTemp, Warning, TEXT("%s 장착 완료!"), *GetName());

@@ -19,6 +19,12 @@ ACH4Character::ACH4Character()
 	InitializationInput();//인풋 함수
 	
 	StimuliSource = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("StimuliSource"));
+
+	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimInstance(TEXT("/Game/Player/PlayerBluePrint/ABP_Player.ABP_Player_C"));
+	if (AnimInstance.Class)
+	{
+		GetMesh()->SetAnimInstanceClass(AnimInstance.Class);
+	}
 }
 
 void ACH4Character::BeginPlay()
