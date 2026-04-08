@@ -57,7 +57,7 @@ void ACH4GameState::OnRep_CurrentPhase()
 
 void ACH4GameState::OnRep_GearParts()
 {
-	UE_LOG(LogTemp, Warning, TEXT("GearParts Count: %d/%d"), GearPartsCount, TotalGearPartsCount);
+	UE_LOG(LogTemp, Warning, TEXT("GearParts Count: %d"), GearPartsCount);
 	// UI : Collected GearParts 갱신
 }
 
