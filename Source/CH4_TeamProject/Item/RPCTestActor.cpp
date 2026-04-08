@@ -35,7 +35,7 @@ float ARPCTestActor::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 		Hp -= ActualDamage;
 		if (Hp <=0)
 		{
-			Destroy();
+			Destroy();	
 		}
 	}
 	UE_LOG(LogTemp,Error, TEXT("%d"),Hp);
