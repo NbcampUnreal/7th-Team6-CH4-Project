@@ -34,7 +34,7 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
 	// INLINE : 함수 호출 시 코드 복붙
-	FORCEINLINE float GetServerTime() const { return ServerTime(); }
+	FORCEINLINE float GetServerTime() const { return ServerTime; }
 	FORCEINLINE void SetServerTime(const float NewTime) { ServerTime = NewTime; }
 
 public:	
