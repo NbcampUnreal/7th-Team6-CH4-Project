@@ -11,11 +11,17 @@ class CH4_TEAMPROJECT_API AMonsterAIController : public AAIController
 	
 public:
 	AMonsterAIController();
-	
+	void BeginPlay();
+
 protected:
+	UFUNCTION()
+	void OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);
+	
 	virtual void OnPossess(APawn* InPawn) override;
 	
-protected:
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
 	TObjectPtr<UBehaviorTree> BehaviorTreeAsset;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "AI")
+	TObjectPtr<UAIPerceptionComponent> AIPerceptionComp;
 };

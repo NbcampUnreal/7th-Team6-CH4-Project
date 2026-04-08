@@ -43,6 +43,9 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	class UCameraComponent* Camera;
+	
+	UPROPERTY(VisibleAnywhere, Category = "AI")
+	class UAIPerceptionStimuliSourceComponent* StimuliSource;
 
 	//함수모음
 private:

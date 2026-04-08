@@ -18,36 +18,36 @@ UBTService_DetectTarget::UBTService_DetectTarget()
 	TargetActorKey.AddObjectFilter(this, GET_MEMBER_NAME_CHECKED(UBTService_DetectTarget, TargetActorKey), AActor::StaticClass());
 }
 
-void UBTService_DetectTarget::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
-{
-	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
-	
-	AAIController* AIController = OwnerComp.GetAIOwner();
-	if (AIController == nullptr || AIController->GetPawn() == nullptr)
-	{
-		return;
-	}
-	
-	// 현재 월드 상의 0번 플레이어가 조종하는 Pawn의 정보를 저장
-	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
-	if (PlayerPawn == nullptr)
-	{
-		// Blackboard에 있는 TargetActorKey에 있던 정보를 삭제
-		OwnerComp.GetBlackboardComponent()->ClearValue(TargetActorKey.SelectedKeyName);
-		return;
-	}
-	
-	// Dist 함수를 사용해 몬스터와 플레이어 사이의 거리를 구해 Distance 변수에 저장
-	const float Distance = FVector::Dist(AIController->GetPawn()->GetActorLocation(), PlayerPawn->GetActorLocation());
-	
-	// 몬스터와 플레이어의 거리가 DetectRadius 범위 안에 있다면 TargetActorKey에 PlayerPawn의 정보를 저장
-	if (Distance <= DetectRadius)
-	{
-		OwnerComp.GetBlackboardComponent()->SetValueAsObject(TargetActorKey.SelectedKeyName, PlayerPawn);
-	}
-	// DetectRadius 범위 밖으로 나가게 되면 TargetActorKey에 있던 정보 삭제
-	else
-	{
-		OwnerComp.GetBlackboardComponent()->ClearValue(TargetActorKey.SelectedKeyName);
-	}
-}
+// void UBTService_DetectTarget::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
+// {
+// 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
+// 	
+// 	AAIController* AIController = OwnerComp.GetAIOwner();
+// 	if (AIController == nullptr || AIController->GetPawn() == nullptr)
+// 	{
+// 		return;
+// 	}
+// 	
+// 	// 현재 월드 상의 0번 플레이어가 조종하는 Pawn의 정보를 저장
+// 	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+// 	if (PlayerPawn == nullptr)
+// 	{
+// 		// Blackboard에 있는 TargetActorKey에 있던 정보를 삭제
+// 		OwnerComp.GetBlackboardComponent()->ClearValue(TargetActorKey.SelectedKeyName);
+// 		return;
+// 	}
+// 	
+// 	// Dist 함수를 사용해 몬스터와 플레이어 사이의 거리를 구해 Distance 변수에 저장
+// 	const float Distance = FVector::Dist(AIController->GetPawn()->GetActorLocation(), PlayerPawn->GetActorLocation());
+// 	
+// 	// 몬스터와 플레이어의 거리가 DetectRadius 범위 안에 있다면 TargetActorKey에 PlayerPawn의 정보를 저장
+// 	if (Distance <= DetectRadius)
+// 	{
+// 		OwnerComp.GetBlackboardComponent()->SetValueAsObject(TargetActorKey.SelectedKeyName, PlayerPawn);
+// 	}
+// 	// DetectRadius 범위 밖으로 나가게 되면 TargetActorKey에 있던 정보 삭제
+// 	else
+// 	{
+// 		OwnerComp.GetBlackboardComponent()->ClearValue(TargetActorKey.SelectedKeyName);
+// 	}
+// }
