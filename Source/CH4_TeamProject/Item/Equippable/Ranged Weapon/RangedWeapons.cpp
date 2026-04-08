@@ -16,13 +16,7 @@ ARangedWeapons::ARangedWeapons()
 	bReplicates = true;
 	
 	PrimaryActorTick.bCanEverTick = false;
-	
-	WeaponMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WeaponMesh"));
-	
-	SetRootComponent(WeaponMesh);
 	WeaponComponent = CreateDefaultSubobject<UEquippableComponent>(TEXT("WeaponComponent"));
-	
-	WeaponMesh->SetCollisionProfileName(TEXT("NoCollision"));
 }
 
 
@@ -71,6 +65,9 @@ void ARangedWeapons::BeginPlay()
 void ARangedWeapons::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	{
+		GEngine->AddOnScreenDebugMessage(1, 1.f, FColor::Cyan, TEXT("Yahoo: RangedWeapon is Ticking!"));
+	}
 }
 
 void ARangedWeapons::Server_Fire_Implementation()
@@ -82,7 +79,11 @@ void ARangedWeapons::Server_Fire_Implementation()
 	{
 		CurrentAmmo --;
 	}
-	GEngine->AddOnScreenDebugMessage(-1,10,FColor::Red,FString::Printf(TEXT("남은 총알 %d"),CurrentAmmo),false);
+	GEngine->AddOnScreenDebugMessage(-1,
+		10,FColor::Red,
+		FString::Printf(
+			TEXT("남은 총알 %d"),CurrentAmmo)
+		,false);
 	// 총알 감소및
 	// 쿨타임 초기화 등등
 }
@@ -104,6 +105,8 @@ void ARangedWeapons::Multicast_PlayEffects_Implementation()
 // 시작점
 void ARangedWeapons::Fire()
 {
+	UE_LOG(LogTemp, Error, TEXT("무조건 찍혀야 하는 로그!"));
+	
 	if (GetOwner() == nullptr)
 	{
 		UE_LOG(LogTemp, Error, TEXT("사격 실패: 이 무기의 Owner가 설정되지 않았습니다!"));
