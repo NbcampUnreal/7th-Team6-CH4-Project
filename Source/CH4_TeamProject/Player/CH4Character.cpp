@@ -16,6 +16,12 @@ ACH4Character::ACH4Character()
 	InitializationPlayerMesh();//메쉬 함수 호출
 	InitializationCamera();//카메라 함수 호출
 	InitializationInput();//인풋 함수
+
+	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimInstance(TEXT("/Game/Player/PlayerBluePrint/ABP_Player.ABP_Player_C"));
+	if (AnimInstance.Class)
+	{
+		GetMesh()->SetAnimInstanceClass(AnimInstance.Class);
+	}
 }
 
 void ACH4Character::BeginPlay()
