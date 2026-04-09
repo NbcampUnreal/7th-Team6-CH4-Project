@@ -18,10 +18,13 @@ protected:
 	void OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);
 	
 	virtual void OnPossess(APawn* InPawn) override;
-	
+	void ClearTarget();
+
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
 	TObjectPtr<UBehaviorTree> BehaviorTreeAsset;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
 	TObjectPtr<UAIPerceptionComponent> AIPerceptionComp;
+	
+	FTimerHandle LoseSightTimerHandle;
 };

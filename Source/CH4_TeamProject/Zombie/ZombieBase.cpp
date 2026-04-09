@@ -11,6 +11,8 @@ AZombieBase::AZombieBase()
 	AIControllerClass = AMonsterAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 	
+	// 좀비끼리 충돌하는 문제를 해결하기 위한 충돌 설정
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
 	// 이동하는 방향으로 몸을 자동으로 돌림
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	// 얼마나 빠르게 회전하는지 설정
@@ -22,6 +24,7 @@ AZombieBase::AZombieBase()
 void AZombieBase::BeginPlay()
 {
 	Super::BeginPlay();
+	// 좀비 이동속도 설정
 	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
 }
 
@@ -57,10 +60,12 @@ void AZombieBase::OnDeath()
 	UAnimInstance* DeathMontageInstance = GetMesh()->GetAnimInstance();
 	if (DeathMontageInstance && DeathMontage)
 	{
+		// 몽타지 재생 및 재생시간 저장
 		float PlayLength = DeathMontageInstance->Montage_Play(DeathMontage);
 		
 		float Delay = FMath::Max(0.f, PlayLength - 0.3f);
 		
+		// 타이머를 이용해 몽타지 재생 시간이 끝나기 전에 액터 삭제
 		GetWorldTimerManager().SetTimer(
 		DestroyTimerHandle,
 		this,

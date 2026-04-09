@@ -48,46 +48,41 @@ void ACH4GameMode::EndGame(EGamePhase GP) const
 	// 현재 월드에 존재하는 모든 PlayerController를 순회(반복)하기 위한 반복자(iterator)
 	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
 	{
-		APlayerController* PC = It->Get();
+		ACH4PlayerController* PC = Cast<ACH4PlayerController>(It->Get());
 		if (PC)
 		{
-			PC->SetIgnoreMoveInput(true);
-			PC->SetIgnoreLookInput(true);
-			// PC->SetIgnoreJumpInput(true); -> 점프 인풋 완성되면 주석 해제
+			PC->Client_DisablePlayerInput();
+		}
+		
+		if (GP == EGamePhase::Clear)
+		{
+			PC->Client_InvokeGameClearUI();
+		}
+		else if (GP == EGamePhase::Lose)
+		{
+			PC->Client_InvokeGameLoseUI();
 		}
 	}
 	
-	// 타이머 정지
-	GetWorldTimerManager().ClearAllTimersForObject(this);
-	
-	if (GP == EGamePhase::Clear)
-	{
-		// 클리어 UI 명령
-	}
-	else if (GP == EGamePhase::Lose)
-	{
-		// 패배 UI 명령
-	}
+	GetWorldTimerManager().ClearAllTimersForObject(this); // 타이머 정지
 }
 
 void ACH4GameMode::OnPlayerDowned(ACH4PlayerState* PlayerState)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Player Downed"));
 	
-	PlayerState->SetLifeState(EPlayerLifeState::Downed);
-	
-	/* PlayerState를 매개변수로 받아오고 있기 때문에 불러오기 필요 없음(확인받은 후 삭제)
-	 *ACH4PlayerState* PS = Cast<ACH4PlayerState>(PlayerState);
-	if (PS)
+	if (PlayerState->PlayerReviveCount <= 0) // 데카 0
 	{
-		PS->SetLifeState(EPlayerLifeState::Downed);
+		PlayerState->SetLifeState(EPlayerLifeState::Dead);
+		return;
 	}
-	*/
+	
+	PlayerState->SetLifeState(EPlayerLifeState::Downed); // 플레이어 상태 변경
 	
 	ACH4GameState* GS = Cast<ACH4GameState>(GetWorld()->GetGameState());
 	if (GS)
 	{
-		GS->SubtractAlivePlayerCount();
+		GS->SubtractAlivePlayerCount(); // 생존자 수 감소
 	}
 	
 	if (GS->AlivePlayerCount > 0)
@@ -95,12 +90,14 @@ void ACH4GameMode::OnPlayerDowned(ACH4PlayerState* PlayerState)
 		ACH4PlayerController* PC = Cast<ACH4PlayerController>(PlayerState->GetOwner()); // 해당 컨트롤러를 소유한 객체를 ()에서 불러오기
 		if (PC)
 		{
-			PC->Client_HandlePlayerDowned();
+			PC->Client_DisablePlayerInput();
+			PC->Client_PlayDownAnim();
+			PC->Client_InvokeDownUI();
 		}
 	}
 	else // 모든 플레이어 다운 시
 	{
-		CheckCondition();
+		SetGameResult();
 	}
 }
 
@@ -108,11 +105,11 @@ void ACH4GameMode::OnPlayerRevived(ACH4PlayerState* PlayerState)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Player Revived"));
 	
-	ACH4PlayerState* PS = Cast<ACH4PlayerState>(PlayerState);
-	if (PS)
-	{
-		PS->SetLifeState(EPlayerLifeState::Alive);
-	}
+	if (PlayerState->PlayerReviveCount <= 0)
+		return;
+
+	PlayerState->PlayerReviveCount--;
+	PlayerState->SetLifeState(EPlayerLifeState::Alive);
 	
 	ACH4GameState* GS = Cast<ACH4GameState>(GetWorld()->GetGameState());
 	if (GS)
@@ -120,15 +117,16 @@ void ACH4GameMode::OnPlayerRevived(ACH4PlayerState* PlayerState)
 		GS->AddAlivePlayerCount();
 	}
 	
-	ACH4PlayerController* PC = Cast<ACH4PlayerController>(PS->GetOwner());
+	ACH4PlayerController* PC = Cast<ACH4PlayerController>(PlayerState->GetPlayerController());
 	if (PC)
 	{
-		PC->Client_HandlePlayerRevived();
+		PC->Client_EnablePlayerInput();
+		PC->Client_PlayReviveAnim();
+		PC->Client_HideDownUI();
 	}
 }
 
-// 플레이어가 다운될 때마다 체크
-void ACH4GameMode::CheckCondition() 
+void ACH4GameMode::SetGameResult() const
 {
 	ACH4GameState* GS = Cast<ACH4GameState>(GetWorld()->GetGameState());
 	if (GS && GS->AlivePlayerCount <= 0)
@@ -137,21 +135,20 @@ void ACH4GameMode::CheckCondition()
 	}
 	else if (GS && GS->AlivePlayerCount > 0 && GS->GearPartsCount == 3)
 	{
-		// 클리어 조건 : 발전기 부품 다 모으면으로(MVP)
 		EndGame(EGamePhase::Clear);
 	}
-}
-
-void ACH4GameMode::MoveToLobby() const
-{
-	// 로비 UI로 이동하는 로직?
+	
+	ACH4PlayerController* PC = Cast<ACH4PlayerController>(GetWorld()->GetGameState());
+	if (PC)
+	{
+		PC->Client_MoveToLobby();
+	}
 }
 
 void ACH4GameMode::UpdateMainServerTime() const
 {
 	if (ACH4GameState* GS = GetGameState<ACH4GameState>())
 	{
-		// 월드 타이머 호출
 		GS->SetServerTime(GetWorld()->GetTimeSeconds());
 	}
 }

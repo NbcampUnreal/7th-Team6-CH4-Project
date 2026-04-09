@@ -26,18 +26,5 @@ void AEquippable::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void AEquippable::Equip(ACharacter* TargetCharacter)
-{
-	if (TargetCharacter)
-	{
-		SetOwner(TargetCharacter);
-		AttachToComponent(
-			TargetCharacter->GetMesh(), 
-			FAttachmentTransformRules::SnapToTargetIncludingScale,FName(TEXT("Weapon_r"))
-		);
-        
-		UE_LOG(LogTemp, Warning, TEXT("%s 장착 완료!"), *GetName());
-	}
-}
 
 
