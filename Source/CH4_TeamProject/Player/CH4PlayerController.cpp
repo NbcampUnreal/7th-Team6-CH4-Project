@@ -18,6 +18,45 @@ void ACH4PlayerController::BeginPlay()
             HUDWidget->AddToViewport();
         }
     }
+
+    CurrentMenuWidget = nullptr;
+
+    // TODO: 시작 시 어떤 메뉴를 먼저 띄울지 함수 호출 위치 결정
+    ShowStartMenu();
+
+
+}
+
+void ACH4PlayerController::ShowStartMenu()
+{
+    HideCurrentMenu(); // 기존에 떠 있는 게 있다면 지웁니다.
+
+    if (!StartMenuClass) return;
+
+    // 1. 위젯 생성 (설계도인 Class로 실체인 Instance를 만듭니다)
+    CurrentMenuWidget = CreateWidget<UUserWidget>(this, StartMenuClass);
+
+    if (CurrentMenuWidget)
+    {
+        // 2. 화면에 붙이기
+        CurrentMenuWidget->AddToViewport();
+
+        // 3. 마우스 설정: 시작 메뉴에서는 버튼을 눌러야 하니 마우스를 보여줍니다.
+        bShowMouseCursor = true;
+
+        // 4. 입력 모드: 게임 캐릭터 조작은 막고 UI만 만지게 설정합니다.
+        FInputModeUIOnly InputMode;
+        InputMode.SetWidgetToFocus(CurrentMenuWidget->TakeWidget());
+        SetInputMode(InputMode);
+    }
+}
+
+void ACH4PlayerController::ShowGameOver()
+{
+}
+
+void ACH4PlayerController::HideCurrentMenu()
+{
 }
 
 void ACH4PlayerController::Client_DisablePlayerInput_Implementation()

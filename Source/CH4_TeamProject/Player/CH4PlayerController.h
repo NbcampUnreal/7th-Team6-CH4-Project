@@ -20,6 +20,16 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+
+	UFUNCTION(BlueprintCallable)
+	void ShowStartMenu();
+
+
+	UFUNCTION(BlueprintCallable)
+	void ShowGameOver();
+
+	UFUNCTION(BlueprintCallable)
+	void HideCurrentMenu();
 	
 public:
 	//----합칠 수 있을듯----(bool 매개변수를 통해서)
@@ -27,6 +37,15 @@ public:
 	void Client_DisablePlayerInput();
 	
 	UFUNCTION(Client, Reliable)
+	void Client_HandlePlayerRevived();
+	//
+	UPROPERTY(EditAnywhere, Category = "MyUI")
+	TSubclassOf<UUserWidget> StartMenuClass; // 시작 화면용 주머니
+
+	UPROPERTY()
+	UUserWidget* CurrentMenuWidget;
+
+
 	void Client_EnablePlayerInput();
 	//---------------------------
 	
