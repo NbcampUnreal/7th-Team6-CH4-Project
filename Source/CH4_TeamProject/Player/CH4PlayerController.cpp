@@ -1,14 +1,23 @@
 ﻿
 #include "CH4PlayerController.h"
 #include "Blueprint/UserWidget.h"
+#include "CH4_TeamProject/DataBase/DataBase.h"
 
 ACH4PlayerController::ACH4PlayerController()
 {
     bReplicates = true;
+    bShowMouseCursor = true;
+    
+    
 }
 
 void ACH4PlayerController::BeginPlay()
 {
+    if (!IsLocalController())
+        return;
+    
+    Client_MoveToLobby();
+    
     // HUD 위젯 생성 및 표시
     if (HUDWidgetClass)
     {
@@ -23,8 +32,13 @@ void ACH4PlayerController::BeginPlay()
 
     // TODO: 시작 시 어떤 메뉴를 먼저 띄울지 함수 호출 위치 결정
     ShowStartMenu();
+}
 
-
+void ACH4PlayerController::BeginPlayingState()
+{
+    Super::BeginPlayingState();
+    
+    ConstructorHelpers::FClassFinder<HUDWidgetClassA>
 }
 
 void ACH4PlayerController::ShowStartMenu()
@@ -91,27 +105,45 @@ void ACH4PlayerController::Client_PlayReviveAnim_Implementation()
     // }
 }
 
-void ACH4PlayerController::Client_InvokeDownUI_Implementation()
+void ACH4PlayerController::Client_MoveToLobby_Implementation()
 {
-    // 회색 화면 등 -> 구현 필요
+    HUDLobbyWidgetInstance = CreateWidget<UUserWidget>(this,HUDLobbyWidgetClass);
+    HUDLobbyWidgetInstance->AddToViewport();
 }
 
-void ACH4PlayerController::Client_HideDownUI_Implementation()
-{    
-    // 다운 UI 제거
-}
-
-void ACH4PlayerController::Client_MoveToLobby_Implementation() const
-{
-    // 로비 UI로 이동
-}
-
-void ACH4PlayerController::Client_InvokeGameClearUI_Implementation() const
+void ACH4PlayerController::Client_InvokeGameClearUI_Implementation()
 {
     // 클리어 UI 띄우기
+
 }
 
 void ACH4PlayerController::Client_InvokeGameLoseUI_Implementation() const
 {
     // 패배 UI 띄우기
 }
+
+/*
+ if (UImage* BossHPBarImage = Cast<UImage>(HUDWidget->GetWidgetFromName(TEXT("BossHPBarImage"))))
+{
+    if (UProgressBar* BossHPProgressBar = Cast<UProgressBar>(HUDWidget->GetWidgetFromName(TEXT("BossHPBar"))))
+    {
+        if (CurrentLevelIndex < 4)
+        {
+            BossHPBarImage->SetVisibility(ESlateVisibility::Hidden);
+            BossHPProgressBar->SetVisibility(ESlateVisibility::Hidden);
+        }
+        else
+        {
+            BossHPBarImage->SetVisibility(ESlateVisibility::Visible);
+            BossHPProgressBar->SetVisibility(ESlateVisibility::Visible);
+							
+            AActor* FoundActor = UGameplayStatics::GetActorOfClass(GetWorld(), AHDBossMonster::StaticClass());
+							
+            if (AHDBossMonster* HdBossMonster = Cast<AHDBossMonster>(FoundActor))
+            {
+                BossHPProgressBar->SetPercent(HdBossMonster->CurrentHP / HdBossMonster->MaxHP);
+            }
+        }
+    }
+}
+*/

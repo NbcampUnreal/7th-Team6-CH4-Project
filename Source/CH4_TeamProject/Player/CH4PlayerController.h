@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "Components/WidgetComponent.h"
 #include "CH4PlayerController.generated.h"
 
-UCLASS()
+UCLASS(Abstract)
 class CH4_TEAMPROJECT_API ACH4PlayerController : public APlayerController
 {
 	GENERATED_BODY()
-	
 
 public:
 	ACH4PlayerController();
@@ -20,6 +20,8 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	
+	virtual void BeginPlayingState() override;
 
 	UFUNCTION(BlueprintCallable)
 	void ShowStartMenu();
@@ -32,8 +34,6 @@ protected:
 	void HideCurrentMenu();
 	
 public:
-	
-		//
 	UPROPERTY(EditAnywhere, Category = "MyUI")
 	TSubclassOf<UUserWidget> StartMenuClass; // 시작 화면용 주머니
 
@@ -60,18 +60,20 @@ public:
 	
 	//----합칠 수 있을듯----
 	UFUNCTION(Client, Reliable)
-	void Client_InvokeDownUI() ;
+	void Client_MoveToLobby();
 	
 	UFUNCTION(Client, Reliable)
-	void Client_HideDownUI();
-	
-	UFUNCTION(Client, Reliable)
-	void Client_MoveToLobby() const;
-	
-	UFUNCTION(Client, Reliable)
-	void Client_InvokeGameClearUI() const;
+	void Client_InvokeGameClearUI();
 	
 	UFUNCTION(Client, Reliable)
 	void Client_InvokeGameLoseUI() const;
 	//---------------------------
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "My UI")
+	TSubclassOf<UUserWidget> HUDLobbyWidgetClass;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "My UI")
+	UUserWidget* HUDLobbyWidgetInstance;
+	
+	
 };

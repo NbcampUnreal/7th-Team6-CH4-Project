@@ -16,8 +16,8 @@ class CH4_TEAMPROJECT_API ACH4GameState : public AGameState
 public:
 	ACH4GameState();
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Level")
-	float LevelDuration;
+	// UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Level")
+	// float LevelDuration;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Leve2")
 	int32 MaxLevels;
@@ -40,7 +40,7 @@ public:
 	UPROPERTY(Replicated)
 	int32 AlivePlayerCount = 4;
 	
-	UPROPERTY(Replicated)
+	UPROPERTY(Replicated, BlueprintReadOnly)
 	float ServerTime = 0.f;
 
 	UPROPERTY(ReplicatedUsing = OnRep_GamePhase)

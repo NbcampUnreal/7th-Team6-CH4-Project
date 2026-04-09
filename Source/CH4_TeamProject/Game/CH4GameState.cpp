@@ -12,7 +12,7 @@ ACH4GameState::ACH4GameState()
 	
 	// 기본값 초기화 (예: Score 초기화)
 	Score = 0;
-	LevelDuration = 60.0f;
+	// LevelDuration = 60.0f;
 	MaxLevels = 2;
 }
 
