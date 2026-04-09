@@ -19,4 +19,15 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	TMap<int32,class URangedGunDataAsset*> DataAsset;
 
+	UFUNCTION(BlueprintCallable,Server,Reliable)
+	void EquipWeapon(TSubclassOf<class ARangedWeapons> WeaponClass);
+
+	UPROPERTY(Replicated)
+	TObjectPtr<ARangedWeapons> CurrentWeapon;
+
+	void Fire();
+	
+private:
+	
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };

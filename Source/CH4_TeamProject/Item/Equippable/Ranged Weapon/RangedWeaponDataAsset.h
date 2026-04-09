@@ -16,13 +16,23 @@ class CH4_TEAMPROJECT_API URangedGunDataAsset : public UPrimaryDataAsset
 	GENERATED_BODY()
 public:
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Equip_Gun_Weapon")
-	int32 Damage =20;
+	int32 Damage = 0;
 	
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Equip_Gun_Weapon")
-	int32 MaxAmmo = 60;
+	int32 MaxAmmo = 0;
+	
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Equip_Gun_Weapon")
+	float RangedLength = 0;
+	
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Equip_Gun_Weapon")
+	float FireRate = 0;
+	
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Equip_Gun_Weapon")
+	TObjectPtr<UStaticMesh> WeaponMesh;
 	
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Equip_Gun_Weapon")
 	TSubclassOf<class ARangedWeapons> WeaponClass;
 	
 	virtual FPrimaryAssetId GetPrimaryAssetId() const override;
 };
+	 

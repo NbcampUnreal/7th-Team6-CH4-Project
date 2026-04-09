@@ -9,6 +9,8 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
+#include "../Item/Equippable/EquippableComponent.h"
+#include "CH4_TeamProject/Item/Equippable/Ranged Weapon/RangedWeapons.h"
 
 ACH4Character::ACH4Character()
 {
@@ -26,11 +28,14 @@ ACH4Character::ACH4Character()
 	{
 		GetMesh()->SetAnimInstanceClass(AnimInstance.Class);
 	}
+	
+	EquippableComponent = CreateDefaultSubobject<UEquippableComponent>(TEXT("EquippableComponent"));
+	bReplicates = true;
 }
 
 void ACH4Character::BeginPlay()
 {
-	Super::BeginPlay();
+	Super::BeginPlay();	
 	//맵핑 불러오기
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
 	{
@@ -38,6 +43,14 @@ void ACH4Character::BeginPlay()
 		{
 			SubSystem->AddMappingContext(DefaultContext, 0);
 		}
+	}
+	if (IsLocallyControlled())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("내 이름은 %s이고, 로컬 컨트롤러가 나를 조종 중이다!"), *GetName());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s: 난 그냥 원격 캐릭터일 뿐이야."), *GetName());
 	}
 
 	GetCharacterMovement()->MaxWalkSpeed = PlayerMoveSpeed;
@@ -57,6 +70,7 @@ void ACH4Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	
 	EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ACH4Character::Move);
 	EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ACH4Character::Look);
+	EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &ACH4Character::Fires);
 }
 
 float ACH4Character::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
@@ -128,6 +142,12 @@ void ACH4Character::InitializationInput()
 	{
 		LookAction = InputLook.Object;
 	}
+	
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputFire(TEXT("/Script/EnhancedInput.InputAction'/Game/Player/Input/Action/IA_Fire.IA_Fire'"));
+	if (InputLook.Object != nullptr)
+	{
+		FireAction = InputFire.Object;
+	}
 }
 
 //무브
@@ -152,3 +172,20 @@ void ACH4Character::Look(const FInputActionValue& Value)
 	AddControllerYawInput(LookAxisVector.X * GetWorld()->DeltaTimeSeconds * mouseSpeed);
 	AddControllerPitchInput(LookAxisVector.Y * GetWorld()->DeltaTimeSeconds * mouseSpeed);
 }
+
+void ACH4Character::Fires_Implementation()
+{
+	if (EquippableComponent == nullptr)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, TEXT("컴포넌트 자체가 널입니다!"));
+		return;
+	}
+
+	if (EquippableComponent->CurrentWeapon == nullptr)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, TEXT("컴포넌트는 있는데 총이 없습니다!"));
+		return;
+	}
+	EquippableComponent->Fire();
+}
+
