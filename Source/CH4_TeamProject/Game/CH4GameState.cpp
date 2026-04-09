@@ -1,6 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
-
-
+﻿
 #include "CH4GameState.h"
 #include "CH4GameInstance.h"
 #include "Net/UnrealNetwork.h"
@@ -46,6 +44,7 @@ void ACH4GameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	DOREPLIFETIME(ACH4GameState, GamePhase);
 	DOREPLIFETIME(ACH4GameState, PhaseRemainingTime);
 	DOREPLIFETIME(ACH4GameState, GearPartsCount);
+	DOREPLIFETIME(ACH4GameState, AlivePlayerCount);
 }
 
 // 변수 복제 시 UI 갱신

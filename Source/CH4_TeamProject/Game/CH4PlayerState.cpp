@@ -1,13 +1,12 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 
 #include "CH4PlayerState.h"
 
+#include "Net/UnrealNetwork.h"
 #include "CH4GameMode.h"
 
 ACH4PlayerState::ACH4PlayerState() : 
-		CurrentHP(MaxHP), 
-		MaxHP(100.f) 
+		MaxHP(100.f), 		
+		CurrentHP(MaxHP) // 초기화 순서에 유의
 		// SpawnPointIndex()
 {
 }
@@ -18,6 +17,7 @@ void ACH4PlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 
 	DOREPLIFETIME(ACH4PlayerState, CurrentHP);
 	DOREPLIFETIME(ACH4PlayerState, MaxHP);
+	DOREPLIFETIME(ACH4PlayerState, LifeState);
 }
 
 void ACH4PlayerState::OnRep_LifeState()
@@ -36,14 +36,19 @@ void ACH4PlayerState::SetCurrentHP(float Damage)
 	CurrentHP -= Damage;
 	if (CurrentHP <= 0)
 	{
-		ACH4GameMode* GM = GetWorld()->GetAuthGameMode<ACH4GameMode>();
-		if (GM)
-		{
-			GM->OnPlayerDowned(this);
-		}
+		Server_RequestDown();
 	}
 }
 
-void ACH4PlayerState::OnRep_IsDowned()
+void ACH4PlayerState::Server_RequestDown_Implementation()
 {
+	ACH4GameMode* GM = GetWorld()->GetAuthGameMode<ACH4GameMode>();
+	if (GM)
+	{
+		GM->OnPlayerDowned(this);
+	}
 }
+
+// void ACH4PlayerState::OnRep_IsDowned()
+// {
+// }

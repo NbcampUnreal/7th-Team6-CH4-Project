@@ -21,14 +21,12 @@ ACH4GameMode::ACH4GameMode()
 	{
 		DefaultPawnClass = PlayerCharacter.Class;
 	}
-	ACH4GameMode::StartPlay();
 }
 
 void ACH4GameMode::StartPlay()
 {
 	Super::StartPlay();
 	
-	// 서버 시간 갱신
 	GetWorldTimerManager().SetTimer(
 		ServerTimeTimerHandle, 
 		this, 
@@ -39,10 +37,14 @@ void ACH4GameMode::StartPlay()
 }
 
 void ACH4GameMode::EndGame(EGamePhase GP) const
-{
-	// UI 변경 명령(컨트롤러) / 결과 표시 / 맵 이동 준비
+{	
+	// GameState에 반영
+	ACH4GameState* GS = Cast<ACH4GameState>(GetWorld()->GetGameState());
+	if (GS)
+	{
+		GS->SetGamePhase(GP);
+	}
 	
-	// 모든 플레이어 입력 막기 (서버 기준) -> PlayerController에 위임?
 	// 현재 월드에 존재하는 모든 PlayerController를 순회(반복)하기 위한 반복자(iterator)
 	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
 	{
@@ -72,11 +74,15 @@ void ACH4GameMode::OnPlayerDowned(ACH4PlayerState* PlayerState)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Player Downed"));
 	
-	ACH4PlayerState* PS = Cast<ACH4PlayerState>(PlayerState);
+	PlayerState->SetLifeState(EPlayerLifeState::Downed);
+	
+	/* PlayerState를 매개변수로 받아오고 있기 때문에 불러오기 필요 없음(확인받은 후 삭제)
+	 *ACH4PlayerState* PS = Cast<ACH4PlayerState>(PlayerState);
 	if (PS)
 	{
 		PS->SetLifeState(EPlayerLifeState::Downed);
 	}
+	*/
 	
 	ACH4GameState* GS = Cast<ACH4GameState>(GetWorld()->GetGameState());
 	if (GS)
@@ -84,19 +90,17 @@ void ACH4GameMode::OnPlayerDowned(ACH4PlayerState* PlayerState)
 		GS->SubtractAlivePlayerCount();
 	}
 	
-	if (GS->AlivePlayerCount <= 0)
+	if (GS->AlivePlayerCount > 0)
 	{
-		GS->AlivePlayerCount = 0;
-		
-		EndGame(GS->GamePhase);
-	}
-	else
-	{
-		ACH4PlayerController* PC = Cast<ACH4PlayerController>(PS->GetOwner()); // 해당 컨트롤러를 소유한 객체를 ()에서 불러오기
+		ACH4PlayerController* PC = Cast<ACH4PlayerController>(PlayerState->GetOwner()); // 해당 컨트롤러를 소유한 객체를 ()에서 불러오기
 		if (PC)
 		{
 			PC->Client_HandlePlayerDowned();
 		}
+	}
+	else // 모든 플레이어 다운 시
+	{
+		CheckCondition();
 	}
 }
 
@@ -121,32 +125,27 @@ void ACH4GameMode::OnPlayerRevived(ACH4PlayerState* PlayerState)
 	{
 		PC->Client_HandlePlayerRevived();
 	}
-	// 소생 조건 : 팀원이 다운된 플레이어에 상호작용 키 입력 시 -> 이것도 컨트롤러에서 구현?
 }
 
-void ACH4GameMode::CheckCondition() // 플레이어가 다운될 때마다 체크
+// 플레이어가 다운될 때마다 체크
+void ACH4GameMode::CheckCondition() 
 {
 	ACH4GameState* GS = Cast<ACH4GameState>(GetWorld()->GetGameState());
 	if (GS && GS->AlivePlayerCount <= 0)
 	{
 		EndGame(EGamePhase::Lose);
 	}
-	else if (GS && GS->AlivePlayerCount >= 1 && GS->GearPartsCount == 3)
+	else if (GS && GS->AlivePlayerCount > 0 && GS->GearPartsCount == 3)
 	{
-		// 스테이지 클리어 조건 : 발전기 부품 다 모으면으로(MVP)
+		// 클리어 조건 : 발전기 부품 다 모으면으로(MVP)
 		EndGame(EGamePhase::Clear);
 	}
 }
 
-// void ACH4GameMode::StartFinalDefenseWave()
-// {
-// 	웨이브 시작 명령
-// }
-
-// void ACH4GameMode::OnWaveCleared()
-// {
-// 	웨이브 중지, 플레이어컨트롤러 입력x, UI 변경 명령 
-// }
+void ACH4GameMode::MoveToLobby() const
+{
+	// 로비 UI로 이동하는 로직?
+}
 
 void ACH4GameMode::UpdateMainServerTime() const
 {
@@ -157,13 +156,19 @@ void ACH4GameMode::UpdateMainServerTime() const
 	}
 }
 
+// --------------------------------------------------
 // void ACH4GameMode::StartFinalDefenseTimer() const
 // {
 // 	// 구조 신호 발생 -> 디펜스 타이머 시작 (DataBase::DefenceTimer)
 // }
 
-void ACH4GameMode::MoveToLobby() const
-{
-	// 로비 UI로 이동하는 로직?
-}
+// void ACH4GameMode::StartFinalDefenseWave()
+// {
+// 	웨이브 시작 명령
+// }
+
+// void ACH4GameMode::OnWaveCleared()
+// {
+// 	웨이브 중지, 플레이어컨트롤러 입력x, UI 변경 명령 
+// }
 
