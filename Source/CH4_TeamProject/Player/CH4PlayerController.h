@@ -32,20 +32,19 @@ protected:
 	void HideCurrentMenu();
 	
 public:
-	//----합칠 수 있을듯----(bool 매개변수를 통해서)
-	UFUNCTION(Client, Reliable)
-	void Client_DisablePlayerInput();
 	
-	UFUNCTION(Client, Reliable)
-	void Client_HandlePlayerRevived();
-	//
+		//
 	UPROPERTY(EditAnywhere, Category = "MyUI")
 	TSubclassOf<UUserWidget> StartMenuClass; // 시작 화면용 주머니
 
 	UPROPERTY()
 	UUserWidget* CurrentMenuWidget;
-
-
+	
+	//----합칠 수 있을듯----(bool 매개변수를 통해서)
+	UFUNCTION(Client, Reliable)
+	void Client_DisablePlayerInput();
+	
+	UFUNCTION(Client, Reliable)
 	void Client_EnablePlayerInput();
 	//---------------------------
 	
