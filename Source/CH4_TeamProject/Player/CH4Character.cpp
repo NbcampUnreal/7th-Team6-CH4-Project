@@ -62,7 +62,6 @@ void ACH4Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 float ACH4Character::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
 	class AController* EventInstigator, AActor* DamageCauser)
 {
-	
 	return Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 }
 

@@ -1,11 +1,9 @@
-// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerState.h"
 #include "CH4_TeamProject/DataBase/DataBase.h"
-#include "Net/UnrealNetwork.h"
 #include "CH4PlayerState.generated.h"
 
 UCLASS()
@@ -28,9 +26,6 @@ public:
 	UPROPERTY(Replicated)
 	float MaxHP;
 	
-	// UPROPERTY(Replicated)
-	// bool bIsDowned;        // 다운 상태 여부 -> DataBase에 정의
-	
 	UPROPERTY(Replicated)
 	int32 SpawnPointIndex; // 배정된 스폰 포인트
 	
@@ -40,6 +35,9 @@ public:
 	void SetLifeState(EPlayerLifeState NewState);
 	void SetCurrentHP(float Damage);
 	
-	UFUNCTION()
-	void OnRep_IsDowned(); // 다운 연출 (팀원 화면에도 표시)
+	UFUNCTION(Server, Reliable)
+	void Server_RequestDown();	
+	
+	// UFUNCTION()
+	// void OnRep_IsDowned(); // 다운 연출 (팀원 화면에도 표시)
 };
