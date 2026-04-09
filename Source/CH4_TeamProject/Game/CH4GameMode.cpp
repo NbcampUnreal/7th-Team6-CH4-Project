@@ -23,7 +23,7 @@ ACH4GameMode::ACH4GameMode()
 	}
 }
 
-void ACH4GameMode::StartPlay() override
+void ACH4GameMode::StartPlay()
 {
 	Super::StartPlay();
 	
