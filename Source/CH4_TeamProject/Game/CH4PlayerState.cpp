@@ -6,9 +6,11 @@
 
 ACH4PlayerState::ACH4PlayerState() : 
 		MaxHP(100.f), 		
-		CurrentHP(MaxHP) // 초기화 순서에 유의
+		CurrentHP(MaxHP),
+		PlayerReviveCount(2)
 		// SpawnPointIndex()
 {
+	bReplicates = true;
 }
 
 void ACH4PlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -28,24 +30,18 @@ void ACH4PlayerState::OnRep_LifeState()
 void ACH4PlayerState::SetLifeState(EPlayerLifeState NewState)
 {
 	LifeState = NewState;
-	OnRep_LifeState(); // 서버에 반영
 }
 
-void ACH4PlayerState::SetCurrentHP(float Damage)
+void ACH4PlayerState::Server_SetCurrentHP_Implementation(float Damage)
 {
 	CurrentHP -= Damage;
 	if (CurrentHP <= 0)
 	{
-		Server_RequestDown();
-	}
-}
-
-void ACH4PlayerState::Server_RequestDown_Implementation()
-{
-	ACH4GameMode* GM = GetWorld()->GetAuthGameMode<ACH4GameMode>();
-	if (GM)
-	{
-		GM->OnPlayerDowned(this);
+		ACH4GameMode* GM = GetWorld()->GetAuthGameMode<ACH4GameMode>();
+		if (GM)
+		{
+			GM->OnPlayerDowned(this);
+		}
 	}
 }
 
