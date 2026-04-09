@@ -25,11 +25,10 @@ public:
     void OnPlayerRevived(ACH4PlayerState* PlayerState);  // 소생
 
     // 승패 판정
-    void CheckCondition();
+    void SetGameResult() const;
 
 private:
 	void UpdateMainServerTime() const;
-	void MoveToLobby() const;
 	
 	FTimerHandle ServerTimeTimerHandle;
 			

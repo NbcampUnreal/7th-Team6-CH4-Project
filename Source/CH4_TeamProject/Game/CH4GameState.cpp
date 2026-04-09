@@ -16,7 +16,6 @@ ACH4GameState::ACH4GameState()
 	MaxLevels = 2;
 }
 
-
 void ACH4GameState::AddScore(int32 Amount)
 {
 	Score += Amount;
@@ -42,46 +41,19 @@ void ACH4GameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	
 	DOREPLIFETIME(ACH4GameState, ServerTime);
 	DOREPLIFETIME(ACH4GameState, GamePhase);
-	DOREPLIFETIME(ACH4GameState, PhaseRemainingTime);
 	DOREPLIFETIME(ACH4GameState, GearPartsCount);
 	DOREPLIFETIME(ACH4GameState, AlivePlayerCount);
 }
 
-// 변수 복제 시 UI 갱신
-void ACH4GameState::OnRep_CurrentPhase()
-{
-	UE_LOG(LogTemp, Warning, TEXT("Current Phase: %hhd"), GamePhase);
-	// UI : GamePhase 갱신
-}
-
-void ACH4GameState::OnRep_GearParts()
+void ACH4GameState::OnRep_GearPartsCount()
 {
 	UE_LOG(LogTemp, Warning, TEXT("GearParts Count: %d"), GearPartsCount);
-	// UI : Collected GearParts 갱신
+	// UI : Collected GearParts 갱신 -> 컨트롤러
 }
 
 void ACH4GameState::OnRep_GamePhase()
 {
 	UE_LOG(LogTemp, Warning, TEXT("GamePhase Changed: %d"), GamePhase);
-
-	switch (GamePhase)
-	{
-	case EGamePhase::StartStage :
-		// UI : 라운드 시작 알림
-		break;
-		
-	case EGamePhase::FinalDefense :
-		// UI : 디펜스 시작 메세지
-		break;
-		
-	case EGamePhase::Clear :
-		// UI : 스테이지 클리어
-		break;
-		
-	case EGamePhase::Lose:
-		// 패배 UI
-		break;
-	}
 }
 
 bool ACH4GameState::CheckAlivePlayerIsZero()
@@ -102,9 +74,11 @@ bool ACH4GameState::CheckAlivePlayerIsZero()
 void ACH4GameState::SetGamePhase(EGamePhase NewPhase)
 {
 	if (GamePhase == NewPhase) return;
-	
 	GamePhase = NewPhase;
-	OnRep_GamePhase(); // 서버에서도 실행
 }
 
-
+// void ACH4GameState::OnRep_CurrentPhase()
+// {
+// 	UE_LOG(LogTemp, Warning, TEXT("Current Phase: %hhd"), GamePhase);
+// 	// UI : GamePhase 갱신
+// }
