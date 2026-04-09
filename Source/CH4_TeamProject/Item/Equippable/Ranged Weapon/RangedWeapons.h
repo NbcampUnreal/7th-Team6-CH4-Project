@@ -43,6 +43,9 @@ public:
 	}
 	virtual void Tick(float DeltaTime) override;
 	
+	UFUNCTION(BlueprintCallable)
+	virtual void Fire();
+	
 protected:
 	virtual void BeginPlay() override;
 	
@@ -60,14 +63,17 @@ protected:
 
 	void TraceShoot();
 	
-	UFUNCTION(BlueprintCallable)
-	virtual void Fire();
-	
 	UPROPERTY(EditAnywhere,Category="DataAsset")
 	URangedGunDataAsset* GunDataAsset;
 	
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_ReLoad();
-	
+		
 	void ProcessReload();
+	
+	bool bIsCoolingDown= false;
+	
+	FTimerHandle TimerHandle_FireDelay;
+	
+	void OnRep_FireReady(); 
 };

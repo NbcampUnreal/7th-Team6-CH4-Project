@@ -7,7 +7,7 @@
 #include "InputActionValue.h"
 #include "CH4Character.generated.h"
 
-
+class UEquippableComponent;
 UCLASS()
 class CH4_TEAMPROJECT_API ACH4Character : public ACharacter
 {
@@ -70,7 +70,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = "Input")
 	class UInputAction* LookAction;
-
+	
+	UPROPERTY(VisibleAnywhere, Category = "Input")
+	class UInputAction* FireAction;
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Stat")
 	float MaxHP = 100.0f;//최대체력
@@ -85,5 +87,12 @@ public:
 	//플레이어 움직임 속도
 	UPROPERTY(EditAnywhere)
 	float PlayerMoveSpeed = 350.0f;
-
+	
+	//장비 장착 컴포넌트
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	TObjectPtr<UEquippableComponent> EquippableComponent;
+	
+	UFUNCTION(Server,Reliable)
+	void Fires();
+	
 };

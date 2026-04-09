@@ -1,12 +1,10 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "RangedWeapons.h"
 #include "DrawDebugHelpers.h"
 #include "Components/StaticMeshComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "RangedWeaponDataAsset.h"
-#include "CH4_TeamProject/Item/Equippable/EquippableComponent.h"
 #include "Net/UnrealNetwork.h"
 
 // Sets default values
@@ -16,9 +14,7 @@ ARangedWeapons::ARangedWeapons()
 	bReplicates = true;
 	
 	PrimaryActorTick.bCanEverTick = false;
-	WeaponComponent = CreateDefaultSubobject<UEquippableComponent>(TEXT("WeaponComponent"));
 }
-
 
 void ARangedWeapons::Server_ApplyDamageToTarget_Implementation(AActor* TargetActor)
 {
@@ -73,6 +69,11 @@ void ARangedWeapons::Tick(float DeltaTime)
 void ARangedWeapons::Server_Fire_Implementation()
 {
 	UE_LOG(LogTemp, Warning, TEXT("3. Server_Fire_Implementation"));
+	if(CurrentAmmo <= 0)
+	{
+		GEngine->AddOnScreenDebugMessage(1, 1.f, FColor::Red,FString::Printf(TEXT("총알이없습니다")));
+		return;
+	}
 	TraceShoot();
 	Multicast_PlayEffects();
 	if (CurrentAmmo >0)
@@ -101,12 +102,14 @@ void ARangedWeapons::Multicast_PlayEffects_Implementation()
 {
 	UE_LOG(LogTemp, Log, TEXT("Fire Effects Played!"));
 }
-
 // 시작점
 void ARangedWeapons::Fire()
 {
 	UE_LOG(LogTemp, Error, TEXT("무조건 찍혀야 하는 로그!"));
-	
+	if (bIsCoolingDown || CurrentAmmo <= 0) return;
+	{
+		UE_LOG(LogTemp, Error, TEXT("총알이 부족해 혹은 딜레이중이야"));
+	}
 	if (GetOwner() == nullptr)
 	{
 		UE_LOG(LogTemp, Error, TEXT("사격 실패: 이 무기의 Owner가 설정되지 않았습니다!"));
@@ -133,18 +136,18 @@ void ARangedWeapons::ProcessReload()
 
 void ARangedWeapons::Server_ReLoad_Implementation()
 {
+	if (MaxClip <= 0)
+	{
+		return;
+	}
 	ProcessReload();
+	
 }
 
 bool ARangedWeapons::Server_ReLoad_Validate()
 {
-	if (MaxClip >=0)
-	{
-		return true;
-	}
-	return false;
+	return true;
 }
-
 
 void ARangedWeapons::TraceShoot()
 {
@@ -157,7 +160,7 @@ void ARangedWeapons::TraceShoot()
 	Params.AddIgnoredActor(GetOwner());
 
 	FVector StartLocation = GetActorLocation();
-	FVector EndLocation = StartLocation + (GetActorForwardVector() * 5000.f);
+	FVector EndLocation = StartLocation + (GetActorForwardVector() * GunDataAsset->RangedLength);
 
 	bool bIsHit =  GetWorld()->LineTraceSingleByChannel(Hit, StartLocation, EndLocation, ECC_Visibility, Params);
 	FColor LineColor = bIsHit ? FColor::Red : FColor::Green; // 맞으면 빨강, 안 맞으면 초록
@@ -180,7 +183,15 @@ void ARangedWeapons::TraceShoot()
 			Server_ApplyDamageToTarget(Hit.GetActor());
 		}
 	}
+	bIsCoolingDown =true;
+	GetWorldTimerManager().SetTimer
+	(TimerHandle_FireDelay,
+	this,
+	&ARangedWeapons::OnRep_FireReady, 
+	GunDataAsset->FireRate, 
+	false);
 }
+
 int32 ARangedWeapons::GetMaxAmmo () const
 {
 	if (GunDataAsset)
@@ -188,4 +199,9 @@ int32 ARangedWeapons::GetMaxAmmo () const
 		return GunDataAsset->MaxAmmo;
 	}
 	return 0;
+}
+
+void ARangedWeapons::OnRep_FireReady() 
+{
+	bIsCoolingDown = false;
 }

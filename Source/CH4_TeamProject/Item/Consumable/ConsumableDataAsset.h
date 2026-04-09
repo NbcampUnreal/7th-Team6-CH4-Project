@@ -13,4 +13,6 @@ UCLASS()
 class CH4_TEAMPROJECT_API UConsumableDataAsset : public UPrimaryDataAsset
 {
 	GENERATED_BODY()
+	
+	float Value =0;
 };
