@@ -1,4 +1,4 @@
-﻿
+
 #include "CH4GameMode.h"
 
 #include "CH4_TeamProject/Player/CH4Character.h"
@@ -120,7 +120,7 @@ void ACH4GameMode::OnPlayerRevived(ACH4PlayerState* PlayerState)
 	ACH4PlayerController* PC = Cast<ACH4PlayerController>(PlayerState->GetPlayerController());
 	if (PC)
 	{
-		/*PC->Client_EnablePlayerInput();*/
+		PC->Client_EnablePlayerInput();
 		PC->Client_PlayReviveAnim();
 		PC->Client_HideDownUI();
 	}
