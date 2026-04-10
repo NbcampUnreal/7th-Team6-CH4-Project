@@ -33,12 +33,6 @@ public:
 	UPROPERTY()
 	UUserWidget* CurrentMenuWidget = nullptr;
 	
-	//아이템 완성시 주석해제
-	//UPROPERTY(BlueprintReadOnly, Category = "GameData")
-	//int32 GamePhase;
-
-	//UPROPERTY(BlueprintReadOnly, Category = "GameData")
-	//int32 GearPartsCount;
 	
 	//아이템 완성시 주석해제
 	//UPROPERTY(BlueprintReadOnly, Category = "GameData")
