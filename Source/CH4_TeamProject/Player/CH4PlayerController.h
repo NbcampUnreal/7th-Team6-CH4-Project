@@ -29,6 +29,9 @@ public:
 	// 현재 열려 있는 룰 위젯의 인스턴스를 저장합니다. (nullptr 필수!)
 	UPROPERTY()
 	UUserWidget* CurrentRulesWidget = nullptr;
+
+	UPROPERTY()
+	UUserWidget* CurrentMenuWidget = nullptr;
 	
 	//아이템 완성시 주석해제
 	//UPROPERTY(BlueprintReadOnly, Category = "GameData")
@@ -68,10 +71,6 @@ protected:
 
 	
 	virtual void BeginPlayingState() override;
-	void ShowStartMenu();
-	void ShowGameOver();
-	void HideCurrentMenu();
-	void Client_HideDownUI_Implementation();
 
 public:
 	UPROPERTY()
