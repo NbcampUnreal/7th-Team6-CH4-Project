@@ -68,6 +68,10 @@ protected:
 
 	
 	virtual void BeginPlayingState() override;
+	void ShowStartMenu();
+	void ShowGameOver();
+	void HideCurrentMenu();
+	void Client_HideDownUI_Implementation();
 
 public:
 	UPROPERTY()

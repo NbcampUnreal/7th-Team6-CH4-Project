@@ -9,7 +9,7 @@
 
 class UEquippableComponent;
 class UPlayerAnimInstance;
-
+class ACH4GameState;
 UCLASS()
 class CH4_TEAMPROJECT_API ACH4Character : public ACharacter
 {
@@ -144,5 +144,7 @@ public:
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 	
 	int HealItemCount = 0;
-
+	
+	UPROPERTY()
+	ACH4GameState* GamsState;
 };
