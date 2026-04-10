@@ -64,14 +64,8 @@ protected:
 
 	
 	virtual void BeginPlayingState() override;
-	void ShowStartMenu();
-	void ShowGameOver();
-	void HideCurrentMenu();
 
 public:
-	UPROPERTY(EditAnywhere, Category = "MyUI")
-	TSubclassOf<UUserWidget> StartMenuClass; // 시작 화면용 주머니
-
 	UPROPERTY()
 	UUserWidget* CurrentMenuWidget;
 	
