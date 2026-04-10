@@ -23,6 +23,7 @@ EBTNodeResult::Type UBTTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerCom
 		return EBTNodeResult::Failed;
 	}
 	
+	UE_LOG(LogTemp, Error, TEXT("Montage Play!!!!!!!!!!!!!!"))
 	AIController->PlayAnimMontage(AttackMontage);
 	return EBTNodeResult::InProgress;
 }
