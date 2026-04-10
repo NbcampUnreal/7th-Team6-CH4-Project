@@ -35,7 +35,7 @@ ABaseItem::ABaseItem()
 void ABaseItem::OnSphereOverlap(
 	UPrimitiveComponent* OverlappedComponent,
 	AActor* OtherActor,
-	 UPrimitiveComponent* OtherComp,
+	UPrimitiveComponent* OtherComp,
 	int32 OtherBodyIndex,
 	bool bFromSweep,
 	const FHitResult& SweepResult)
@@ -46,6 +46,8 @@ void ABaseItem::OnSphereOverlap(
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Item Picked Up!"));
 	}
+	
+	
 }
 
 // Called when the game starts or when spawned

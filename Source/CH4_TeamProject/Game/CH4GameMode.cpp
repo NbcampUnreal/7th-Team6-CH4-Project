@@ -1,4 +1,4 @@
-
+﻿
 #include "CH4GameMode.h"
 
 #include "CH4_TeamProject/Player/CH4Character.h"
@@ -6,7 +6,6 @@
 #include "CH4_TeamProject/Game/CH4GameState.h"
 #include "CH4_TeamProject/Game/CH4PlayerState.h"
 #include "CH4_TeamProject/Player/CH4PlayerController.h"
-
 
 ACH4GameMode::ACH4GameMode()
 {	
@@ -36,7 +35,7 @@ void ACH4GameMode::StartPlay()
 		0.f);
 }
 
-void ACH4GameMode::EndGame(EGamePhase GP) const
+void ACH4GameMode::EndGame(EGamePhase GP)
 {	
 	// GameState에 반영
 	ACH4GameState* GS = Cast<ACH4GameState>(GetWorld()->GetGameState());
@@ -122,17 +121,17 @@ void ACH4GameMode::OnPlayerRevived(ACH4PlayerState* PlayerState)
 	ACH4PlayerController* PC = Cast<ACH4PlayerController>(PlayerState->GetPlayerController());
 	if (PC)
 	{
-		PC->Client_EnablePlayerInput();
+		/*PC->Client_EnablePlayerInput();*/
 		PC->Client_PlayReviveAnim();
 		PC->Client_SetPlayerDownedUI(false);
 	}
 }
 
-void ACH4GameMode::SetGameResult() const
+void ACH4GameMode::SetGameResult()
 {
 	ACH4GameState* GS = Cast<ACH4GameState>(GetWorld()->GetGameState());
 	if (GS && GS->AlivePlayerCount <= 0)
-	{
+	{ 
 		EndGame(EGamePhase::Lose);
 	}
 	else if (GS && GS->AlivePlayerCount > 0 && GS->GearPartsCount == 3)

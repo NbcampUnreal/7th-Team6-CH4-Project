@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "CH4GameMode.h"
 #include "GameFramework/GameState.h"
 #include "CH4_TeamProject/DataBase/DataBase.h"
 #include "CH4GameState.generated.h"
@@ -59,7 +60,8 @@ public:
 	void AddAlivePlayerCount() { AlivePlayerCount++; }
 	void SubtractAlivePlayerCount() { AlivePlayerCount--; }
 	
-	void AddGearPartsCount() { GearPartsCount++; }
+	UFUNCTION()
+	void AddGearPartsCount();
 	
 	bool CheckAlivePlayerIsZero();
 	
