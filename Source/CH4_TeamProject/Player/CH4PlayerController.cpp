@@ -1,6 +1,7 @@
 ﻿
 #include "CH4PlayerController.h"
 #include "Blueprint/UserWidget.h"
+#include "CH4_TeamProject/Player/CH4Character.h"
 #include "CH4_TeamProject/DataBase/DataBase.h"
 
 ACH4PlayerController::ACH4PlayerController()
@@ -37,8 +38,7 @@ void ACH4PlayerController::BeginPlay()
 void ACH4PlayerController::BeginPlayingState()
 {
     Super::BeginPlayingState();
-    
-    ConstructorHelpers::FClassFinder<HUDWidgetClassA>
+
 }
 
 void ACH4PlayerController::ShowStartMenu()
@@ -89,20 +89,20 @@ void ACH4PlayerController::Client_EnablePlayerInput_Implementation()
 
 void ACH4PlayerController::Client_PlayDownAnim_Implementation()
 {
-    // ACH4Character* MyChar = Cast<ACH4Character>(GetPawn());  -> 다운 애니메이션 찾으면 주석 풀기
-    // if (MyChar)
-    // {
-    //     MyChar->PlayDownAnimation();
-    // }
+    ACH4Character* MyChar = Cast<ACH4Character>(GetPawn());
+    if (MyChar)
+    {
+        // MyChar->PlayDownAnimation();
+    }
 }
 
 void ACH4PlayerController::Client_PlayReviveAnim_Implementation()
 {
-    // ACH4Character* MyChar = Cast<ACH4Character>(GetPawn());  -> 소생 애니메이션 찾으면 주석 풀기
-    // if (MyChar)
-    // {
-    //     MyChar->PlayReviveAnimation();
-    // }
+    ACH4Character* MyChar = Cast<ACH4Character>(GetPawn());
+    if (MyChar)
+    {
+        // MyChar->PlayReviveAnimation();
+    }
 }
 
 void ACH4PlayerController::Client_MoveToLobby_Implementation()
@@ -113,37 +113,38 @@ void ACH4PlayerController::Client_MoveToLobby_Implementation()
 
 void ACH4PlayerController::Client_InvokeGameClearUI_Implementation()
 {
-    // 클리어 UI 띄우기
-
+    HUDGameClearWidgetInstance = CreateWidget<UUserWidget>(this,HUDGameClearWidgetClass);
+    HUDGameClearWidgetInstance->AddToViewport();
 }
 
-void ACH4PlayerController::Client_InvokeGameLoseUI_Implementation() const
+void ACH4PlayerController::Client_InvokeGameLoseUI_Implementation()
 {
-    // 패배 UI 띄우기
+    HUDGameLoseWidgetInstance = CreateWidget<UUserWidget>(this,HUDGameLoseWidgetClass);
+    HUDGameLoseWidgetInstance->AddToViewport();
 }
 
-/*
- if (UImage* BossHPBarImage = Cast<UImage>(HUDWidget->GetWidgetFromName(TEXT("BossHPBarImage"))))
+void ACH4PlayerController::Client_SetPlayerDownedUI_Implementation(bool bShow)
 {
-    if (UProgressBar* BossHPProgressBar = Cast<UProgressBar>(HUDWidget->GetWidgetFromName(TEXT("BossHPBar"))))
+    if (!IsLocalController())
+        return;
+    
+    if (bShow)
     {
-        if (CurrentLevelIndex < 4)
+        if (!HUDPlayerDownedWidgetInstance)
         {
-            BossHPBarImage->SetVisibility(ESlateVisibility::Hidden);
-            BossHPProgressBar->SetVisibility(ESlateVisibility::Hidden);
-        }
-        else
-        {
-            BossHPBarImage->SetVisibility(ESlateVisibility::Visible);
-            BossHPProgressBar->SetVisibility(ESlateVisibility::Visible);
-							
-            AActor* FoundActor = UGameplayStatics::GetActorOfClass(GetWorld(), AHDBossMonster::StaticClass());
-							
-            if (AHDBossMonster* HdBossMonster = Cast<AHDBossMonster>(FoundActor))
+            HUDPlayerDownedWidgetInstance = CreateWidget<UUserWidget>(this,HUDPlayerDownedWidgetClass);
+            if (HUDPlayerDownedWidgetInstance)
             {
-                BossHPProgressBar->SetPercent(HdBossMonster->CurrentHP / HdBossMonster->MaxHP);
+                HUDPlayerDownedWidgetInstance->AddToViewport();
             }
         }
     }
+    else
+    {
+        if (HUDPlayerDownedWidgetInstance)
+        {
+            HUDPlayerDownedWidgetInstance->RemoveFromParent();
+            HUDPlayerDownedWidgetInstance = nullptr;
+        }
+    }
 }
-*/

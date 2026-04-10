@@ -40,25 +40,42 @@ public:
 	UPROPERTY()
 	UUserWidget* CurrentMenuWidget;
 	
-	//----합칠 수 있을듯----(bool 매개변수를 통해서)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "My UI")
+	TSubclassOf<UUserWidget> HUDLobbyWidgetClass;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "My UI")
+	UUserWidget* HUDLobbyWidgetInstance;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "My UI")
+	TSubclassOf<UUserWidget> HUDGameClearWidgetClass;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "My UI")
+	UUserWidget* HUDGameClearWidgetInstance;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "My UI")
+	TSubclassOf<UUserWidget> HUDGameLoseWidgetClass;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "My UI")
+	UUserWidget* HUDGameLoseWidgetInstance;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "My UI")
+	TSubclassOf<UUserWidget> HUDPlayerDownedWidgetClass;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "My UI")
+	UUserWidget* HUDPlayerDownedWidgetInstance;
+	
 	UFUNCTION(Client, Reliable)
 	void Client_DisablePlayerInput();
 	
 	UFUNCTION(Client, Reliable)
 	void Client_EnablePlayerInput();
-	//---------------------------
 	
-	
-	//----합칠 수 있을듯----(EPlayerLifeState 매개변수에 따라서)
 	UFUNCTION(Client, Reliable)
 	void Client_PlayDownAnim();
 	
 	UFUNCTION(Client, Reliable)
 	void Client_PlayReviveAnim();
-	//---------------------------
 	
-	
-	//----합칠 수 있을듯----
 	UFUNCTION(Client, Reliable)
 	void Client_MoveToLobby();
 	
@@ -66,14 +83,8 @@ public:
 	void Client_InvokeGameClearUI();
 	
 	UFUNCTION(Client, Reliable)
-	void Client_InvokeGameLoseUI() const;
-	//---------------------------
+	void Client_InvokeGameLoseUI();	
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "My UI")
-	TSubclassOf<UUserWidget> HUDLobbyWidgetClass;
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "My UI")
-	UUserWidget* HUDLobbyWidgetInstance;
-	
-	
+	UFUNCTION(Client, Reliable)
+	void Client_SetPlayerDownedUI(bool bShow);
 };

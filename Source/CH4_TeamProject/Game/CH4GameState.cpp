@@ -1,6 +1,7 @@
 ﻿
 #include "CH4GameState.h"
 #include "CH4GameInstance.h"
+#include "CH4_TeamProject/Player/CH4PlayerController.h"
 #include "Net/UnrealNetwork.h"
 
 ACH4GameState::ACH4GameState()
@@ -67,6 +68,9 @@ bool ACH4GameState::CheckAlivePlayerIsZero()
 	{
 		AlivePlayerIsZero = true;
 		SetGamePhase(EGamePhase::Lose);
+		
+		ACH4PlayerController* PC = Cast<ACH4PlayerController>(GetWorld()->GetFirstPlayerController());
+		PC->Client_InvokeGameLoseUI();
 	}
 	return AlivePlayerIsZero;
 }
