@@ -4,9 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "Components/WidgetComponent.h"
 #include "CH4PlayerController.generated.h"
 
-UCLASS()
+UCLASS(Abstract)
 class CH4_TEAMPROJECT_API ACH4PlayerController : public APlayerController
 {
 	GENERATED_BODY()
@@ -20,22 +21,46 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	
+	virtual void BeginPlayingState() override;
 
 public:
-	
-		//
 	UPROPERTY(EditAnywhere, Category = "MyUI")
 	TSubclassOf<UUserWidget> StartMenuClass; // 시작 화면용 주머니
 
 	UPROPERTY()
 	UUserWidget* CurrentMenuWidget;
 	
-	//----합칠 수 있을듯----(bool 매개변수를 통해서)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "My UI")
+	TSubclassOf<UUserWidget> HUDLobbyWidgetClass;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "My UI")
+	UUserWidget* HUDLobbyWidgetInstance;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "My UI")
+	TSubclassOf<UUserWidget> HUDGameClearWidgetClass;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "My UI")
+	UUserWidget* HUDGameClearWidgetInstance;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "My UI")
+	TSubclassOf<UUserWidget> HUDGameLoseWidgetClass;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "My UI")
+	UUserWidget* HUDGameLoseWidgetInstance;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "My UI")
+	TSubclassOf<UUserWidget> HUDPlayerDownedWidgetClass;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "My UI")
+	UUserWidget* HUDPlayerDownedWidgetInstance;
+	
 	UFUNCTION(Client, Reliable)
 	void Client_DisablePlayerInput();
 	
 	UFUNCTION(Client, Reliable)
 	void Client_EnablePlayerInput();
+	
 	//---------------------------
 
 
@@ -45,23 +70,16 @@ public:
 
 	UFUNCTION(Client, Reliable)
 	void Client_PlayReviveAnim();
-	//---------------------------
-
-
-	//----합칠 수 있을듯----
+	
 	UFUNCTION(Client, Reliable)
-	void Client_InvokeDownUI() ;
-
+	void Client_MoveToLobby();
+	
 	UFUNCTION(Client, Reliable)
-	void Client_HideDownUI();
-
+	void Client_InvokeGameClearUI();
+	
 	UFUNCTION(Client, Reliable)
-	void Client_MoveToLobby() const;
-
+	void Client_InvokeGameLoseUI();	
+	
 	UFUNCTION(Client, Reliable)
-	void Client_InvokeGameClearUI() const;
-
-	UFUNCTION(Client, Reliable)
-	void Client_InvokeGameLoseUI() const;
-	//---------------------------
+	void Client_SetPlayerDownedUI(bool bShow);
 };
