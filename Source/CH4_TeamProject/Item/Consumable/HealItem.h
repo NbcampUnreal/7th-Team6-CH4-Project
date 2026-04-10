@@ -3,17 +3,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "../BaseItem.h"
-#include "ConsumableItem.generated.h"
+#include "ConsumableItem.h"
+#include "HealItem.generated.h"
 
 UCLASS()
-class CH4_TEAMPROJECT_API AConsumableItem : public ABaseItem
+class CH4_TEAMPROJECT_API AHealItem : public AConsumableItem
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this actor's properties
-	AConsumableItem();
+	AHealItem();
 
 protected:
 	// Called when the game starts or when spawned
@@ -23,4 +23,5 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	
+	int32 HealAmount = 20;
 };

@@ -46,6 +46,7 @@ protected:
 	
 	UPROPERTY(VisibleAnywhere, Category = "AI")
 	class UAIPerceptionStimuliSourceComponent* StimuliSource;
+	
 
 	//함수모음
 private:
@@ -73,6 +74,12 @@ private:
 	
 	UPROPERTY(VisibleAnywhere, Category = "Input")
 	class UInputAction* FireAction;
+	
+	UPROPERTY(VisibleAnywhere, Category = "Input")
+	class UInputAction* EquipAction;
+	
+	UPROPERTY(VisibleAnywhere, Category = "Input")
+	class UInputAction* HealAction;
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Stat")
 	float MaxHP = 100.0f;//최대체력
@@ -92,7 +99,26 @@ public:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	TObjectPtr<UEquippableComponent> EquippableComponent;
 	
-	UFUNCTION(Server,Reliable)
+	UFUNCTION(BlueprintCallable)
 	void Fires();
 	
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat|Weapon")
+	class URangedGunDataAsset* PrimaryWeaponData;
+	//장비장착 임렵함수
+	void OnEquipInput();
+	
+	
+	
+	
+	void ApplyItemEffect(class AHealItem* HealItem);
+	
+	void OnApplyItemEffect();
+	
+	UPROPERTY()
+	TObjectPtr<class AHealItem> Heal;
+		
+	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
+	
+	int HealItemCount = 0;
 };
