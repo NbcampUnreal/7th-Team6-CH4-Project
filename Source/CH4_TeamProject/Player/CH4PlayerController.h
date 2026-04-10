@@ -66,9 +66,6 @@ protected:
 	virtual void BeginPlayingState() override;
 
 public:
-	UPROPERTY(EditAnywhere, Category = "MyUI")
-	TSubclassOf<UUserWidget> StartMenuClass; // 시작 화면용 주머니
-
 	UPROPERTY()
 	UUserWidget* CurrentMenuWidget;
 	
@@ -102,10 +99,6 @@ public:
 	UFUNCTION(Client, Reliable)
 	void Client_EnablePlayerInput();
 	
-	//---------------------------
-
-
-	//----합칠 수 있을듯----(EPlayerLifeState 매개변수에 따라서)
 	UFUNCTION(Client, Reliable)
 	void Client_PlayDownAnim();
 
