@@ -1,4 +1,4 @@
-﻿
+
 #include "CH4PlayerController.h"
 #include "Blueprint/UserWidget.h"
 #include "CH4_TeamProject/Player/CH4Character.h"
@@ -74,14 +74,14 @@ void ACH4PlayerController::HideCurrentMenu()
 }
 
 void ACH4PlayerController::Client_DisablePlayerInput_Implementation()
-{    
+{
     SetIgnoreMoveInput(true);
     SetIgnoreLookInput(true);
     // SetIgnoreJumpInput(true); -> 점프 구현 시 주석 풀기
 }
 
 void ACH4PlayerController::Client_EnablePlayerInput_Implementation()
-{    
+{
     SetIgnoreMoveInput(false);
     SetIgnoreLookInput(false);
     // SetIgnoreJumpInput(false); -> 점프 구현 시 주석 풀기
@@ -109,6 +109,12 @@ void ACH4PlayerController::Client_MoveToLobby_Implementation()
 {
     HUDLobbyWidgetInstance = CreateWidget<UUserWidget>(this,HUDLobbyWidgetClass);
     HUDLobbyWidgetInstance->AddToViewport();
+    // 회색 화면 등 -> 구현 필요
+}
+
+void ACH4PlayerController::Client_HideDownUI_Implementation()
+{
+    // 다운 UI 제거
 }
 
 void ACH4PlayerController::Client_InvokeGameClearUI_Implementation()
@@ -147,4 +153,6 @@ void ACH4PlayerController::Client_SetPlayerDownedUI_Implementation(bool bShow)
             HUDPlayerDownedWidgetInstance = nullptr;
         }
     }
+}
+    // 패배 UI 띄우기
 }

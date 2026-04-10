@@ -12,6 +12,7 @@ class CH4_TEAMPROJECT_API ACH4PlayerController : public APlayerController
 {
 	GENERATED_BODY()
 
+
 public:
 	ACH4PlayerController();
 
@@ -23,16 +24,6 @@ protected:
 	
 	virtual void BeginPlayingState() override;
 
-	UFUNCTION(BlueprintCallable)
-	void ShowStartMenu();
-
-
-	UFUNCTION(BlueprintCallable)
-	void ShowGameOver();
-
-	UFUNCTION(BlueprintCallable)
-	void HideCurrentMenu();
-	
 public:
 	UPROPERTY(EditAnywhere, Category = "MyUI")
 	TSubclassOf<UUserWidget> StartMenuClass; // 시작 화면용 주머니
@@ -70,9 +61,13 @@ public:
 	UFUNCTION(Client, Reliable)
 	void Client_EnablePlayerInput();
 	
+	//---------------------------
+
+
+	//----합칠 수 있을듯----(EPlayerLifeState 매개변수에 따라서)
 	UFUNCTION(Client, Reliable)
 	void Client_PlayDownAnim();
-	
+
 	UFUNCTION(Client, Reliable)
 	void Client_PlayReviveAnim();
 	

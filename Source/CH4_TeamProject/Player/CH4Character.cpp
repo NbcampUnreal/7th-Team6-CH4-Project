@@ -7,10 +7,13 @@
 #include "CH4_TeamProject/Game/CH4PlayerState.h"
 #include "Engine/Engine.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "../Item/Equippable/EquippableComponent.h"
 #include "CH4_TeamProject/Item/Equippable/Ranged Weapon/RangedWeapons.h"
+#include "CH4_TeamProject/Player/PlayerAnimInstance.h"
+#include "Animation/AnimInstance.h"
 
 ACH4Character::ACH4Character()
 {
@@ -67,16 +70,21 @@ void ACH4Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent);
-	
+
 	EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ACH4Character::Move);
 	EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ACH4Character::Look);
 	EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &ACH4Character::Fires);
+	EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &ACH4Character::Interact);
 }
 
-float ACH4Character::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
-	class AController* EventInstigator, AActor* DamageCauser)
+float ACH4Character::TakeDamage(float DamageAmount, const FDamageEvent& DamageEvent,
+	AController* EventInstigator, AActor* DamageCauser)
 {
-	return Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	const float Damage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	PlayHitAnimation();
+
+	return Damage;
 }
 
 //플레이어 메쉬
@@ -148,6 +156,12 @@ void ACH4Character::InitializationInput()
 	{
 		FireAction = InputFire.Object;
 	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputInteract(TEXT("/Script/EnhancedInput.InputAction'/Game/Player/Input/Action/IA_Interaction.IA_Interaction'"));
+	if (InputInteract.Object != nullptr)
+	{
+		InteractAction = InputInteract.Object;
+	}
 }
 
 //무브
@@ -189,3 +203,159 @@ void ACH4Character::Fires_Implementation()
 	EquippableComponent->Fire();
 }
 
+// 몽타주 호출 함수들
+void ACH4Character::PlayHitAnimation()
+{
+	if (UPlayerAnimInstance* AnimInst = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance()))
+	{
+		AnimInst->PlayHitHeadMontage();
+	}
+}
+
+void ACH4Character::PlayPickupAnimation()
+{
+	if (UPlayerAnimInstance* AnimInst = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance()))
+	{
+		AnimInst->PlayPickupMontage();
+	}
+}
+
+void ACH4Character::PlayDownAnimation()
+{
+	if (UPlayerAnimInstance* AnimInst = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance()))
+	{
+		AnimInst->PlayDownMontage();
+	}
+}
+
+void ACH4Character::PlayDeathAnimation()
+{
+	if (UPlayerAnimInstance* AnimInst = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance()))
+	{
+		AnimInst->PlayDeathMontage();
+	}
+}
+
+void ACH4Character::PlayReviveAnimation()
+{
+	if (UPlayerAnimInstance* AnimInst = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance()))
+	{
+		AnimInst->PlayReviveMontage();
+	}
+}
+
+
+//상호작용(소생>줍기)->우선순위
+void ACH4Character::Interact()
+{
+	//플레이어를 살릴 수 있는지 체크
+	if (TryReviveNearbyPlayer())
+	{
+		return;
+	}
+
+	//다운된 플레이어가 없으면 아이템 줍기
+	if (TryPickupNearbyItem())
+	{
+		return;
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("상호작용 가능한 대상이 없습니다."));
+}
+
+bool ACH4Character::TryReviveNearbyPlayer()
+{
+	TArray<AActor*> IgnoreActors;
+	IgnoreActors.Add(this);
+
+	TArray<AActor*> OutActors;
+	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn));
+
+	const bool bHit = UKismetSystemLibrary::SphereOverlapActors(
+		GetWorld(),
+		GetActorLocation(),
+		InteractionRadius,
+		ObjectTypes,
+		ACH4Character::StaticClass(),
+		IgnoreActors,
+		OutActors
+	);
+
+	if (!bHit)
+	{
+		return false;
+	}
+
+	for (AActor* Actor : OutActors)
+	{
+		ACH4Character* OtherCharacter = Cast<ACH4Character>(Actor);
+		if (OtherCharacter == nullptr)
+		{
+			continue;
+		}
+
+		//다운된 플레이어를 태그로 구분 다운된 플레이어 BP 또는 캐릭터에 "DownedPlayer" 태그를 넣어두면 됨
+		if (OtherCharacter->ActorHasTag(TEXT("DownedPlayer")))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("%s 를 소생합니다."), *OtherCharacter->GetName());
+
+			//다운된 플레이어의 부활 애니메이션 재생
+			OtherCharacter->PlayReviveAnimation();
+
+			//PlayPickupAnimation();(일부러막음)
+
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool ACH4Character::TryPickupNearbyItem()
+{
+	TArray<AActor*> IgnoreActors;
+	IgnoreActors.Add(this);
+
+	TArray<AActor*> OutActors;
+	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldDynamic));
+
+	const bool bHit = UKismetSystemLibrary::SphereOverlapActors(
+		GetWorld(),
+		GetActorLocation(),
+		InteractionRadius,
+		ObjectTypes,
+		AActor::StaticClass(),
+		IgnoreActors,
+		OutActors
+	);
+
+	if (!bHit)
+	{
+		return false;
+	}
+
+	for (AActor* Actor : OutActors)
+	{
+		if (Actor == nullptr)
+		{
+			continue;
+		}
+
+		//줍기 가능한 아이템을 태그로 구분 아이템 BP 또는 액터에 "PickupItem" 태그를 넣어두면 됨
+		if (Actor->ActorHasTag(TEXT("PickupItem")))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("%s 아이템을 줍습니다."), *Actor->GetName());
+
+			PlayPickupAnimation();
+
+			// 실제 인벤토리 처리나 Destroy는
+			// Actor->Destroy();
+
+			return true;
+		}
+	}
+
+	return false;
+}
