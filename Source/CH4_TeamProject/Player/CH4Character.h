@@ -8,6 +8,8 @@
 #include "CH4Character.generated.h"
 
 class UEquippableComponent;
+class UPlayerAnimInstance;
+
 UCLASS()
 class CH4_TEAMPROJECT_API ACH4Character : public ACharacter
 {
@@ -36,6 +38,14 @@ public:
 		AActor* DamageCauser
 	) override;
 
+public:
+	//애니메이션 호출 함수
+	void PlayHitAnimation();
+	void PlayPickupAnimation();
+	void PlayDownAnimation();
+	void PlayDeathAnimation();
+	void PlayReviveAnimation();
+
 protected:
 	//카메라쪽
 	UPROPERTY(EditAnywhere)
@@ -59,6 +69,11 @@ private:
 	void Move(const FInputActionValue& Value);//무브함수
 
 	void Look(const FInputActionValue& Value);//시점 함수
+	
+	//상호작용
+	void Interact();//상호작용
+	bool TryReviveNearbyPlayer();//가까이 다운된플레이어
+	bool TryPickupNearbyItem();//가까운 아이템
 
 
 	//입력값(움직임,시점)
@@ -80,6 +95,10 @@ private:
 	
 	UPROPERTY(VisibleAnywhere, Category = "Input")
 	class UInputAction* HealAction;
+
+	UPROPERTY(VisibleAnywhere, Category = "Input")
+	class UInputAction* InteractAction;
+
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Stat")
 	float MaxHP = 100.0f;//최대체력
@@ -94,6 +113,10 @@ public:
 	//플레이어 움직임 속도
 	UPROPERTY(EditAnywhere)
 	float PlayerMoveSpeed = 350.0f;
+
+	//상호작용 거리
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
+	float InteractionRadius = 200.0f;
 	
 	//장비 장착 컴포넌트
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
@@ -121,4 +144,5 @@ public:
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 	
 	int HealItemCount = 0;
+
 };

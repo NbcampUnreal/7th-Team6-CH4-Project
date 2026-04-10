@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -30,6 +30,9 @@ public:
 	
 	// 컴포넌트에서 발사
 	void Fire();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool UsingWeapon = false;
 	
 	//기억할 총알갯수
 	UPROPERTY()
