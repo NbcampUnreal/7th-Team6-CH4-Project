@@ -24,10 +24,5 @@ void AConsumableItem::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-//void AConsumableItem::UsingHealItem()
-//{
-//	인벤토리에서 갯수까기
-//	캐릭터 hp+=20;	
-//
-//}
+
 

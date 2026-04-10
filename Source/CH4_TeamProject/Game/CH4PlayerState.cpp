@@ -4,13 +4,14 @@
 #include "Net/UnrealNetwork.h"
 #include "CH4GameMode.h"
 
-ACH4PlayerState::ACH4PlayerState() : 
-		MaxHP(100.f), 		
-		CurrentHP(MaxHP),
-		PlayerReviveCount(2)
-		// SpawnPointIndex()
+ACH4PlayerState::ACH4PlayerState()
+		
 {
 	bReplicates = true;
+	
+	MaxHP = 100.f; 		
+	CurrentHP = MaxHP;
+	PlayerReviveCount = 2;
 }
 
 void ACH4PlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -44,7 +45,3 @@ void ACH4PlayerState::Server_SetCurrentHP_Implementation(float Damage)
 		}
 	}
 }
-
-// void ACH4PlayerState::OnRep_IsDowned()
-// {
-// }

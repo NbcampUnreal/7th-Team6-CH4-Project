@@ -1,15 +1,24 @@
-﻿#include "CH4PlayerController.h"
+#include "CH4PlayerController.h"
 #include "Blueprint/UserWidget.h"
 #include "CH4_TeamProject/Player/CH4Character.h"
+#include "CH4_TeamProject/DataBase/DataBase.h"
 #include <Kismet\KismetSystemLibrary.h>
 
 ACH4PlayerController::ACH4PlayerController()
 {
     bReplicates = true;
+    bShowMouseCursor = true;
+    
+    
 }
 
 void ACH4PlayerController::BeginPlay()
 {
+    if (!IsLocalController())
+        return;
+    
+    Client_MoveToLobby();
+    
     // HUD 위젯 생성 및 표시
     if (HUDWidgetClass)
     {
@@ -24,7 +33,11 @@ void ACH4PlayerController::BeginPlay()
 
     // TODO: 시작 시 어떤 메뉴를 먼저 띄울지 함수 호출 위치 결정
     ShowStartMenu();
+}
 
+void ACH4PlayerController::BeginPlayingState()
+{
+    Super::BeginPlayingState();
 
 }
 
@@ -129,14 +142,14 @@ void ACH4PlayerController::ShowGameRule()
 
 
 void ACH4PlayerController::Client_DisablePlayerInput_Implementation()
-{    
+{
     SetIgnoreMoveInput(true);
     SetIgnoreLookInput(true);
     // SetIgnoreJumpInput(true); -> 점프 구현 시 주석 풀기
 }
 
 void ACH4PlayerController::Client_EnablePlayerInput_Implementation()
-{    
+{
     SetIgnoreMoveInput(false);
     SetIgnoreLookInput(false);
     // SetIgnoreJumpInput(false); -> 점프 구현 시 주석 풀기
@@ -144,43 +157,70 @@ void ACH4PlayerController::Client_EnablePlayerInput_Implementation()
 
 void ACH4PlayerController::Client_PlayDownAnim_Implementation()
 {
-    // ACH4Character* MyChar = Cast<ACH4Character>(GetPawn());  -> 다운 애니메이션 찾으면 주석 풀기
-    // if (MyChar)
-    // {
-    //     MyChar->PlayDownAnimation();
-    // }
+    ACH4Character* MyChar = Cast<ACH4Character>(GetPawn());
+    if (MyChar)
+    {
+        // MyChar->PlayDownAnimation();
+    }
 }
 
 void ACH4PlayerController::Client_PlayReviveAnim_Implementation()
 {
-    // ACH4Character* MyChar = Cast<ACH4Character>(GetPawn());  -> 소생 애니메이션 찾으면 주석 풀기
-    // if (MyChar)
-    // {
-    //     MyChar->PlayReviveAnimation();
-    // }
+    ACH4Character* MyChar = Cast<ACH4Character>(GetPawn());
+    if (MyChar)
+    {
+        // MyChar->PlayReviveAnimation();
+    }
 }
 
-void ACH4PlayerController::Client_InvokeDownUI_Implementation()
+void ACH4PlayerController::Client_MoveToLobby_Implementation()
 {
+    HUDLobbyWidgetInstance = CreateWidget<UUserWidget>(this,HUDLobbyWidgetClass);
+    HUDLobbyWidgetInstance->AddToViewport();
     // 회색 화면 등 -> 구현 필요
 }
 
 void ACH4PlayerController::Client_HideDownUI_Implementation()
-{    
+{
     // 다운 UI 제거
 }
 
-void ACH4PlayerController::Client_MoveToLobby_Implementation() const
+void ACH4PlayerController::Client_InvokeGameClearUI_Implementation()
 {
-    // 로비 UI로 이동
+    HUDGameClearWidgetInstance = CreateWidget<UUserWidget>(this,HUDGameClearWidgetClass);
+    HUDGameClearWidgetInstance->AddToViewport();
 }
 
-void ACH4PlayerController::Client_InvokeGameClearUI_Implementation() const
+void ACH4PlayerController::Client_InvokeGameLoseUI_Implementation()
 {
-    // 클리어 UI 띄우기
+    HUDGameLoseWidgetInstance = CreateWidget<UUserWidget>(this,HUDGameLoseWidgetClass);
+    HUDGameLoseWidgetInstance->AddToViewport();
 }
 
-void ACH4PlayerController::Client_InvokeGameLoseUI_Implementation() const
+void ACH4PlayerController::Client_SetPlayerDownedUI_Implementation(bool bShow)
 {
+    if (!IsLocalController())
+        return;
+    
+    if (bShow)
+    {
+        if (!HUDPlayerDownedWidgetInstance)
+        {
+            HUDPlayerDownedWidgetInstance = CreateWidget<UUserWidget>(this,HUDPlayerDownedWidgetClass);
+            if (HUDPlayerDownedWidgetInstance)
+            {
+                HUDPlayerDownedWidgetInstance->AddToViewport();
+            }
+        }
+    }
+    else
+    {
+        if (HUDPlayerDownedWidgetInstance)
+        {
+            HUDPlayerDownedWidgetInstance->RemoveFromParent();
+            HUDPlayerDownedWidgetInstance = nullptr;
+        }
+    }
+}
     // 패배 UI 띄우기
 }

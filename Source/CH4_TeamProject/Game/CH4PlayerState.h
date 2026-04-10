@@ -38,8 +38,4 @@ public:
 	
 	UFUNCTION(Server, Reliable)
 	void Server_SetCurrentHP(float Damage);
-
-	
-	// UFUNCTION()
-	// void OnRep_IsDowned(); // 다운 연출 (팀원 화면에도 표시)
 };

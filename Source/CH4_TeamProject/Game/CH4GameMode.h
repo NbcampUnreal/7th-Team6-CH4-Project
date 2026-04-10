@@ -26,11 +26,11 @@ public:
 
     // 승패 판정
     void SetGameResult() const;
+	
+	FTimerHandle ServerTimeTimerHandle;
 
 private:
 	void UpdateMainServerTime() const;
-	
-	FTimerHandle ServerTimeTimerHandle;
 			
 	// void StartFinalDefenseTimer() const;	
 		

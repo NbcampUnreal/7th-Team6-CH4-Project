@@ -9,7 +9,7 @@
 
 
 ACH4GameMode::ACH4GameMode()
-{
+{	
 	GameStateClass = ACH4GameState::StaticClass();
 	PlayerStateClass = ACH4PlayerState::StaticClass();
 	PlayerControllerClass = ACH4PlayerController::StaticClass();
@@ -56,10 +56,12 @@ void ACH4GameMode::EndGame(EGamePhase GP) const
 		
 		if (GP == EGamePhase::Clear)
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Clear"));
 			PC->Client_InvokeGameClearUI();
 		}
 		else if (GP == EGamePhase::Lose)
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Lose"));
 			PC->Client_InvokeGameLoseUI();
 		}
 	}
@@ -92,7 +94,7 @@ void ACH4GameMode::OnPlayerDowned(ACH4PlayerState* PlayerState)
 		{
 			PC->Client_DisablePlayerInput();
 			PC->Client_PlayDownAnim();
-			PC->Client_InvokeDownUI();
+			PC->Client_SetPlayerDownedUI(true);
 		}
 	}
 	else // 모든 플레이어 다운 시
@@ -122,7 +124,7 @@ void ACH4GameMode::OnPlayerRevived(ACH4PlayerState* PlayerState)
 	{
 		/*PC->Client_EnablePlayerInput();*/
 		PC->Client_PlayReviveAnim();
-		PC->Client_HideDownUI();
+		PC->Client_SetPlayerDownedUI(false);
 	}
 }
 
@@ -136,12 +138,6 @@ void ACH4GameMode::SetGameResult() const
 	else if (GS && GS->AlivePlayerCount > 0 && GS->GearPartsCount == 3)
 	{
 		EndGame(EGamePhase::Clear);
-	}
-	
-	ACH4PlayerController* PC = Cast<ACH4PlayerController>(GetWorld()->GetGameState());
-	if (PC)
-	{
-		PC->Client_MoveToLobby();
 	}
 }
 
