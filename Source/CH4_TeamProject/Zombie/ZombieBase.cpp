@@ -43,7 +43,7 @@ float AZombieBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEven
 	UAnimInstance* TakeDamageMontageInstance = GetMesh()->GetAnimInstance();
 	if (TakeDamageMontageInstance && TakeDamageMontage)
 	{
-		TakeDamageMontageInstance->Montage_Play(TakeDamageMontage);
+		Multi_PlayTakeDamageMontage(TakeDamageMontage);
 	}
 	
 	// 받은 데미지 계산 후 체력에 적용
@@ -61,7 +61,9 @@ void AZombieBase::OnDeath()
 	if (DeathMontageInstance && DeathMontage)
 	{
 		// 몽타지 재생 및 재생시간 저장
-		float PlayLength = DeathMontageInstance->Montage_Play(DeathMontage);
+		Multi_PlayDeathMontage(DeathMontage);
+		
+		float PlayLength = DeathMontage->GetPlayLength();
 		
 		float Delay = FMath::Max(0.f, PlayLength - 0.3f);
 		
@@ -84,6 +86,21 @@ void AZombieBase::OnDeath()
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);\
 	// 메쉬 콜리전 지움
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
+void AZombieBase::Multi_PlayDeathMontage_Implementation(UAnimMontage* MontageToPlay)
+{
+	PlayAnimMontage(MontageToPlay);
+}
+
+void AZombieBase::Multi_PlayTakeDamageMontage_Implementation(UAnimMontage* MontageToPlay)
+{
+	PlayAnimMontage(MontageToPlay);
+}
+
+void AZombieBase::Multi_PlayAttackMontage_Implementation(UAnimMontage* MontageToPlay)
+{
+	PlayAnimMontage(MontageToPlay);
 }
 
 void AZombieBase::DestroyZombie()

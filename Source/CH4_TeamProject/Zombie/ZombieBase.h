@@ -20,6 +20,15 @@ public:
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 	virtual void OnDeath();
 
+	UFUNCTION(NetMulticast, Reliable)
+	void Multi_PlayAttackMontage(UAnimMontage* MontageToPlay);
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void Multi_PlayTakeDamageMontage(UAnimMontage* MontageToPlay);
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void Multi_PlayDeathMontage(UAnimMontage* MontageToPlay);
+	
 	//virtual FGenericTeamId GetGenericTeamId() const override { return static_cast<uint8>(TeamID); }
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
