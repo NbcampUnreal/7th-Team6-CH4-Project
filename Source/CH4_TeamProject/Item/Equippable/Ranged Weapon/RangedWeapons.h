@@ -46,12 +46,17 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual void Fire();
 	
+	UPROPERTY(Replicated)
+	int32 CurrentAmmo;
+	
+	void SetCurrentAmmo();
+
+	UPROPERTY(ReplicatedUsing = OnRep_FireReady)
+	bool bIsCoolingDown= false;
+	void AddMaxClip(int32 AmmoItem);
 protected:
 	virtual void BeginPlay() override;
 	
-	UPROPERTY(Replicated)
-	int32 CurrentAmmo;
-
 	UPROPERTY(Replicated)
 	int32 MaxClip = 300;
 	
@@ -71,9 +76,13 @@ protected:
 		
 	void ProcessReload();
 	
-	bool bIsCoolingDown= false;
 	
 	FTimerHandle TimerHandle_FireDelay;
-	
+	UFUNCTION()
 	void OnRep_FireReady(); 
+	
+	void ResetCoolTime();
+	
+	
+	
 };
