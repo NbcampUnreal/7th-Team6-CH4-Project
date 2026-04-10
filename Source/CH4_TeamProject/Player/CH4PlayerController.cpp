@@ -4,7 +4,6 @@
 #include "CH4_TeamProject/Player/CH4Character.h"
 #include "CH4_TeamProject/DataBase/DataBase.h"
 #include <Kismet\KismetSystemLibrary.h>
-
 #include "Kismet/GameplayStatics.h"
 
 ACH4PlayerController::ACH4PlayerController()
@@ -78,22 +77,13 @@ void ACH4PlayerController::HideCurrentWidget()
 
 void ACH4PlayerController::StartGame()
 {
-    UGameViewportClient* Viewport = GetWorld()->GetGameViewport();
-    if (Viewport)
-    {
-        Viewport->RemoveAllViewportWidgets();
-    }
-
-    // 2. 현재 메뉴 변수 정리 (nullptr 방금 배운 거 활용!)
-    CurrentWidget = nullptr;
+    UE_LOG(LogTemp, Warning, TEXT("Level Start!"));
+    HideCurrentWidget();
+    
+    UGameplayStatics::OpenLevel(this, FName("REALSTAGE"));
     
     // 3. 게임 화면이 나왔으니 다시 HUD(체력바 등)를 띄워줌
     CurrentWidget = CreateWidget<UUserWidget>(this, HUDWidgetClass);
-        return;
-    
-    // Client_MoveToLobby();
-    
-    // HUD 위젯 생성 및 표시
     if (HUDWidgetClass)
     {
         CurrentWidget->AddToViewport();
@@ -132,41 +122,11 @@ void ACH4PlayerController::ShowGameRule()
         bShowMouseCursor = true;
     }
 
-    CurrentMenuWidget = nullptr;
+    CurrentWidget = nullptr;
 
     // TODO: 시작 시 어떤 메뉴를 먼저 띄울지 함수 호출 위치 결정
     ShowStartMenu();
 }
-
-void ACH4PlayerController::BeginPlayingState()
-{
-    Super::BeginPlayingState();
-
-}
-
-void ACH4PlayerController::ShowStartMenu()
-{
-    HideCurrentMenu(); // 기존에 떠 있는 게 있다면 지웁니다.
-
-    if (!StartMenuClass) return;
-
-    // 1. 위젯 생성 (설계도인 Class로 실체인 Instance를 만듭니다)
-    CurrentMenuWidget = CreateWidget<UUserWidget>(this, StartMenuClass);
-
-    if (CurrentMenuWidget)
-    {
-        // 2. 화면에 붙이기
-        CurrentMenuWidget->AddToViewport();
-
-        // 3. 마우스 설정: 시작 메뉴에서는 버튼을 눌러야 하니 마우스를 보여줍니다.
-        bShowMouseCursor = true;
-
-        // 4. 입력 모드: 게임 캐릭터 조작은 막고 UI만 만지게 설정합니다.
-        FInputModeUIOnly InputMode;
-        SetInputMode(InputMode);
-    }
-}
-
 
 void ACH4PlayerController::Client_DisablePlayerInput_Implementation()
 {
@@ -205,12 +165,6 @@ void ACH4PlayerController::Client_MoveToLobby_Implementation()
     HUDLobbyWidgetInstance = CreateWidget<UUserWidget>(this,HUDLobbyWidgetClass);
     HUDLobbyWidgetInstance->AddToViewport();
     // 회색 화면 등 -> 구현 필요
-}
-
-void ACH4PlayerController::Client_InvokeGameClearUI_Implementation()
-{
-    HUDGameClearWidgetInstance = CreateWidget<UUserWidget>(this,HUDGameClearWidgetClass);
-    HUDGameClearWidgetInstance->AddToViewport();
 }
 
 void ACH4PlayerController::Client_InvokeGameClearUI_Implementation()
