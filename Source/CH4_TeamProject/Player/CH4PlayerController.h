@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -19,8 +19,49 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	TSubclassOf<UUserWidget> HUDWidgetClass;
 
+
+	//
+	UPROPERTY(EditAnywhere, Category = "MyUI")
+	TSubclassOf<UUserWidget> StartMenuClass; // 시작 화면용 주머니
+
+	// 룰 화면 위젯 블루프린트 클래스를 에디터에서 할당받습니다.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
+	TSubclassOf<UUserWidget> GameRulesWidgetClass;
+
+	// 현재 열려 있는 룰 위젯의 인스턴스를 저장합니다. (nullptr 필수!)
+	UPROPERTY()
+	UUserWidget* CurrentRulesWidget = nullptr;
+
+
+	//아이템 완성시 주석해제
+	//UPROPERTY(BlueprintReadOnly, Category = "GameData")
+	//int32 GamePhase;
+
+	//UPROPERTY(BlueprintReadOnly, Category = "GameData")
+	//int32 GearPartsCount;
+
+
 protected:
 	virtual void BeginPlay() override;
+
+	UFUNCTION(BlueprintCallable)
+	void ShowStartMenu();
+
+	UFUNCTION(BlueprintCallable, Category = "Menu")
+	void ShowGameRule();
+
+	UFUNCTION(BlueprintCallable)
+	void ShowGameOver();
+
+	UFUNCTION(BlueprintCallable)
+	void HideCurrentMenu();
+
+	UFUNCTION(BlueprintCallable, Category = "Menu")
+	void StartGame();
+
+	UFUNCTION(BlueprintCallable, Category = "Menu")
+	void ExitGame();
+
 	
 	virtual void BeginPlayingState() override;
 	void ShowStartMenu();
