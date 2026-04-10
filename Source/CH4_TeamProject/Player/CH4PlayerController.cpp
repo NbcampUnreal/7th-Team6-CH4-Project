@@ -2,14 +2,11 @@
 #include "CH4PlayerController.h"
 #include "Blueprint/UserWidget.h"
 #include "CH4_TeamProject/Player/CH4Character.h"
-#include "CH4_TeamProject/DataBase/DataBase.h"
 
 ACH4PlayerController::ACH4PlayerController()
 {
     bReplicates = true;
     bShowMouseCursor = true;
-    
-    
 }
 
 void ACH4PlayerController::BeginPlay()
@@ -148,6 +145,4 @@ void ACH4PlayerController::Client_SetPlayerDownedUI_Implementation(bool bShow)
             HUDPlayerDownedWidgetInstance = nullptr;
         }
     }
-}
-    // 패배 UI 띄우기
 }

@@ -23,6 +23,7 @@ protected:
 	virtual void BeginPlay() override;
 	
 	virtual void BeginPlayingState() override;
+	void ShowStartMenu();
 	void ShowGameOver();
 	void HideCurrentMenu();
 
