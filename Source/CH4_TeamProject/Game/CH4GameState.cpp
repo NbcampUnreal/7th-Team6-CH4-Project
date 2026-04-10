@@ -57,6 +57,19 @@ void ACH4GameState::OnRep_GamePhase()
 	UE_LOG(LogTemp, Warning, TEXT("GamePhase Changed: %d"), GamePhase);
 }
 
+void ACH4GameState::AddGearPartsCount()
+{
+	GearPartsCount++;
+	if (GearPartsCount >= 3)
+	{
+		if (HasAuthority())
+		{
+			ACH4GameMode* GM = Cast<ACH4GameMode>(GetWorld()->GetAuthGameMode());
+			GM->SetGameResult();
+		}
+	}; 
+}
+
 bool ACH4GameState::CheckAlivePlayerIsZero()
 {
 	bool AlivePlayerIsZero;

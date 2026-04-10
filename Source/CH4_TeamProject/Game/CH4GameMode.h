@@ -17,15 +17,16 @@ public:
 
 protected:
 	virtual void StartPlay() override;
-	void EndGame(EGamePhase GP) const;
 	
 public:
+	void EndGame(EGamePhase GP);
+	
     // 플레이어 관리
     void OnPlayerDowned(ACH4PlayerState* PlayerState);   // 다운
     void OnPlayerRevived(ACH4PlayerState* PlayerState);  // 소생
 
     // 승패 판정
-    void SetGameResult() const;
+    void SetGameResult();
 	
 	FTimerHandle ServerTimeTimerHandle;
 
