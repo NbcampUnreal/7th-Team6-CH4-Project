@@ -49,6 +49,16 @@ void ARangedWeapons::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(ARangedWeapons, CurrentAmmo);
 	DOREPLIFETIME(ARangedWeapons, MaxClip); 
+	DOREPLIFETIME(ARangedWeapons, bIsCoolingDown); 
+	
+}
+
+void ARangedWeapons::SetCurrentAmmo()
+{
+	if (GunDataAsset)
+	{
+		CurrentAmmo = GunDataAsset->MaxAmmo;
+	}
 }
 
 void ARangedWeapons::BeginPlay()
@@ -68,12 +78,12 @@ void ARangedWeapons::Tick(float DeltaTime)
 
 void ARangedWeapons::Server_Fire_Implementation()
 {
-	UE_LOG(LogTemp, Warning, TEXT("3. Server_Fire_Implementation"));
-	if(CurrentAmmo <= 0)
+	if(	bIsCoolingDown || CurrentAmmo <= 0)
 	{
 		GEngine->AddOnScreenDebugMessage(1, 1.f, FColor::Red,FString::Printf(TEXT("총알이없습니다")));
 		return;
 	}
+	bIsCoolingDown =true;
 	TraceShoot();
 	Multicast_PlayEffects();
 	if (CurrentAmmo >0)
@@ -87,14 +97,17 @@ void ARangedWeapons::Server_Fire_Implementation()
 		,false);
 	// 총알 감소및
 	// 쿨타임 초기화 등등
+	GetWorldTimerManager().SetTimer
+	(TimerHandle_FireDelay,
+	this,
+	&ARangedWeapons::ResetCoolTime, 
+	GunDataAsset->FireRate, 
+	false);
 }
 
 bool ARangedWeapons::Server_Fire_Validate()
 {
-	UE_LOG(LogTemp, Warning, TEXT("2. Server_Fire_Validate"));
-	// 조건확인 총알갯수 
-	// 쿨타임 등등
-	// 이결과가 참이여야 위에 함수가 실행
+	//  여기서 펄스면 팅김
 	return true;
 }
 
@@ -106,17 +119,18 @@ void ARangedWeapons::Multicast_PlayEffects_Implementation()
 void ARangedWeapons::Fire()
 {
 	UE_LOG(LogTemp, Error, TEXT("무조건 찍혀야 하는 로그!"));
-	if (bIsCoolingDown || CurrentAmmo <= 0) return;
+	if (bIsCoolingDown || CurrentAmmo <= 0)
 	{
 		UE_LOG(LogTemp, Error, TEXT("총알이 부족해 혹은 딜레이중이야"));
+		return;
 	}
+	bIsCoolingDown = true;
 	if (GetOwner() == nullptr)
 	{
 		UE_LOG(LogTemp, Error, TEXT("사격 실패: 이 무기의 Owner가 설정되지 않았습니다!"));
 		return;
 	}
 	UE_LOG(LogTemp, Warning, TEXT("1. Fire Called on Client"));
-	
 	Server_Fire();	
 }
 
@@ -183,13 +197,7 @@ void ARangedWeapons::TraceShoot()
 			Server_ApplyDamageToTarget(Hit.GetActor());
 		}
 	}
-	bIsCoolingDown =true;
-	GetWorldTimerManager().SetTimer
-	(TimerHandle_FireDelay,
-	this,
-	&ARangedWeapons::OnRep_FireReady, 
-	GunDataAsset->FireRate, 
-	false);
+	
 }
 
 int32 ARangedWeapons::GetMaxAmmo () const
@@ -203,5 +211,21 @@ int32 ARangedWeapons::GetMaxAmmo () const
 
 void ARangedWeapons::OnRep_FireReady() 
 {
+	
+}
+
+void ARangedWeapons::ResetCoolTime()
+{
 	bIsCoolingDown = false;
+	
+	UE_LOG(LogTemp, Error, TEXT("Yahoo: 쿨다운 해제됨!"));
+}
+
+void ARangedWeapons::AddMaxClip(int32 AmmoItem)
+{
+	if (!HasAuthority())
+	{
+		return;
+	}
+	MaxClip += AmmoItem; 
 }

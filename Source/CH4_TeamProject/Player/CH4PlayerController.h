@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+	#include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "Components/WidgetComponent.h"
 #include "CH4PlayerController.generated.h"
