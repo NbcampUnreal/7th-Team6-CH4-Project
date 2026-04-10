@@ -112,11 +112,6 @@ void ACH4PlayerController::Client_MoveToLobby_Implementation()
     // 회색 화면 등 -> 구현 필요
 }
 
-void ACH4PlayerController::Client_HideDownUI_Implementation()
-{
-    // 다운 UI 제거
-}
-
 void ACH4PlayerController::Client_InvokeGameClearUI_Implementation()
 {
     HUDGameClearWidgetInstance = CreateWidget<UUserWidget>(this,HUDGameClearWidgetClass);

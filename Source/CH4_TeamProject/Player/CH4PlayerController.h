@@ -23,6 +23,8 @@ protected:
 	virtual void BeginPlay() override;
 	
 	virtual void BeginPlayingState() override;
+	void ShowGameOver();
+	void HideCurrentMenu();
 
 public:
 	UPROPERTY(EditAnywhere, Category = "MyUI")
@@ -61,10 +63,6 @@ public:
 	UFUNCTION(Client, Reliable)
 	void Client_EnablePlayerInput();
 	
-	//---------------------------
-
-
-	//----합칠 수 있을듯----(EPlayerLifeState 매개변수에 따라서)
 	UFUNCTION(Client, Reliable)
 	void Client_PlayDownAnim();
 
