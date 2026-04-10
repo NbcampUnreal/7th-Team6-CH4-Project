@@ -26,6 +26,22 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
 	TSubclassOf<UUserWidget> GameRulesWidgetClass;
 
+	// 게임 오버 위젯 설계도 (에디터에서 할당용)
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<UUserWidget> GameOverWidgetClass;
+
+	// 1. 게임 클리어 위젯 설계도 (에디터에서 선택용)
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<UUserWidget> GameClearWidgetClass;
+
+	// 2. 현재 화면에 떠 있는 클리어 위젯을 담는 바구니
+	UPROPERTY()
+	UUserWidget* CurrentGameClearWidget = nullptr;
+
+	// 현재 화면에 떠 있는 게임 오버 위젯 저장용
+	UPROPERTY()
+	UUserWidget* CurrentGameOverWidget = nullptr;
+
 	// 현재 열려 있는 룰 위젯의 인스턴스를 저장합니다. (nullptr 필수!)
 	UPROPERTY()
 	UUserWidget* CurrentRulesWidget = nullptr;
@@ -59,6 +75,10 @@ protected:
 
 	UFUNCTION(BlueprintCallable, Category = "Menu")
 	void StartGame();
+
+	// 3. 게임 클리어 시 실행할 함수 (블루프린트에서 부를 수 있게)
+	UFUNCTION(BlueprintCallable, Category = "GameEvents")
+	void ShowGameClear();
 
 	UFUNCTION(BlueprintCallable, Category = "Menu")
 	void ExitGame();

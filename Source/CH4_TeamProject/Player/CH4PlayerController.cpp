@@ -56,6 +56,28 @@ void ACH4PlayerController::ShowStartMenu()
 
 void ACH4PlayerController::ShowGameOver()
 {
+    //if (GameOverWidgetClass)
+    //{
+    //    // 1. 게임 오버 위젯 생성
+    //    CurrentGameOverWidget = CreateWidget<UUserWidget>(this, GameOverWidgetClass);
+
+    //    if (CurrentGameOverWidget)
+    //    {
+    //        // 2. 화면에 표시
+    //        CurrentGameOverWidget->AddToViewport();
+
+    //        // 3. 마우스 커서 보이게 설정
+    //        bShowMouseCursor = true;
+
+    //        // 4. 입력 모드를 UI 전용으로 (그래야 버튼이 눌림)
+    //        FInputModeUIOnly InputMode;
+    //        InputMode.SetWidgetToFocus(CurrentGameOverWidget->TakeWidget());
+    //        SetInputMode(InputMode);
+
+    //        // 5. 게임 일시정지 (필요하다면)
+    //        // UGameplayStatics::SetGamePaused(GetWorld(), true);
+    //    }
+    //}
 }
 
 void ACH4PlayerController::HideCurrentWidget()
@@ -93,6 +115,32 @@ void ACH4PlayerController::StartGame()
         SetInputMode(InputMode);
         bShowMouseCursor = false;
     }
+}
+
+void ACH4PlayerController::ShowGameClear()
+{
+//    if (GameClearWidgetClass)
+//    {
+//        // 위젯 생성
+//        CurrentGameClearWidget = CreateWidget<UUserWidget>(this, GameClearWidgetClass);
+//
+//        if (CurrentGameClearWidget)
+//        {
+//            // 화면에 띄우기
+//            CurrentGameClearWidget->AddToViewport();
+//
+//            // 마우스 커서 활성화
+//            bShowMouseCursor = true;
+//
+//            // 입력 모드를 UI 전용으로 (클리어 창의 버튼을 눌러야 하니까요)
+//            FInputModeUIOnly InputMode;
+//            InputMode.SetWidgetToFocus(CurrentGameClearWidget->TakeWidget());
+//            SetInputMode(InputMode);
+//
+//            // [선택] 게임을 일시정지 시키고 싶다면 아래 주석을 푸세요
+//            // UGameplayStatics::SetGamePaused(GetWorld(), true);
+//        }
+//    }
 }
 
 void ACH4PlayerController::ExitGame()
