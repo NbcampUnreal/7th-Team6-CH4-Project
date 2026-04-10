@@ -4,6 +4,8 @@
 #include "CH4_TeamProject/DataBase/DataBase.h"
 #include <Kismet\KismetSystemLibrary.h>
 
+#include "Kismet/GameplayStatics.h"
+
 ACH4PlayerController::ACH4PlayerController()
 {
     bReplicates = true;
@@ -17,7 +19,7 @@ void ACH4PlayerController::BeginPlay()
     if (!IsLocalController())
         return;
     
-    Client_MoveToLobby();
+    // Client_MoveToLobby();
     
     // HUD 위젯 생성 및 표시
     if (HUDWidgetClass)
@@ -93,7 +95,9 @@ void ACH4PlayerController::StartGame()
     {
         Viewport->RemoveAllViewportWidgets();
     }
-
+    
+    UGameplayStatics::OpenLevel(this, FName("REALSTAGE"));
+    
     // 2. 현재 메뉴 변수 정리 (nullptr 방금 배운 거 활용!)
     CurrentMenuWidget = nullptr;
 

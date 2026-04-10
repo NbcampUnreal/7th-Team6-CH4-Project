@@ -1,14 +1,11 @@
 ﻿
 #include "CH4GameMode.h"
 
-#include "AIController.h"
 #include "CH4_TeamProject/Player/CH4Character.h"
 #include "UObject/ConstructorHelpers.h"
 #include "CH4_TeamProject/Game/CH4GameState.h"
 #include "CH4_TeamProject/Game/CH4PlayerState.h"
 #include "CH4_TeamProject/Player/CH4PlayerController.h"
-#include "Kismet/GameplayStatics.h"
-
 
 ACH4GameMode::ACH4GameMode()
 {	
@@ -36,8 +33,6 @@ void ACH4GameMode::StartPlay()
 		1.f, 
 		true, 
 		0.f);
-	
-	UGameplayStatics::OpenLevel(GetWorld(), TEXT("REALSTAGE"));
 }
 
 void ACH4GameMode::EndGame(EGamePhase GP)
