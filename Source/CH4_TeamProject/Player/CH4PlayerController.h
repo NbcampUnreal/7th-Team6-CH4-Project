@@ -10,7 +10,7 @@ UCLASS()
 class CH4_TEAMPROJECT_API ACH4PlayerController : public APlayerController
 {
 	GENERATED_BODY()
-	
+
 
 public:
 	ACH4PlayerController();
@@ -21,16 +21,6 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	UFUNCTION(BlueprintCallable)
-	void ShowStartMenu();
-
-
-	UFUNCTION(BlueprintCallable)
-	void ShowGameOver();
-
-	UFUNCTION(BlueprintCallable)
-	void HideCurrentMenu();
-	
 public:
 	
 		//
@@ -47,30 +37,30 @@ public:
 	UFUNCTION(Client, Reliable)
 	void Client_EnablePlayerInput();
 	//---------------------------
-	
-	
+
+
 	//----합칠 수 있을듯----(EPlayerLifeState 매개변수에 따라서)
 	UFUNCTION(Client, Reliable)
 	void Client_PlayDownAnim();
-	
+
 	UFUNCTION(Client, Reliable)
 	void Client_PlayReviveAnim();
 	//---------------------------
-	
-	
+
+
 	//----합칠 수 있을듯----
 	UFUNCTION(Client, Reliable)
 	void Client_InvokeDownUI() ;
-	
+
 	UFUNCTION(Client, Reliable)
 	void Client_HideDownUI();
-	
+
 	UFUNCTION(Client, Reliable)
 	void Client_MoveToLobby() const;
-	
+
 	UFUNCTION(Client, Reliable)
 	void Client_InvokeGameClearUI() const;
-	
+
 	UFUNCTION(Client, Reliable)
 	void Client_InvokeGameLoseUI() const;
 	//---------------------------
