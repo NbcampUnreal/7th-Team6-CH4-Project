@@ -25,7 +25,7 @@ void ACH4PlayerController::BeginPlay()
         UUserWidget* HUDWidget = CreateWidget<UUserWidget>(this, HUDWidgetClass);
         if (HUDWidget)
         {
-            HUDWidget->AddToViewport();
+           // HUDWidget->AddToViewport();
         }
     }
 
@@ -155,4 +155,4 @@ void ACH4PlayerController::Client_SetPlayerDownedUI_Implementation(bool bShow)
     }
 }
     // 패배 UI 띄우기
-}
+

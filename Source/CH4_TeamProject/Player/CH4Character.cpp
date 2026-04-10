@@ -18,6 +18,8 @@
 #include "../Item/Consumable/HealItem.h"
 #include "CH4_TeamProject/Player/PlayerAnimInstance.h"
 #include "Animation/AnimInstance.h"
+#include "CH4_TeamProject/Game/CH4GameState.h"
+#include "CH4_TeamProject/Item/Consumable/GearItem.h"
 
 ACH4Character::ACH4Character()
 {
@@ -60,7 +62,7 @@ void ACH4Character::BeginPlay()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("%s: 난 그냥 원격 캐릭터일 뿐이야."), *GetName());
 	}
-	
+	GamsState = Cast<ACH4GameState>(GetWorld()->GetGameState());
 	GetCharacterMovement()->MaxWalkSpeed = PlayerMoveSpeed;
 }
 
@@ -132,6 +134,15 @@ void ACH4Character::NotifyActorBeginOverlap(AActor* OtherActor)
 		LyingItem->SetActorEnableCollision(false);
 
 		UE_LOG(LogTemp, Log, TEXT("야후: 아이템 획득! 현재 개수: %d"), HealItemCount);
+	}
+	
+	AGearItem* GearItem = Cast<AGearItem>(OtherActor);
+	if (GearItem)
+	{
+		ACH4GameState* Gs =  Cast<ACH4GameState>(GamsState);
+		Gs->AddGearPartsCount();
+		GearItem->Destroy();
+		UE_LOG(LogTemp,Error,TEXT("기어 파츠캣수:%d"),Gs->GearPartsCount);
 	}
 }
 
