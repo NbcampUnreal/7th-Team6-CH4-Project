@@ -1,38 +1,138 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
 #include "PlayerAnimInstance.generated.h"
 
-/**
- * 
- */
+
+//현재 캐릭터가 어떤 행동 상태인지 구분하기 위한 enum
+ UENUM(BlueprintType)
+enum class EPlayerActionState : uint8
+{
+	None	UMETA(DisplayName = "None"),
+	Hit		UMETA(DisplayName = "Hit"),
+	Pickup	UMETA(DisplayName = "Pickup"),
+	Down	UMETA(DisplayName = "Down"),
+	Dead	UMETA(DisplayName = "Dead"),
+	Revive	UMETA(DisplayName = "Revive")
+};
+
 UCLASS()
 class CH4_TEAMPROJECT_API UPlayerAnimInstance : public UAnimInstance
 {
 	GENERATED_BODY()
+
 public:
 	UPlayerAnimInstance();
 
 protected:
-	virtual void NativeInitializeAnimation() override;//애니메이션이 생성되면 호출되는 함수
+	virtual void NativeInitializeAnimation() override;
 
-	virtual void NativeUpdateAnimation(float DeltaSeconds) override;//프레임마다 호출
+	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
+protected:
+	
+	//이 AnimInstance를 소유한 캐릭터
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")
-	class ACharacter* Owner;//캐릭터 액터
+	class ACharacter* Owner;
 
+	
+	//캐릭터의 이동 컴포넌트
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")
-	class UCharacterMovementComponent* Movement;//무브먼트 컴포넌트
+	class UCharacterMovementComponent* Movement;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")
-	FVector Velocity;//속력 저장 변수
 
+	// 현재 캐릭터의 실제 속도 벡터
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")
-	float MoveSpeed;//속력에 백터의 2D 구성요소 길이 저장
+	FVector Velocity = FVector::ZeroVector;
 
+	//이동 속도
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")
-	bool isFalling = false;//땅에 닿여 있는지 여부
+	float MoveSpeed = 350.0f;
+
+	
+	//캐릭터가 공중에 떠 있는지 여부 점프 / 낙하 애니메이션 전환에 사용
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")
+	bool bIsFalling = false;
+
+	
+	 //다운 상태 유지 여부
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State")
+	bool bIsDown = false;
+
+	
+	//죽은 상태 유지 여부 true면 DeadLoop 또는 사망 상태 유지 포즈로 전환 가능
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State")
+	bool bIsDead = false;
+
+	
+	//현재 재생 중인 액션 상태 중복 재생 방지, 상태 기반 제한, 충돌 처리에 사용
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State")
+	EPlayerActionState CurrentActionState = EPlayerActionState::None;
+
+protected:
+	//피격용 몽타주
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Montage")
+	TObjectPtr<class UAnimMontage> HitHeadMontage;
+
+	//아이템 줍기용 몽타주
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Montage")
+	TObjectPtr<class UAnimMontage> PickupMontage;
+
+	//다운 시작용 몽타주
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Montage")
+	TObjectPtr<class UAnimMontage> DownMontage;
+
+	// 사망 시작용 몽타주
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Montage")
+	TObjectPtr<class UAnimMontage> DeathMontage;
+
+	//부활 시작용 몽타주
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Montage")
+	TObjectPtr<class UAnimMontage> ReviveMontage;
+
+protected:
+	//특정 행동 검사(상태 마다 안되는것 되는것 판단)
+	bool CanPlayAction(EPlayerActionState NewAction) const;
+
+	//몽타주 재생을 담당하는 공통 함수
+	bool TryPlayMontage(UAnimMontage* Montage, EPlayerActionState NewAction, bool bStopOtherMontages = false);
+
+public:
+	//피격 몽타주
+	UFUNCTION(BlueprintCallable, Category = "Animation")
+	bool PlayHitHeadMontage();
+
+	//줍기 몽타주
+	UFUNCTION(BlueprintCallable, Category = "Animation")
+	bool PlayPickupMontage();
+
+	//다운 몽타주
+	UFUNCTION(BlueprintCallable, Category = "Animation")
+	bool PlayDownMontage();
+
+	//사망 몽타주
+	UFUNCTION(BlueprintCallable, Category = "Animation")
+	bool PlayDeathMontage();
+
+	//부활 몽타주
+	UFUNCTION(BlueprintCallable, Category = "Animation")
+	bool PlayReviveMontage();
+
+	//다운 상태 유지 여부 설정
+	UFUNCTION(BlueprintCallable, Category = "Animation")
+	void SetDownState(bool bNewIsDown);
+
+	//죽은 상태 유지 여부 설정
+	UFUNCTION(BlueprintCallable, Category = "Animation")
+	void SetDeadState(bool bNewIsDead);
+
+	//현재 액션 상태를 None으로 초기화	
+	UFUNCTION(BlueprintCallable, Category = "Animation")
+	void ClearActionState();
+
+	//현재 액션 상태를 반환 디버깅이나 조건 분기용
+	UFUNCTION(BlueprintPure, Category = "Animation")
+	EPlayerActionState GetCurrentActionState() const { return CurrentActionState; }
 };

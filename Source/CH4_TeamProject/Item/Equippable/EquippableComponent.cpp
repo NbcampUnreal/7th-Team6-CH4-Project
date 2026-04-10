@@ -1,9 +1,10 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "EquippableComponent.h"
 #include "GameFramework/Character.h"
 #include "Net/UnrealNetwork.h"
+#include "Ranged Weapon/RangedWeaponDataAsset.h"
 #include "Ranged Weapon/RangedWeapons.h"
 
 
@@ -12,12 +13,18 @@ class URangedGunDataAsset;
 UEquippableComponent::UEquippableComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+	SetIsReplicatedByDefault(true);
 }
 
 void UEquippableComponent::Fire()
 {
+	if (CurrentWeapon == nullptr)
+	{
+		return;
+	}
 	CurrentWeapon->Fire();
 }
+
 
 void UEquippableComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -25,9 +32,9 @@ void UEquippableComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 	DOREPLIFETIME(UEquippableComponent, CurrentWeapon);
 }
 
-void UEquippableComponent::EquipWeapon_Implementation(TSubclassOf<class ARangedWeapons> WeaponClass)
+void UEquippableComponent::EquipWeapon_Implementation(URangedGunDataAsset* WeaponData)
 {
-	if (!GetOwner()->HasAuthority() || !WeaponClass)
+	if (!GetOwner()->HasAuthority() || !WeaponData)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("EquipWeapon Called!"));
 		return;
@@ -35,36 +42,51 @@ void UEquippableComponent::EquipWeapon_Implementation(TSubclassOf<class ARangedW
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("EquipWeapon Called!"));
 
 	UWorld* World = GetWorld();
-
-	if (CurrentWeapon)
+	if (!World)
 	{
-		CurrentWeapon->Destroy();
+		return;
 	}
 
+	if (CurrentWeapon)
+	{	
+		WeaponAmmoMemory.Add(CurrentWeapon->GetClass(), CurrentWeapon->CurrentAmmo);
+		CurrentWeapon->Destroy();
+	}
+	
 	FActorSpawnParameters SpawnActor;
 	SpawnActor.Owner = GetOwner();
 	SpawnActor.Instigator = Cast<APawn>(GetOwner());
 	SpawnActor.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
 	CurrentWeapon = World->SpawnActor<ARangedWeapons>
-	(WeaponClass,
+	(WeaponData->WeaponClass,
 	 GetOwner()->GetActorLocation(),
 	 GetOwner()->GetActorRotation(),
 	 SpawnActor);
+	
 	if (CurrentWeapon)
 	{
 		ACharacter* MyCharacter = Cast<ACharacter>(GetOwner());
 		if (MyCharacter)
 		{
-			CurrentWeapon->AttachToComponent(MyCharacter->GetMesh(),
-			                                 FAttachmentTransformRules::SnapToTargetIncludingScale,
-			                                 FName("Weapon_r")
+			CurrentWeapon->AttachToComponent
+			(MyCharacter->GetMesh(),
+			FAttachmentTransformRules::SnapToTargetIncludingScale,
+			FName("Weapon_r")
 			);
 		}
+		//UsingWeapon = true;
 	}
-	else
+	if (CurrentWeapon)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("스폰실패"));
+		if (WeaponAmmoMemory.Contains(WeaponData->WeaponClass))
+		{
+			CurrentWeapon->CurrentAmmo = (WeaponAmmoMemory[WeaponData->WeaponClass]);
+		}
+		else
+		{
+			CurrentWeapon->SetCurrentAmmo();
+		}
 	}
-	
 }
+	

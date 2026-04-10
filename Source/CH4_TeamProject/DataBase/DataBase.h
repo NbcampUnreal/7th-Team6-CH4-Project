@@ -6,7 +6,7 @@ enum class EPlayerLifeState : uint8
 {
 	Alive UMETA(DisplayName = "Alive"), // 에디터에서 표시할 이름
 	Downed UMETA(DisplayName = "Downed"),
-	Dead UMETA(DisplayName = "Dead") // 4명 모두 다운 상태일 때
+	Dead UMETA(DisplayName = "Dead")
 };
 
 UENUM(BlueprintType)

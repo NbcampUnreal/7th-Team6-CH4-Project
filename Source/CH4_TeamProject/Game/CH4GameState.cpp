@@ -1,6 +1,7 @@
 ﻿
 #include "CH4GameState.h"
 #include "CH4GameInstance.h"
+#include "CH4_TeamProject/Player/CH4PlayerController.h"
 #include "Net/UnrealNetwork.h"
 
 ACH4GameState::ACH4GameState()
@@ -12,7 +13,7 @@ ACH4GameState::ACH4GameState()
 	
 	// 기본값 초기화 (예: Score 초기화)
 	Score = 0;
-	LevelDuration = 60.0f;
+	// LevelDuration = 60.0f;
 	MaxLevels = 2;
 }
 
@@ -56,6 +57,19 @@ void ACH4GameState::OnRep_GamePhase()
 	UE_LOG(LogTemp, Warning, TEXT("GamePhase Changed: %d"), GamePhase);
 }
 
+void ACH4GameState::AddGearPartsCount()
+{
+	GearPartsCount++;
+	if (GearPartsCount >= 3)
+	{
+		if (HasAuthority())
+		{
+			ACH4GameMode* GM = Cast<ACH4GameMode>(GetWorld()->GetAuthGameMode());
+			GM->SetGameResult();
+		}
+	}; 
+}
+
 bool ACH4GameState::CheckAlivePlayerIsZero()
 {
 	bool AlivePlayerIsZero;
@@ -67,6 +81,9 @@ bool ACH4GameState::CheckAlivePlayerIsZero()
 	{
 		AlivePlayerIsZero = true;
 		SetGamePhase(EGamePhase::Lose);
+		
+		ACH4PlayerController* PC = Cast<ACH4PlayerController>(GetWorld()->GetFirstPlayerController());
+		PC->Client_InvokeGameLoseUI();
 	}
 	return AlivePlayerIsZero;
 }
