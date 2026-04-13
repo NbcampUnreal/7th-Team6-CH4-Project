@@ -13,11 +13,6 @@ ACH4PlayerController::ACH4PlayerController()
     bReplicates = true;
     bShowMouseCursor = true;
     
-    ACH4GameState* GS = Cast<ACH4GameState>(UGameplayStatics::GetGameState(this));
-    if (GS)
-    {
-        GS->AddAlivePlayerCount();
-    }
 }
 
 void ACH4PlayerController::BeginPlay()
@@ -129,10 +124,20 @@ void ACH4PlayerController::StartGame()
     }
 }
 
-void ACH4PlayerController::Server_StartGame_Implementation()
+// void ACH4PlayerController::Server_StartGame_Implementation()
+// {
+//     ACH4GameMode* GM = Cast<ACH4GameMode>(GetWorld()->GetAuthGameMode());
+//     GM->PlayGame();
+// }
+    
+void ACH4PlayerController::JoinServer()
 {
-    ACH4GameMode* GM = Cast<ACH4GameMode>(GetWorld()->GetAuthGameMode());
-    GM->PlayGame();
+    UE_LOG(LogTemp, Warning, TEXT("JoinServer Called"));
+    
+    if (IsLocalController())
+    {
+        ClientTravel(TEXT("127.0.0.1:7777"), TRAVEL_Absolute);
+    }
 }
 
 void ACH4PlayerController::ShowGameClear()
