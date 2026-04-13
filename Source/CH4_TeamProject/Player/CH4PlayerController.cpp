@@ -22,7 +22,7 @@ void ACH4PlayerController::BeginPlay()
     }
     
     // TODO: 시작 시 어떤 메뉴를 먼저 띄울지 함수 호출 위치 결정
-    ShowStartMenu();
+   // ShowStartMenu();
 }
 
 void ACH4PlayerController::BeginPlayingState()

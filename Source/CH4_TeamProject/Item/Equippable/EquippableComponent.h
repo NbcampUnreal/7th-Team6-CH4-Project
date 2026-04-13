@@ -38,6 +38,12 @@ public:
 	UPROPERTY()
 	TMap<TSubclassOf<ARangedWeapons>, int32> WeaponAmmoMemory;
 
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	FTransform GetLeftHandSocketTransform() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	bool HasCurrentWeapon() const;
+
 private:
 	
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;

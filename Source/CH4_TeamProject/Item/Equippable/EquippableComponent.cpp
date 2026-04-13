@@ -6,6 +6,7 @@
 #include "Net/UnrealNetwork.h"
 #include "Ranged Weapon/RangedWeaponDataAsset.h"
 #include "Ranged Weapon/RangedWeapons.h"
+#include "Components/StaticMeshComponent.h"
 
 
 class URangedGunDataAsset;
@@ -75,7 +76,7 @@ void UEquippableComponent::EquipWeapon_Implementation(URangedGunDataAsset* Weapo
 			FName("Weapon_r")
 			);
 		}
-		//UsingWeapon = true;
+		UsingWeapon = true;
 	}
 	if (CurrentWeapon)
 	{
@@ -90,3 +91,20 @@ void UEquippableComponent::EquipWeapon_Implementation(URangedGunDataAsset* Weapo
 	}
 }
 	
+FTransform UEquippableComponent::GetLeftHandSocketTransform() const
+{
+	if (CurrentWeapon && CurrentWeapon->WeaponMesh)
+	{
+		if (CurrentWeapon->WeaponMesh->DoesSocketExist(TEXT("LeftHandSocket")))
+		{
+			return CurrentWeapon->WeaponMesh->GetSocketTransform(TEXT("LeftHandSocket"), RTS_World);
+		}
+	}
+
+	return FTransform::Identity;
+}
+
+bool UEquippableComponent::HasCurrentWeapon() const
+{
+	return CurrentWeapon != nullptr;
+}
