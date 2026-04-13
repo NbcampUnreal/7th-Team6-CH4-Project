@@ -131,7 +131,6 @@ void ACH4PlayerController::StartGame()
 
 void ACH4PlayerController::Server_StartGame_Implementation()
 {
-    
     ACH4GameMode* GM = Cast<ACH4GameMode>(GetWorld()->GetAuthGameMode());
     GM->PlayGame();
 }

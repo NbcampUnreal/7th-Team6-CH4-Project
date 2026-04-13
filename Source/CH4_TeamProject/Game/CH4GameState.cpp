@@ -8,7 +8,7 @@ ACH4GameState::ACH4GameState()
 {
 	bReplicates = true;
 	
-	GamePhase = EGamePhase::StartStage;
+	GamePhase = EGamePhase::None;
 	GearPartsCount = 0;
 	
 	// 기본값 초기화 (예: Score 초기화)
