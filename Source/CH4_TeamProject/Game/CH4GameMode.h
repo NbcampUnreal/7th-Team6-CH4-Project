@@ -16,10 +16,12 @@ public:
 	ACH4GameMode();
 
 	void BeginPlay()override ;
+	
 protected:
 	virtual void StartPlay() override;
 	
 public:
+	void PlayGame();
 	void EndGame(EGamePhase GP);
 	
     // 플레이어 관리
