@@ -6,6 +6,8 @@
 #include "CH4_TeamProject/Game/CH4GameState.h"
 #include "CH4_TeamProject/Game/CH4PlayerState.h"
 #include "CH4_TeamProject/Player/CH4PlayerController.h"
+#include "Kismet/GameplayStatics.h"
+#include "CH4_TeamProject/Item/Consumable/ItemSpawnVolume.h"
 
 ACH4GameMode::ACH4GameMode()
 {	
@@ -19,6 +21,22 @@ ACH4GameMode::ACH4GameMode()
 	if (PlayerCharacter.Class)
 	{
 		DefaultPawnClass = PlayerCharacter.Class;
+	}
+}
+
+void ACH4GameMode::BeginPlay()
+{
+	Super::BeginPlay();
+	TArray<AActor*> FoundVolumes;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AItemSpawnVolume::StaticClass(), FoundVolumes);
+	
+	for (AActor* Actor : FoundVolumes)
+	{
+		AItemSpawnVolume* SpawnVolume = Cast<AItemSpawnVolume>(Actor);
+		if (SpawnVolume)
+		{
+			SpawnVolume->SpawnAllItems();
+		}
 	}
 }
 

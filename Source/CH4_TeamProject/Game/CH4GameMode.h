@@ -15,6 +15,7 @@ class CH4_TEAMPROJECT_API ACH4GameMode : public AGameMode
 public:
 	ACH4GameMode();
 
+	void BeginPlay()override ;
 protected:
 	virtual void StartPlay() override;
 	
