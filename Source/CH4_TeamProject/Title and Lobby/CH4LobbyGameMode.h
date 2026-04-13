@@ -15,7 +15,7 @@ private:
 	ACH4LobbyGameMode();
 	
 public:
-	int32 ReadyPlayerCount;
+	int32 ReadyPlayerCount=0;
 	
 	UPROPERTY()
 	int32 MaxPlayerCount = 2;
@@ -26,4 +26,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetReadyPlayerCount();
 	
+	
 };
+	

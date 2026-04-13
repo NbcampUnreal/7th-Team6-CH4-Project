@@ -18,7 +18,7 @@ ACH4GameMode::ACH4GameMode()
 	bUseSeamlessTravel = true;
 	
 	static ConstructorHelpers::FClassFinder<ACH4Character>
-		PlayerCharacter(TEXT("Game/Player/PlayerBluePrint/BP_Player.BP_Player_C"));
+		PlayerCharacter(TEXT("/Game/Player/PlayerBluePrint/BP_Player.BP_Player_C"));
 
 	if (PlayerCharacter.Class)
 	{

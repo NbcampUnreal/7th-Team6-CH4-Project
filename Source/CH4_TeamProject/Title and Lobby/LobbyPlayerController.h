@@ -21,4 +21,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "My UI")
 	UUserWidget* HUDServerLobbyWidgetInstance;
 	
+	UFUNCTION(Server, Reliable,BlueprintCallable)
+	void Server_RequestReady();
 };
+	
