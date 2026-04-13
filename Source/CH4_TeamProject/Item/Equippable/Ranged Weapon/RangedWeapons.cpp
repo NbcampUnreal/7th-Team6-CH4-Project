@@ -5,6 +5,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "RangedWeaponDataAsset.h"
+#include "GameFramework/Character.h"
 #include "Net/UnrealNetwork.h"
 
 // Sets default values
@@ -183,14 +184,23 @@ void ARangedWeapons::TraceShoot()
 {
 	// 서버 권한이 없으면 실행하지 않음 (이중 보안)
 	if (!HasAuthority()) return;
-
+	
+	APlayerController* PC = Cast<APlayerController>(GetInstigatorController());
+	if (!PC){return;}
+	
+	FVector StartLocation;
+	FRotator ViewRotation;
+	
+	PC->GetPlayerViewPoint(StartLocation,ViewRotation);
+	
+	StartLocation = GetActorLocation();
+	FVector EndLocation = StartLocation + (ViewRotation.Vector() * GunDataAsset->RangedLength);
+	
 	FHitResult Hit;
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(this);
 	Params.AddIgnoredActor(GetOwner());
-
-	FVector StartLocation = GetActorLocation();
-	FVector EndLocation = StartLocation + (GetActorForwardVector() * GunDataAsset->RangedLength);
+	
 
 	bool bIsHit =  GetWorld()->LineTraceSingleByChannel(Hit, StartLocation, EndLocation, ECC_Visibility, Params);
 	FColor LineColor = bIsHit ? FColor::Red : FColor::Green; // 맞으면 빨강, 안 맞으면 초록
