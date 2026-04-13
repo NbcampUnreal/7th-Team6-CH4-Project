@@ -15,6 +15,8 @@ ACH4GameMode::ACH4GameMode()
 	PlayerStateClass = ACH4PlayerState::StaticClass();
 	PlayerControllerClass = ACH4PlayerController::StaticClass();
 	
+	bUseSeamlessTravel = true;
+	
 	static ConstructorHelpers::FClassFinder<ACH4Character>
 		PlayerCharacter(TEXT("Game/Player/PlayerBluePrint/BP_Player.BP_Player_C"));
 
@@ -45,29 +47,47 @@ void ACH4GameMode::BeginPlay()
 		ACH4PlayerController* PC = Cast<ACH4PlayerController>(It->Get());
 		PC->Client_EnablePlayerInput();
 	}
-	
-	GetWorldTimerManager().SetTimer(
-	ServerTimeTimerHandle, 
-	this, 
-	&ACH4GameMode::UpdateMainServerTime, 
-	1.f, 
-	true, 
-	0.f);
+}
+
+void ACH4GameMode::PostLogin(APlayerController* NewPlayer)
+{
+	Super::PostLogin(NewPlayer);
+
+	ACH4GameState* GS = Cast<ACH4GameState>(GetWorld()->GetGameState());
+	if (GS)
+	{
+		GS->AddAlivePlayerCount();
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Player Joined: %d"), GS->AlivePlayerCount);
+
+	if (!bGameStarted && GS->AlivePlayerCount >= 4)
+	{
+		bGameStarted = true;
+		
+		GetWorld()->GetTimerManager().SetTimerForNextTick([this]()
+		{
+			PlayGame();
+		});
+	}
 }
 
 void ACH4GameMode::PlayGame()
 {
+	UE_LOG(LogTemp, Warning, TEXT("PlayGame CALLED"));
+	
 	ACH4GameState* GS = Cast<ACH4GameState>(GetWorld()->GetGameState());
 	if (GS)
 	{
 		GS->SetGamePhase(EGamePhase::StartStage);
 	}
 	
-	GetWorld()->ServerTravel("/Game/Maps/REALSTAGE");
+	GetWorld()->ServerTravel(TEXT("/Game/Maps/REALSTAGE"));
 }
 
 void ACH4GameMode::EndGame(EGamePhase GP)
 {	
+	bGameStarted = false;
 	// GameState에 반영
 	ACH4GameState* GS = Cast<ACH4GameState>(GetWorld()->GetGameState());
 	if (GS)

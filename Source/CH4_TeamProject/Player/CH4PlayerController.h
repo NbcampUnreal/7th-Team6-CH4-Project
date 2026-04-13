@@ -127,7 +127,9 @@ public:
 	
 	UFUNCTION(Client, Reliable)
 	void Client_SetPlayerDownedUI(bool bShow);
-	
+
+	UFUNCTION(BlueprintCallable, Category = "Menu")
+	void JoinServer();
 	// 3. 게임 클리어 시 실행할 함수 (블루프린트에서 부를 수 있게)
 	UFUNCTION(BlueprintCallable, Category = "GameEvents")
 	void ShowGameClear();
@@ -137,6 +139,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Menu")
 	void StartGame();
 	
-	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "Menu")
-	void Server_StartGame();
+	// UFUNCTION(Server, Reliable, BlueprintCallable, Category = "Menu")
+	// void Server_StartGame();
 };
