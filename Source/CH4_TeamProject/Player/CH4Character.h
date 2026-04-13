@@ -89,6 +89,9 @@ private:
 	
 	UPROPERTY(VisibleAnywhere, Category = "Input")
 	class UInputAction* FireAction;
+
+	UPROPERTY(VisibleAnywhere, Category = "Input")
+	class UInputAction* JumpAction;
 	
 	UPROPERTY(VisibleAnywhere, Category = "Input")
 	class UInputAction* EquipAction;
