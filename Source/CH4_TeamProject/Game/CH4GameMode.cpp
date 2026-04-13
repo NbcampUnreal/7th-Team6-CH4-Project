@@ -27,6 +27,7 @@ ACH4GameMode::ACH4GameMode()
 void ACH4GameMode::BeginPlay()
 {
 	Super::BeginPlay();
+	
 	TArray<AActor*> FoundVolumes;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AItemSpawnVolume::StaticClass(), FoundVolumes);
 	
@@ -37,29 +38,6 @@ void ACH4GameMode::BeginPlay()
 		{
 			SpawnVolume->SpawnAllItems();
 		}
-	}
-}
-
-void ACH4GameMode::StartPlay()
-{
-	Super::StartPlay();
-	
-	GetWorldTimerManager().SetTimer(
-		ServerTimeTimerHandle, 
-		this, 
-		&ACH4GameMode::UpdateMainServerTime, 
-		1.f, 
-		true, 
-		0.f);
-	
-}
-
-void ACH4GameMode::PlayGame()
-{
-	ACH4GameState* GS = Cast<ACH4GameState>(GetWorld()->GetGameState());
-	if (GS)
-	{
-		GS->SetGamePhase(EGamePhase::StartStage);
 	}
 	
 	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
@@ -75,6 +53,17 @@ void ACH4GameMode::PlayGame()
 	1.f, 
 	true, 
 	0.f);
+}
+
+void ACH4GameMode::PlayGame()
+{
+	ACH4GameState* GS = Cast<ACH4GameState>(GetWorld()->GetGameState());
+	if (GS)
+	{
+		GS->SetGamePhase(EGamePhase::StartStage);
+	}
+	
+	GetWorld()->ServerTravel("/Game/Maps/REALSTAGE");
 }
 
 void ACH4GameMode::EndGame(EGamePhase GP)

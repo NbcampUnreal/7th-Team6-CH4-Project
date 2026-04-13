@@ -17,9 +17,6 @@ public:
 
 	void BeginPlay()override ;
 	
-protected:
-	virtual void StartPlay() override;
-	
 public:
 	void PlayGame();
 	void EndGame(EGamePhase GP);
