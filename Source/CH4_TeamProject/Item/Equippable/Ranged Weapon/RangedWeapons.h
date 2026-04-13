@@ -54,6 +54,8 @@ public:
 	UPROPERTY(ReplicatedUsing = OnRep_FireReady)
 	bool bIsCoolingDown= false;
 	void AddMaxClip(int32 AmmoItem);
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_ReLoad();
 protected:
 	virtual void BeginPlay() override;
 	
@@ -64,15 +66,13 @@ protected:
 	void Server_Fire();
 	
 	UFUNCTION(NetMulticast, Unreliable)
-	void Multicast_PlayEffects();
+	void Multicast_PlayEffects(FVector TraceStart, FVector TraceEnd, bool bHit);
 
 	void TraceShoot();
 	
 	UPROPERTY(EditAnywhere,Category="DataAsset")
 	URangedGunDataAsset* GunDataAsset;
 	
-	UFUNCTION(Server, Reliable, WithValidation)
-	void Server_ReLoad();
 		
 	void ProcessReload();
 	

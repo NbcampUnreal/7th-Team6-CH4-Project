@@ -94,10 +94,16 @@ private:
 	class UInputAction* EquipAction;
 	
 	UPROPERTY(VisibleAnywhere, Category = "Input")
+	class UInputAction* EquipAction2;
+	
+	UPROPERTY(VisibleAnywhere, Category = "Input")
 	class UInputAction* HealAction;
 
 	UPROPERTY(VisibleAnywhere, Category = "Input")
 	class UInputAction* InteractAction;
+	
+	UPROPERTY(VisibleAnywhere, Category = "Input")
+	class UInputAction* ReloadAction;
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Stat")
@@ -125,16 +131,30 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void Fires();
 	
+	UFUNCTION()
+	void OnReload();
+	
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat|Weapon")
-	class URangedGunDataAsset* PrimaryWeaponData;
+	class URangedGunDataAsset* PrimaryWeaponData1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat|Weapon")
+	class URangedGunDataAsset* PrimaryWeaponData2;
 	//장비장착 임렵함수
-	void OnEquipInput();
+	void OnEquipInput1();
 	
+	void OnEquipInput2();
 	
-	
+	UFUNCTION(Server, Reliable)
+	void Server_ApplyItemEffect(class AHealItem* HealItem);
 	
 	void ApplyItemEffect(class AHealItem* HealItem);
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void HealLog();
+	
+	
+	
 	
 	void OnApplyItemEffect();
 	
