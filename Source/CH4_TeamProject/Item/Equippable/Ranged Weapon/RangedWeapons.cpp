@@ -5,6 +5,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "RangedWeaponDataAsset.h"
+#include "GameFramework/Character.h"
 #include "Net/UnrealNetwork.h"
 
 // Sets default values
@@ -78,6 +79,8 @@ void ARangedWeapons::Tick(float DeltaTime)
 
 void ARangedWeapons::Server_Fire_Implementation()
 {
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Server_Fire 실행됨!"));
+    
 	if(	bIsCoolingDown || CurrentAmmo <= 0)
 	{
 		GEngine->AddOnScreenDebugMessage(1, 1.f, FColor::Red,FString::Printf(TEXT("총알이없습니다")));
@@ -85,7 +88,6 @@ void ARangedWeapons::Server_Fire_Implementation()
 	}
 	bIsCoolingDown =true;
 	TraceShoot();
-	Multicast_PlayEffects();
 	if (CurrentAmmo >0)
 	{
 		CurrentAmmo --;
@@ -111,9 +113,21 @@ bool ARangedWeapons::Server_Fire_Validate()
 	return true;
 }
 
-void ARangedWeapons::Multicast_PlayEffects_Implementation()
+void ARangedWeapons::Multicast_PlayEffects_Implementation(FVector TraceStart, FVector TraceEnd, bool bHit)
 {
-	UE_LOG(LogTemp, Log, TEXT("Fire Effects Played!"));
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("Multicast 실행됨!"));
+	FColor LineColor = bHit ? FColor::Red : FColor::Green;
+
+	DrawDebugLine(
+		GetWorld(),
+		TraceStart,   // 서버에서 받은 시작점
+		TraceEnd,
+		LineColor,
+		false,
+		2.0f,
+		0,
+		2.0f
+	);
 }
 // 시작점
 void ARangedWeapons::Fire()
@@ -124,7 +138,6 @@ void ARangedWeapons::Fire()
 		UE_LOG(LogTemp, Error, TEXT("총알이 부족해 혹은 딜레이중이야"));
 		return;
 	}
-	bIsCoolingDown = true;
 	if (GetOwner() == nullptr)
 	{
 		UE_LOG(LogTemp, Error, TEXT("사격 실패: 이 무기의 Owner가 설정되지 않았습니다!"));
@@ -136,6 +149,10 @@ void ARangedWeapons::Fire()
 
 void ARangedWeapons::ProcessReload()
 {
+	if (!HasAuthority())
+	{
+		return;
+	}
 	if (!GunDataAsset || CurrentAmmo >= GunDataAsset->MaxAmmo) return;
 	if (MaxClip <= 0){ return; }
 	int32 AmmoNeeded = GunDataAsset->MaxAmmo - CurrentAmmo;
@@ -155,11 +172,11 @@ void ARangedWeapons::Server_ReLoad_Implementation()
 		return;
 	}
 	ProcessReload();
-	
 }
 
 bool ARangedWeapons::Server_ReLoad_Validate()
 {
+	UE_LOG(LogTemp,Error,TEXT("장전 서버진입성공 남은 총알갯수%d"), MaxClip)
 	return true;
 }
 
@@ -167,37 +184,38 @@ void ARangedWeapons::TraceShoot()
 {
 	// 서버 권한이 없으면 실행하지 않음 (이중 보안)
 	if (!HasAuthority()) return;
-
+	
+	APlayerController* PC = Cast<APlayerController>(GetInstigatorController());
+	if (!PC){return;}
+	
+	FVector StartLocation;
+	FRotator ViewRotation;
+	
+	PC->GetPlayerViewPoint(StartLocation,ViewRotation);
+	
+	StartLocation = GetActorLocation();
+	FVector EndLocation = StartLocation + (ViewRotation.Vector() * GunDataAsset->RangedLength);
+	
 	FHitResult Hit;
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(this);
 	Params.AddIgnoredActor(GetOwner());
-
-	FVector StartLocation = GetActorLocation();
-	FVector EndLocation = StartLocation + (GetActorForwardVector() * GunDataAsset->RangedLength);
+	
 
 	bool bIsHit =  GetWorld()->LineTraceSingleByChannel(Hit, StartLocation, EndLocation, ECC_Visibility, Params);
 	FColor LineColor = bIsHit ? FColor::Red : FColor::Green; // 맞으면 빨강, 안 맞으면 초록
-    
-	DrawDebugLine(
-		GetWorld(),
-		StartLocation,
-		bIsHit ? Hit.ImpactPoint : EndLocation, // 맞은 지점까지만 그리거나 끝까지 그림
-		LineColor,
-		false,      // Persistent (영구 유지 여부)
-		2.0f,       // LifeTime (2초 동안 화면에 남음)
-		0,          // DepthPriority
-		2.0f        // Thickness (선의 두께)
-	);
-	if (bIsHit)
-	{
-		// 서버니까 당당하게 Destroy()나 데미지 처리를 합니다.
-		if (Hit.GetActor())
-		{
-			Server_ApplyDamageToTarget(Hit.GetActor());
-		}
-	}
 	
+	
+	if (bIsHit && Hit.GetActor())
+	{
+		Server_ApplyDamageToTarget(Hit.GetActor());
+			Multicast_PlayEffects(StartLocation, Hit.ImpactPoint, true);
+	}
+	else
+	{
+		Multicast_PlayEffects(StartLocation, EndLocation, false);
+	}
+
 }
 
 int32 ARangedWeapons::GetMaxAmmo () const

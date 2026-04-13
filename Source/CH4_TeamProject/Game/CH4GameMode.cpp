@@ -6,6 +6,8 @@
 #include "CH4_TeamProject/Game/CH4GameState.h"
 #include "CH4_TeamProject/Game/CH4PlayerState.h"
 #include "CH4_TeamProject/Player/CH4PlayerController.h"
+#include "Kismet/GameplayStatics.h"
+#include "CH4_TeamProject/Item/Consumable/ItemSpawnVolume.h"
 
 ACH4GameMode::ACH4GameMode()
 {	
@@ -22,17 +24,46 @@ ACH4GameMode::ACH4GameMode()
 	}
 }
 
-void ACH4GameMode::StartPlay()
+void ACH4GameMode::BeginPlay()
 {
-	Super::StartPlay();
+	Super::BeginPlay();
+	
+	TArray<AActor*> FoundVolumes;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AItemSpawnVolume::StaticClass(), FoundVolumes);
+	
+	for (AActor* Actor : FoundVolumes)
+	{
+		AItemSpawnVolume* SpawnVolume = Cast<AItemSpawnVolume>(Actor);
+		if (SpawnVolume)
+		{
+			SpawnVolume->SpawnAllItems();
+		}
+	}
+	
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	{
+		ACH4PlayerController* PC = Cast<ACH4PlayerController>(It->Get());
+		PC->Client_EnablePlayerInput();
+	}
 	
 	GetWorldTimerManager().SetTimer(
-		ServerTimeTimerHandle, 
-		this, 
-		&ACH4GameMode::UpdateMainServerTime, 
-		1.f, 
-		true, 
-		0.f);
+	ServerTimeTimerHandle, 
+	this, 
+	&ACH4GameMode::UpdateMainServerTime, 
+	1.f, 
+	true, 
+	0.f);
+}
+
+void ACH4GameMode::PlayGame()
+{
+	ACH4GameState* GS = Cast<ACH4GameState>(GetWorld()->GetGameState());
+	if (GS)
+	{
+		GS->SetGamePhase(EGamePhase::StartStage);
+	}
+	
+	GetWorld()->ServerTravel("/Game/Maps/REALSTAGE");
 }
 
 void ACH4GameMode::EndGame(EGamePhase GP)
@@ -51,17 +82,6 @@ void ACH4GameMode::EndGame(EGamePhase GP)
 		if (PC)
 		{
 			PC->Client_DisablePlayerInput();
-		}
-		
-		if (GP == EGamePhase::Clear)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Clear"));
-			PC->Client_InvokeGameClearUI();
-		}
-		else if (GP == EGamePhase::Lose)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Lose"));
-			PC->Client_InvokeGameLoseUI();
 		}
 	}
 	

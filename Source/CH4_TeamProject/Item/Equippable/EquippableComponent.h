@@ -31,6 +31,9 @@ public:
 	// 컴포넌트에서 발사
 	void Fire();
 
+	void Reload();
+	
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool UsingWeapon = false;
 	

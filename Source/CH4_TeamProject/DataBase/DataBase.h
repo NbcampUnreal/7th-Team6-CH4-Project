@@ -12,6 +12,7 @@ enum class EPlayerLifeState : uint8
 UENUM(BlueprintType)
 enum class EGamePhase : uint8
 {
+	None UMETA(DisplayName = "None"),
 	StartStage UMETA(DisplayName = "StartStage"),
 	FinalDefense UMETA(DisplayName = "FinalDefense"),
 	Clear UMETA(DisplayName = "Clear"),

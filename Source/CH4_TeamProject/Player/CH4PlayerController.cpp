@@ -1,9 +1,11 @@
-
+﻿
 #include "CH4PlayerController.h"
 #include "Blueprint/UserWidget.h"
 #include "CH4_TeamProject/Player/CH4Character.h"
 #include "CH4_TeamProject/DataBase/DataBase.h"
 #include <Kismet\KismetSystemLibrary.h>
+
+#include "CH4_TeamProject/Game/CH4GameState.h"
 #include "Kismet/GameplayStatics.h"
 
 ACH4PlayerController::ACH4PlayerController()
@@ -11,7 +13,11 @@ ACH4PlayerController::ACH4PlayerController()
     bReplicates = true;
     bShowMouseCursor = true;
     
-    
+    ACH4GameState* GS = Cast<ACH4GameState>(UGameplayStatics::GetGameState(this));
+    if (GS)
+    {
+        GS->AddAlivePlayerCount();
+    }
 }
 
 void ACH4PlayerController::BeginPlay()
@@ -38,12 +44,12 @@ void ACH4PlayerController::ShowStartMenu()
     if (!StartMenuClass) return;
 
     // 1. 위젯 생성 (설계도인 Class로 실체인 Instance를 만듭니다)
-    CurrentWidget = CreateWidget<UUserWidget>(this, StartMenuClass);
+    CurrentMenuWidget = CreateWidget<UUserWidget>(this, StartMenuClass);
 
-    if (CurrentWidget)
+    if (CurrentMenuWidget)
     {
         // 2. 화면에 붙이기
-        CurrentWidget->AddToViewport();
+        CurrentMenuWidget->AddToViewport();
 
         // 3. 마우스 설정: 시작 메뉴에서는 버튼을 눌러야 하니 마우스를 보여줍니다.
         bShowMouseCursor = true;
@@ -56,18 +62,40 @@ void ACH4PlayerController::ShowStartMenu()
 
 void ACH4PlayerController::ShowGameOver()
 {
+    if (GameOverWidgetClass)
+    {
+        // 1. 게임 오버 위젯 생성
+        CurrentGameOverWidget = CreateWidget<UUserWidget>(this, GameOverWidgetClass);
+
+        if (CurrentGameOverWidget)
+        {
+            // 2. 화면에 표시
+            CurrentGameOverWidget->AddToViewport();
+
+            // 3. 마우스 커서 보이게 설정
+            bShowMouseCursor = true;
+
+            // 4. 입력 모드를 UI 전용으로 (그래야 버튼이 눌림)
+            FInputModeUIOnly InputMode;
+            InputMode.SetWidgetToFocus(CurrentGameOverWidget->TakeWidget());
+            SetInputMode(InputMode);
+
+    //        // 5. 게임 일시정지 (필요하다면)
+    //        // UGameplayStatics::SetGamePaused(GetWorld(), true);
+        }
+    }
 }
 
 void ACH4PlayerController::HideCurrentWidget()
 {
     // 1. 만약 현재 떠 있는 메뉴(CurrentMenuWidget)가 있다면?
-    if (CurrentWidget)
+    if (CurrentMenuWidget)
     {
         // 화면에서 지우고
-        CurrentWidget->RemoveFromParent();
+        CurrentMenuWidget->RemoveFromParent();
 
         // 메모리 주소도 깨끗하게 비웁니다 (방금 배운 nullptr!)
-        CurrentWidget = nullptr;
+        CurrentMenuWidget = nullptr;
     }
 
     // 3. 입력을 다시 '게임 전용'으로 바꿉니다. (그래야 캐릭터가 움직입니다)
@@ -77,16 +105,22 @@ void ACH4PlayerController::HideCurrentWidget()
 
 void ACH4PlayerController::StartGame()
 {
-    UE_LOG(LogTemp, Warning, TEXT("Level Start!"));
-    HideCurrentWidget();
+    if (UGameViewportClient* ViewportClient = GetWorld()->GetGameViewport())
+    {
+        ViewportClient->RemoveAllViewportWidgets();
+    }
     
-    UGameplayStatics::OpenLevel(this, FName("REALSTAGE"));
+    if (CurrentMenuWidget)
+    {
+        CurrentMenuWidget->RemoveFromParent();
+        CurrentMenuWidget = nullptr;
+    }
     
     // 3. 게임 화면이 나왔으니 다시 HUD(체력바 등)를 띄워줌
-    CurrentWidget = CreateWidget<UUserWidget>(this, HUDWidgetClass);
+    CurrentMenuWidget = CreateWidget<UUserWidget>(this, HUDWidgetClass);
     if (HUDWidgetClass)
     {
-        CurrentWidget->AddToViewport();
+        CurrentMenuWidget->AddToViewport();
         
         // 4. ★핵심: 입력 모드를 게임 전용으로! (이걸 안 하면 화면만 비고 조작이 안 됨)
         FInputModeGameOnly InputMode;
@@ -95,7 +129,43 @@ void ACH4PlayerController::StartGame()
     }
 }
 
-void ACH4PlayerController::ExitGame()
+void ACH4PlayerController::Server_StartGame_Implementation()
+{
+    ACH4GameMode* GM = Cast<ACH4GameMode>(GetWorld()->GetAuthGameMode());
+    GM->PlayGame();
+}
+
+void ACH4PlayerController::ShowGameClear()
+{
+    HideCurrentWidget();
+    
+    if (GameClearWidgetClass)
+    {
+        // 위젯 생성
+        CurrentGameClearWidget = CreateWidget<UUserWidget>(this, GameClearWidgetClass);
+
+        if (CurrentGameClearWidget)
+        {
+            // 화면에 띄우기
+            CurrentGameClearWidget->AddToViewport();
+
+            // 마우스 커서 활성화
+            bShowMouseCursor = true;
+
+            // 입력 모드를 UI 전용으로 (클리어 창의 버튼을 눌러야 하니까요)
+            FInputModeUIOnly InputMode;
+            InputMode.SetWidgetToFocus(CurrentGameClearWidget->TakeWidget());
+            SetInputMode(InputMode);
+
+//            // [선택] 게임을 일시정지 시키고 싶다면 아래 주석을 푸세요
+            UGameplayStatics::SetGamePaused(GetWorld(), true);
+        }
+    }
+}
+
+     
+
+        void ACH4PlayerController::ExitGame()
 {
     // UKismetSystemLibrary::QuitGame(월드 context, 컨트롤러, 종료 사유, 배경 실행 여부)
     UE_LOG(LogTemp, Warning, TEXT("=== C++ ExitGame 진입 성공! ==="));
@@ -111,21 +181,17 @@ void ACH4PlayerController::ShowGameRule()
     if (!GameRulesWidgetClass) return;
 
     // 3. 룰 위젯 생성 및 저장
-    CurrentWidget = CreateWidget<UUserWidget>(this, GameRulesWidgetClass);
-    if (CurrentWidget)
+    CurrentMenuWidget = CreateWidget<UUserWidget>(this, GameRulesWidgetClass);
+    if (CurrentMenuWidget)
     {
         // 4. 화면에 띄우기 (AddToViewport)
-        CurrentWidget->AddToViewport();
+        CurrentMenuWidget->AddToViewport();
         
         FInputModeUIOnly InputMode;
         SetInputMode(InputMode);
         bShowMouseCursor = true;
     }
 
-    CurrentWidget = nullptr;
-
-    // TODO: 시작 시 어떤 메뉴를 먼저 띄울지 함수 호출 위치 결정
-    ShowStartMenu();
 }
 
 void ACH4PlayerController::Client_DisablePlayerInput_Implementation()
@@ -147,7 +213,7 @@ void ACH4PlayerController::Client_PlayDownAnim_Implementation()
     ACH4Character* MyChar = Cast<ACH4Character>(GetPawn());
     if (MyChar)
     {
-        // MyChar->PlayDownAnimation();
+         MyChar->PlayDownAnimation();
     }
 }
 
@@ -156,7 +222,7 @@ void ACH4PlayerController::Client_PlayReviveAnim_Implementation()
     ACH4Character* MyChar = Cast<ACH4Character>(GetPawn());
     if (MyChar)
     {
-        // MyChar->PlayReviveAnimation();
+         MyChar->PlayReviveAnimation();
     }
 }
 

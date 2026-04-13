@@ -15,10 +15,10 @@ class CH4_TEAMPROJECT_API ACH4GameMode : public AGameMode
 public:
 	ACH4GameMode();
 
-protected:
-	virtual void StartPlay() override;
+	void BeginPlay()override ;
 	
 public:
+	void PlayGame();
 	void EndGame(EGamePhase GP);
 	
     // 플레이어 관리

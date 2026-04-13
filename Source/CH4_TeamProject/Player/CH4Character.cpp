@@ -11,9 +11,6 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "../Item/Equippable/EquippableComponent.h"
-#include "CH4_TeamProject/Item/Equippable/Ranged Weapon/RangedWeapons.h"
-#include "../Type.h"
-#include "CH4_TeamProject/Item/Consumable/ConsumableDataAsset.h"
 #include "CH4_TeamProject/Item/Consumable/HealItem.h"
 #include "../Item/Consumable/HealItem.h"
 #include "CH4_TeamProject/Player/PlayerAnimInstance.h"
@@ -72,7 +69,7 @@ void ACH4Character::Tick(float DeltaTime)
 
 }
 
-void ACH4Character::OnEquipInput()
+void ACH4Character::OnEquipInput1()
 {
 	UE_LOG(LogTemp, Error, TEXT("호출은 성공"));
 
@@ -81,20 +78,53 @@ void ACH4Character::OnEquipInput()
 		UE_LOG(LogTemp, Error, TEXT("실패 원인: EquippableComponent가 비어있음!"));
 	}
 
-	if (PrimaryWeaponData == nullptr)
+	if (PrimaryWeaponData1 == nullptr)
 	{
 		UE_LOG(LogTemp, Error, TEXT("실패 원인: PrimaryWeaponData가 비어있음! 에디터에서 할당했는지 확인하세요."));
 	}
 
-	if (EquippableComponent && PrimaryWeaponData)
+	if (EquippableComponent && PrimaryWeaponData1)
 	{
-		EquippableComponent->EquipWeapon(PrimaryWeaponData);
+		EquippableComponent->EquipWeapon(PrimaryWeaponData1);
 		UE_LOG(LogTemp, Warning, TEXT("장착 성공! 서버 함수 호출함."));
 	}
 }
 
+void ACH4Character::OnEquipInput2()
+{
+	if (EquippableComponent == nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("실패 원인: EquippableComponent가 비어있음!"));
+	}
+
+	if (PrimaryWeaponData2 == nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("실패 원인: PrimaryWeaponData가 비어있음! 에디터에서 할당했는지 확인하세요."));
+	}
+
+	if (EquippableComponent && PrimaryWeaponData2)
+	{
+		EquippableComponent->EquipWeapon(PrimaryWeaponData2);
+		UE_LOG(LogTemp, Warning, TEXT("장착 성공! 서버 함수 호출함."));
+	}
+}
+
+void ACH4Character::Server_ApplyItemEffect_Implementation(AHealItem* HealItem)
+{
+	ApplyItemEffect(HealItem);
+	HealLog_Implementation();
+}
+
 void ACH4Character::ApplyItemEffect(AHealItem* HealItem)
 {
+	
+	if (!HasAuthority())
+	{
+		UE_LOG(LogTemp, Error, TEXT("야후: 여기는 클라라서 못 지나감!"));
+		return;
+	}
+	
+	UE_LOG(LogTemp, Warning, TEXT("힐 되는중? 갯수까이나?"));
 	if (HealItemCount <= 0 || !HealItem) return;
 	
 	CurrentHP = FMath::Clamp(CurrentHP + HealItem->HealAmount, 0.0f, MaxHP);
@@ -109,12 +139,18 @@ void ACH4Character::ApplyItemEffect(AHealItem* HealItem)
 	}
 }
 
+void ACH4Character::HealLog_Implementation()
+{
+	
+	UE_LOG(LogTemp, Warning, TEXT("힐 추가"));
+}
+
 void ACH4Character::OnApplyItemEffect()
 {
 	UE_LOG(LogTemp, Warning, TEXT("야후: 4번 키 눌림!"));
 	if (Heal != nullptr)
 	{
-		ApplyItemEffect(Heal);
+		Server_ApplyItemEffect(Heal);
 	}
 }
 
@@ -122,14 +158,12 @@ void ACH4Character::NotifyActorBeginOverlap(AActor* OtherActor)
 {
 	Super::NotifyActorBeginOverlap(OtherActor);
 	AHealItem* LyingItem = Cast<AHealItem>(OtherActor);
-    
+	
 	if (LyingItem)
 	{
-		// 내 리모컨(Heal)에 이 아이템을 등록!
 		Heal = LyingItem;
 		HealItemCount++;
-
-		// 바닥에서 안 보이게 숨기고 충돌 끄기 (인벤토리에 넣은 것처럼 처리)
+		
 		LyingItem->SetActorHiddenInGame(true);
 		LyingItem->SetActorEnableCollision(false);
 
@@ -156,8 +190,11 @@ void ACH4Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ACH4Character::Look);
 	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACH4Character::Jump);
 	EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &ACH4Character::Fires);
-	EnhancedInputComponent->BindAction(EquipAction, ETriggerEvent::Started, this, &ACH4Character::OnEquipInput);
+	EnhancedInputComponent->BindAction(EquipAction, ETriggerEvent::Started, this, &ACH4Character::OnEquipInput1);
+	EnhancedInputComponent->BindAction(EquipAction2, ETriggerEvent::Started, this, &ACH4Character::OnEquipInput2);
+	
 	EnhancedInputComponent->BindAction(HealAction, ETriggerEvent::Started, this, &ACH4Character::OnApplyItemEffect);
+	EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Started, this, &ACH4Character::OnReload);
 	
 	EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &ACH4Character::Interact);
 }
@@ -252,12 +289,23 @@ void ACH4Character::InitializationInput()
 	{
 		EquipAction = InputEquip.Object;
 	}
+	
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputEquip2(TEXT("/Script/EnhancedInput.InputAction'/Game/Player/Input/Action/IA_Equip2.IA_Equip2'"));
+	if (InputEquip.Object != nullptr)
+	{
+		EquipAction2 = InputEquip2.Object;
+	}
+	
 	static ConstructorHelpers::FObjectFinder<UInputAction> InputHeal(TEXT("/Script/EnhancedInput.InputAction'/Game/Player/Input/Action/IA_Heal.IA_Heal'"));
 	if (InputEquip.Object != nullptr)
 	{
 		HealAction = InputHeal.Object;
 	}
-	
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputReload(TEXT("/Script/EnhancedInput.InputAction'/Game/Player/Input/Action/IA_Reload.IA_Reload'"));
+	if (InputEquip.Object != nullptr)
+	{
+		ReloadAction = InputReload.Object;
+	}
 
 	static ConstructorHelpers::FObjectFinder<UInputAction> InputInteract(TEXT("/Script/EnhancedInput.InputAction'/Game/Player/Input/Action/IA_Interaction.IA_Interaction'"));
 	if (InputInteract.Object != nullptr)
@@ -305,6 +353,11 @@ void ACH4Character::Fires()
 		return;
 	}
 	EquippableComponent->Fire();
+}
+
+void ACH4Character::OnReload()
+{
+	EquippableComponent->Reload();
 }
 
 // 몽타주 호출 함수들

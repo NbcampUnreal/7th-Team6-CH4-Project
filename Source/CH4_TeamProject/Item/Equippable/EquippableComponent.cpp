@@ -26,6 +26,15 @@ void UEquippableComponent::Fire()
 	CurrentWeapon->Fire();
 }
 
+void UEquippableComponent::Reload()
+{
+	if (CurrentWeapon == nullptr)
+	{
+		return;
+	}
+	CurrentWeapon->Server_ReLoad();
+}
+
 
 void UEquippableComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
