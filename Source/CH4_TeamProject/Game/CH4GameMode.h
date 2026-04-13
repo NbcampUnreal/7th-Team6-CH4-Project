@@ -16,7 +16,8 @@ public:
 	ACH4GameMode();
 
 	void BeginPlay()override ;
-	
+	void PostLogin(APlayerController* NewPlayer);
+
 public:
 	void PlayGame();
 	void EndGame(EGamePhase GP);
@@ -32,6 +33,7 @@ public:
 
 private:
 	void UpdateMainServerTime() const;
+	bool bGameStarted = false;
 			
 	// void StartFinalDefenseTimer() const;	
 		
