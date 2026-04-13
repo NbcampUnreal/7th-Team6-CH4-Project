@@ -1,5 +1,6 @@
 #include "BTTask_Attack.h"
 #include "AIController.h"
+#include "CH4_TeamProject/Zombie/ZombieBase.h"
 #include "GameFramework/Character.h"
 
 UBTTask_Attack::UBTTask_Attack()
@@ -24,7 +25,11 @@ EBTNodeResult::Type UBTTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerCom
 	}
 	
 	UE_LOG(LogTemp, Error, TEXT("Montage Play!!!!!!!!!!!!!!"))
-	AIController->PlayAnimMontage(AttackMontage);
+	AZombieBase* Zombie = Cast<AZombieBase>(Owner->GetPawn());
+	if (Zombie)
+	{
+		Zombie->Multi_PlayAttackMontage(AttackMontage);
+	}
 	return EBTNodeResult::InProgress;
 }
 
