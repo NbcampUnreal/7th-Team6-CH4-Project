@@ -4,6 +4,8 @@
 #include "CH4_TeamProject/Player/CH4Character.h"
 #include "CH4_TeamProject/DataBase/DataBase.h"
 #include <Kismet\KismetSystemLibrary.h>
+
+#include "CH4_TeamProject/Game/CH4GameState.h"
 #include "Kismet/GameplayStatics.h"
 
 ACH4PlayerController::ACH4PlayerController()
@@ -11,7 +13,11 @@ ACH4PlayerController::ACH4PlayerController()
     bReplicates = true;
     bShowMouseCursor = true;
     
-    
+    ACH4GameState* GS = Cast<ACH4GameState>(UGameplayStatics::GetGameState(this));
+    if (GS)
+    {
+        GS->AddAlivePlayerCount();
+    }
 }
 
 void ACH4PlayerController::BeginPlay()
@@ -99,11 +105,17 @@ void ACH4PlayerController::HideCurrentWidget()
 
 void ACH4PlayerController::StartGame()
 {
+    if (UGameViewportClient* ViewportClient = GetWorld()->GetGameViewport())
+    {
+        ViewportClient->RemoveAllViewportWidgets();
+    }
+    
     if (CurrentMenuWidget)
     {
         CurrentMenuWidget->RemoveFromParent();
         CurrentMenuWidget = nullptr;
     }
+    
     // 3. 게임 화면이 나왔으니 다시 HUD(체력바 등)를 띄워줌
     CurrentMenuWidget = CreateWidget<UUserWidget>(this, HUDWidgetClass);
     if (HUDWidgetClass)
@@ -117,8 +129,17 @@ void ACH4PlayerController::StartGame()
     }
 }
 
+void ACH4PlayerController::Server_StartGame_Implementation()
+{
+    
+    ACH4GameMode* GM = Cast<ACH4GameMode>(GetWorld()->GetAuthGameMode());
+    GM->PlayGame();
+}
+
 void ACH4PlayerController::ShowGameClear()
 {
+    HideCurrentWidget();
+    
     if (GameClearWidgetClass)
     {
         // 위젯 생성
@@ -138,7 +159,7 @@ void ACH4PlayerController::ShowGameClear()
             SetInputMode(InputMode);
 
 //            // [선택] 게임을 일시정지 시키고 싶다면 아래 주석을 푸세요
-//            // UGameplayStatics::SetGamePaused(GetWorld(), true);
+            UGameplayStatics::SetGamePaused(GetWorld(), true);
         }
     }
 }

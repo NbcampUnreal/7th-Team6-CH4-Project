@@ -39,7 +39,7 @@ public:
 
 public:	
 	UPROPERTY(Replicated)
-	int32 AlivePlayerCount = 4;
+	int32 AlivePlayerCount = 0;
 	
 	UPROPERTY(Replicated, BlueprintReadOnly)
 	float ServerTime = 0.f;
@@ -57,8 +57,12 @@ public:
 	void OnRep_GamePhase();
 	
 	int32 GetAlivePlayerCount() const{ return AlivePlayerCount; }
-	void AddAlivePlayerCount() { AlivePlayerCount++; }
-	void SubtractAlivePlayerCount() { AlivePlayerCount--; }
+	
+	UFUNCTION(Server, Reliable)
+	void AddAlivePlayerCount();
+	
+	UFUNCTION(Server, Reliable)
+	void SubtractAlivePlayerCount();
 	
 	UFUNCTION()
 	void AddGearPartsCount();

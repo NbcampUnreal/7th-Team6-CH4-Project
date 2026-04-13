@@ -51,6 +51,30 @@ void ACH4GameMode::StartPlay()
 		1.f, 
 		true, 
 		0.f);
+	
+}
+
+void ACH4GameMode::PlayGame()
+{
+	ACH4GameState* GS = Cast<ACH4GameState>(GetWorld()->GetGameState());
+	if (GS)
+	{
+		GS->SetGamePhase(EGamePhase::StartStage);
+	}
+	
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	{
+		ACH4PlayerController* PC = Cast<ACH4PlayerController>(It->Get());
+		PC->Client_EnablePlayerInput();
+	}
+	
+	GetWorldTimerManager().SetTimer(
+	ServerTimeTimerHandle, 
+	this, 
+	&ACH4GameMode::UpdateMainServerTime, 
+	1.f, 
+	true, 
+	0.f);
 }
 
 void ACH4GameMode::EndGame(EGamePhase GP)
@@ -69,17 +93,6 @@ void ACH4GameMode::EndGame(EGamePhase GP)
 		if (PC)
 		{
 			PC->Client_DisablePlayerInput();
-		}
-		
-		if (GP == EGamePhase::Clear)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Clear"));
-			PC->Client_InvokeGameClearUI();
-		}
-		else if (GP == EGamePhase::Lose)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Lose"));
-			PC->Client_InvokeGameLoseUI();
 		}
 	}
 	

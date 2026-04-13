@@ -52,9 +52,35 @@ void ACH4GameState::OnRep_GearPartsCount()
 	// UI : Collected GearParts 갱신 -> 컨트롤러
 }
 
-void ACH4GameState::OnRep_GamePhase()
+void ACH4GameState::OnRep_GamePhase() // 변경 시 자동 호출
 {
 	UE_LOG(LogTemp, Warning, TEXT("GamePhase Changed: %d"), GamePhase);
+	
+	ACH4PlayerController* PC = Cast<ACH4PlayerController>(GetWorld()->GetFirstPlayerController());
+	if (!PC) return;
+	
+	if (GamePhase == EGamePhase::Clear)
+	{
+		PC->ShowGameClear();
+	}
+	else if (GamePhase == EGamePhase::Lose)
+	{
+		PC->ShowGameOver();
+	}
+	else if (GamePhase == EGamePhase::StartStage)
+	{
+		PC->StartGame();
+	}
+}
+
+void ACH4GameState::AddAlivePlayerCount_Implementation()
+{
+	AlivePlayerCount++;
+}
+
+void ACH4GameState::SubtractAlivePlayerCount_Implementation()
+{
+	AlivePlayerCount--;
 }
 
 void ACH4GameState::AddGearPartsCount()
