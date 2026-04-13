@@ -30,6 +30,7 @@ public:
 	
 	UPROPERTY(Replicated)
 	int32 SpawnPointIndex; // 배정된 스폰 포인트
+
 	
 	UFUNCTION()
 	void OnRep_LifeState();
@@ -38,4 +39,6 @@ public:
 	
 	UFUNCTION(Server, Reliable)
 	void Server_SetCurrentHP(float Damage);
+	
+	void SetPlayerLifeState(EPlayerLifeState PL);
 };

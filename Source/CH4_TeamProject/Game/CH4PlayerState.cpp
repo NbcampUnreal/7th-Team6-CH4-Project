@@ -25,7 +25,6 @@ void ACH4PlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 
 void ACH4PlayerState::OnRep_LifeState()
 {
-	// UI 갱신 or 캐릭터 반응
 }
 
 void ACH4PlayerState::SetLifeState(EPlayerLifeState NewState)
@@ -44,4 +43,9 @@ void ACH4PlayerState::Server_SetCurrentHP_Implementation(float Damage)
 			GM->OnPlayerDowned(this);
 		}
 	}
+}
+
+void ACH4PlayerState::SetPlayerLifeState(EPlayerLifeState PL)
+{
+	LifeState = PL;
 }

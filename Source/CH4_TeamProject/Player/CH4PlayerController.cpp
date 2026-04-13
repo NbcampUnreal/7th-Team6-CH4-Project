@@ -130,15 +130,15 @@ void ACH4PlayerController::StartGame()
 //     GM->PlayGame();
 // }
     
-void ACH4PlayerController::JoinServer()
-{
-    UE_LOG(LogTemp, Warning, TEXT("JoinServer Called"));
-    
-    if (IsLocalController())
-    {
-        ClientTravel(TEXT("127.0.0.1:7777"), TRAVEL_Absolute);
-    }
-}
+// void ACH4PlayerController::JoinServer()
+// {
+//     UE_LOG(LogTemp, Warning, TEXT("JoinServer Called"));
+//     
+//     if (IsLocalController())
+//     {
+//         ClientTravel(TEXT("127.0.0.1:7777"), TRAVEL_Absolute);
+//     }
+// }
 
 void ACH4PlayerController::ShowGameClear()
 {
