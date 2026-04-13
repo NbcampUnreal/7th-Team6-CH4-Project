@@ -2,7 +2,7 @@
 
 
 #include "LobbyPlayerController.h"
-
+#include "CH4LobbyGameMode.h"
 ALobbyPlayerController::ALobbyPlayerController()
 {
 
@@ -24,4 +24,14 @@ void ALobbyPlayerController::BeginPlay()
 	HUDServerLobbyWidgetInstance = CreateWidget<UUserWidget>(this,HUDServerLobbyWidgetClass);
 	if (HUDServerLobbyWidgetInstance)
 	HUDServerLobbyWidgetInstance->AddToViewport();
+}
+
+void ALobbyPlayerController::Server_RequestReady_Implementation()
+{
+	ACH4LobbyGameMode* GM = GetWorld()->GetAuthGameMode<ACH4LobbyGameMode>();
+	if (GM)
+	{
+		GM->SetPlayerLifeState(this);
+		UE_LOG(LogTemp,Error,TEXT("컨트롤러에서 호출은됨"))
+	}
 }
