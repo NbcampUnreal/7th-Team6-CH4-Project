@@ -126,8 +126,9 @@ void ACH4PlayerController::StartGame()
 
 void ACH4PlayerController::BackToLobby_Implementation()
 {
+	if (!HasAuthority()) return;
+
 	ACH4GameMode* GM = GetWorld()->GetAuthGameMode<ACH4GameMode>();
-    
 	if (GM)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("서버에서 GM을 찾았습니다. 이동 명령을 내립니다!"));

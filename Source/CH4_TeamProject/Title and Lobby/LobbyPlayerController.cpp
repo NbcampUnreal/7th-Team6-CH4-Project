@@ -23,7 +23,11 @@ void ALobbyPlayerController::BeginPlay()
 	
 	HUDServerLobbyWidgetInstance = CreateWidget<UUserWidget>(this,HUDServerLobbyWidgetClass);
 	if (HUDServerLobbyWidgetInstance)
-	HUDServerLobbyWidgetInstance->AddToViewport();
+	{
+		HUDServerLobbyWidgetInstance->AddToViewport();
+		
+		bShowMouseCursor = true;
+	}
 }
 
 void ALobbyPlayerController::HideCurrentWidget()

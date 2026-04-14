@@ -15,7 +15,8 @@ ACH4GameMode::ACH4GameMode()
 	PlayerStateClass = ACH4PlayerState::StaticClass();
 	PlayerControllerClass = ACH4PlayerController::StaticClass();
 	
-	bUseSeamlessTravel = true;
+	bUseSeamlessTravel = false;
+	bIsReturningToLobby = false;
 	
 	static ConstructorHelpers::FClassFinder<ACH4Character>
 		PlayerCharacter(TEXT("/Game/Player/PlayerBluePrint/BP_Player.BP_Player_C"));
@@ -182,10 +183,20 @@ void ACH4GameMode::SetGameResult()
 
 void ACH4GameMode::RequestReturnToLobby()
 {
+	if (!HasAuthority())
+	{
+		return;
+	}
+	
 	UE_LOG(LogTemp, Warning, TEXT("=== 게임 종료: 모든 플레이어를 로비로 보냅니다. ==="));
 	
-	FString LobbyMapPath = TEXT("/Game/Maps/TitleAndLobby/L_Lobby?listen");
+	if (bIsReturningToLobby)
+	{
+		return;
+	}
 	
+	bIsReturningToLobby = true;
+	FString LobbyMapPath = TEXT("/Game/Maps/TitleAndLobby/L_Lobby?listen");
 	GetWorld()->ServerTravel(LobbyMapPath);
 }
 

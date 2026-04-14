@@ -15,6 +15,8 @@ private:
 	ACH4LobbyGameMode();
 	
 public:
+	virtual void BeginPlay() override;
+	
 	int32 ReadyPlayerCount=0;
 	
 	UPROPERTY()

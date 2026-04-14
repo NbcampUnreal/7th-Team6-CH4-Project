@@ -8,6 +8,12 @@
 
 ACH4LobbyGameMode::ACH4LobbyGameMode()
 {
+	bUseSeamlessTravel = false;
+}
+
+void ACH4LobbyGameMode::BeginPlay()
+{
+	Super::BeginPlay();
 }
 
 void ACH4LobbyGameMode::SetPlayerLifeState(ACH4PlayerController* PC1)
