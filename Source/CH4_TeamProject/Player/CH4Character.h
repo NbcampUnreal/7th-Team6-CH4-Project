@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
+#include "CH4_TeamProject/Player/PlayerAnimInstance.h"
 #include "CH4Character.generated.h"
 
 class UEquippableComponent;
@@ -46,6 +47,13 @@ public:
 	void PlayDeathAnimation();
 	void PlayReviveAnimation();
 
+	void OnDeath();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multi_PlayAction(EPlayerActionState NewState);
+
+	UFUNCTION(Server, Reliable)
+	void Server_Interact();
 protected:
 	//카메라쪽
 	UPROPERTY(EditAnywhere)

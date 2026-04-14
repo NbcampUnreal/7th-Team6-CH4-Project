@@ -9,12 +9,12 @@
  UENUM(BlueprintType)
 enum class EPlayerActionState : uint8
 {
-	None	UMETA(DisplayName = "None"),
-	Hit		UMETA(DisplayName = "Hit"),
-	Pickup	UMETA(DisplayName = "Pickup"),
-	Down	UMETA(DisplayName = "Down"),
-	Dead	UMETA(DisplayName = "Dead"),
-	Revive	UMETA(DisplayName = "Revive")
+	None	UMETA(DisplayName = "None"),//0
+	Hit		UMETA(DisplayName = "Hit"),//1
+	Pickup	UMETA(DisplayName = "Pickup"),//2
+	Down	UMETA(DisplayName = "Down"),//3
+	Dead	UMETA(DisplayName = "Dead"),//4
+	Revive	UMETA(DisplayName = "Revive")//5
 };
 
 UCLASS()
@@ -71,7 +71,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State")
 	EPlayerActionState CurrentActionState = EPlayerActionState::None;
 
-protected:
+public:
 	//피격용 몽타주
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Montage")
 	TObjectPtr<class UAnimMontage> HitHeadMontage;
