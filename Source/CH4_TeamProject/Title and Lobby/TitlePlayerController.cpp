@@ -21,5 +21,8 @@ void ATitlePlayerController::BeginPlay()
 	
 	HUDTitleWidgetInstance = CreateWidget<UUserWidget>(this,HUDTitleWidgetClass);
 	if (HUDTitleWidgetInstance)
-	HUDTitleWidgetInstance->AddToViewport();
+	{
+		HUDTitleWidgetInstance->AddToViewport();
+		bShowMouseCursor = true;
+	}
 }
