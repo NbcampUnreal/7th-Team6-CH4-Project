@@ -36,6 +36,7 @@ public:
 private:
 	void UpdateMainServerTime() const;
 	bool bGameStarted = false;
+	bool bIsReturningToLobby = false;
 			
 	// void StartFinalDefenseTimer() const;	
 		
