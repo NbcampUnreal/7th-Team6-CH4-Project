@@ -26,6 +26,16 @@ void ALobbyPlayerController::BeginPlay()
 	HUDServerLobbyWidgetInstance->AddToViewport();
 }
 
+void ALobbyPlayerController::HideCurrentWidget()
+{
+	Super::HideCurrentWidget();
+}
+
+void ALobbyPlayerController::ShowGameRule()
+{
+	Super::ShowGameRule();
+}
+
 void ALobbyPlayerController::Server_RequestReady_Implementation()
 {
 	ACH4LobbyGameMode* GM = GetWorld()->GetAuthGameMode<ACH4LobbyGameMode>();

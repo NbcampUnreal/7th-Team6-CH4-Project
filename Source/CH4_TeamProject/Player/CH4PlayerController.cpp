@@ -79,7 +79,7 @@ void ACH4PlayerController::ShowGameOver()
     //        // UGameplayStatics::SetGamePaused(GetWorld(), true);
         }
     }
-}
+}   
 
 void ACH4PlayerController::HideCurrentWidget()
 {
@@ -179,16 +179,22 @@ void ACH4PlayerController::ShowGameClear()
 
 void ACH4PlayerController::ShowGameRule()
 {
+    UE_LOG(LogTemp, Warning, TEXT("야후! ShowGameRule 함수가 일단 실행은 됐어!"));
 // 1. 이미 열린 게 있다면 지웁니다.
     HideCurrentWidget();
 
     // 2. 클래스 체크
-    if (!GameRulesWidgetClass) return;
+    if (!GameRulesWidgetClass)
+    {
+        UE_LOG(LogTemp,Error,TEXT("위젯이 유효하지않아"))
+        return;
+    }
 
     // 3. 룰 위젯 생성 및 저장
     CurrentMenuWidget = CreateWidget<UUserWidget>(this, GameRulesWidgetClass);
     if (CurrentMenuWidget)
     {
+        UE_LOG(LogTemp, Warning, TEXT("위젯 생성 및 뷰포트 추가 완료!"));
         // 4. 화면에 띄우기 (AddToViewport)
         CurrentMenuWidget->AddToViewport();
         

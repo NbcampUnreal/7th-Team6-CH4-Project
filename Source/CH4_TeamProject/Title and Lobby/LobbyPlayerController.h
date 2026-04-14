@@ -23,5 +23,9 @@ public:
 	
 	UFUNCTION(Server, Reliable,BlueprintCallable)
 	void Server_RequestReady();
+	
+	virtual void HideCurrentWidget() override;
+	
+	virtual void ShowGameRule() override;
 };
 	
