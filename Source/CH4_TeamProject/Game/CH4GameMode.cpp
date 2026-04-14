@@ -105,7 +105,7 @@ void ACH4GameMode::EndGame(EGamePhase GP)
 		}
 	}
 	
-	GetWorldTimerManager().ClearAllTimersForObject(this); // 타이머 정지
+	GetWorldTimerManager().ClearAllTimersForObject(this); 
 }
 
 void ACH4GameMode::OnPlayerDowned(ACH4PlayerState* PlayerState)
@@ -178,6 +178,15 @@ void ACH4GameMode::SetGameResult()
 	{
 		EndGame(EGamePhase::Clear);
 	}
+}
+
+void ACH4GameMode::RequestReturnToLobby()
+{
+	UE_LOG(LogTemp, Warning, TEXT("=== 게임 종료: 모든 플레이어를 로비로 보냅니다. ==="));
+	
+	FString LobbyMapPath = TEXT("/Game/Maps/TitleAndLobby/L_Lobby?listen");
+	
+	GetWorld()->ServerTravel(LobbyMapPath);
 }
 
 void ACH4GameMode::UpdateMainServerTime() const
