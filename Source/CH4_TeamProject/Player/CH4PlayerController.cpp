@@ -15,11 +15,13 @@ ACH4PlayerController::ACH4PlayerController()
 
 void ACH4PlayerController::BeginPlay()
 {
-	if (!IsLocalController())
+	if (IsLocalController())
 	{
-		return;
+		FInputModeGameOnly InputMode;
+		SetInputMode(InputMode);
+		bShowMouseCursor = false;
 	}
-
+	
 	// TODO: 시작 시 어떤 메뉴를 먼저 띄울지 함수 호출 위치 결정
 	// ShowStartMenu();
 }
