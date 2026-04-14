@@ -139,6 +139,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Menu")
 	void StartGame();
 	
+	UFUNCTION(BlueprintCallable, Server, Reliable)
+	void BackToLobby();
 	// UFUNCTION(Server, Reliable, BlueprintCallable, Category = "Menu")
 	// void Server_StartGame();
 };

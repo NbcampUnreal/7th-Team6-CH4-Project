@@ -31,6 +31,8 @@ public:
 	
 	FTimerHandle ServerTimeTimerHandle;
 
+	UFUNCTION(BlueprintCallable, Category = "GameFlow")
+	void RequestReturnToLobby();
 private:
 	void UpdateMainServerTime() const;
 	bool bGameStarted = false;
