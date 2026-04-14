@@ -60,7 +60,7 @@ void ACH4Character::BeginPlay()
 		UE_LOG(LogTemp, Warning, TEXT("%s: 난 그냥 원격 캐릭터일 뿐이야."), *GetName());
 	}
 	GamsState = Cast<ACH4GameState>(GetWorld()->GetGameState());
-	GetCharacterMovement()->MaxWalkSpeed = PlayerMoveSpeed;
+	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 }
 
 void ACH4Character::Tick(float DeltaTime)
@@ -192,6 +192,8 @@ void ACH4Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &ACH4Character::Fires);
 	EnhancedInputComponent->BindAction(EquipAction, ETriggerEvent::Started, this, &ACH4Character::OnEquipInput1);
 	EnhancedInputComponent->BindAction(EquipAction2, ETriggerEvent::Started, this, &ACH4Character::OnEquipInput2);
+	EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this, &ACH4Character::StartSprint);
+	EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &ACH4Character::StopSprint);
 	
 	EnhancedInputComponent->BindAction(HealAction, ETriggerEvent::Started, this, &ACH4Character::OnApplyItemEffect);
 	EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Started, this, &ACH4Character::OnReload);
@@ -278,6 +280,12 @@ void ACH4Character::InitializationInput()
 	{
 		JumpAction = InputJump.Object;
 	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputSprint(TEXT("/Script/EnhancedInput.InputAction'/Game/Player/Input/Action/IA_Sprint.IA_Sprint'"));
+	if (InputSprint.Object != nullptr)
+	{
+		SprintAction = InputSprint.Object;
+	}
 	
 	static ConstructorHelpers::FObjectFinder<UInputAction> InputFire(TEXT("/Script/EnhancedInput.InputAction'/Game/Player/Input/Action/IA_Fire.IA_Fire'"));
 	if (InputFire.Object != nullptr)
@@ -312,6 +320,7 @@ void ACH4Character::InitializationInput()
 	{
 		InteractAction = InputInteract.Object;
 	}
+
 }
 
 //무브
@@ -327,6 +336,19 @@ void ACH4Character::Move(const FInputActionValue& Value)
 
 	AddMovementInput(Forward, Movement.Y);
 	AddMovementInput(Right, Movement.X);
+}
+//뛰기시작
+void ACH4Character::StartSprint()
+{
+	bIsSprinting = true;
+	GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+}
+
+//뛰기 멈출때
+void ACH4Character::StopSprint()
+{
+	bIsSprinting = false;
+	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 }
 
 //시점
