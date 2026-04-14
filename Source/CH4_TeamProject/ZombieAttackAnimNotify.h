@@ -27,6 +27,7 @@ public:
 
 	virtual void BranchingPointNotify(FBranchingPointNotifyPayload& BranchingPointPayload) override;
 
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Hitbox")
 	EUPHitboxShape Shape = EUPHitboxShape::Sphere;
