@@ -9,7 +9,6 @@
 UZombieAttackAnimNotify::UZombieAttackAnimNotify()
 {
 	// 에디터에서도 Notify 실행되도록 설정
-	bShouldFireInEditor = true;
 	// 프레임이 밀리지 않게 하기 위해 정확한 프레임에 즉시 실행
 	bIsNativeBranchingPoint = true;
 }
