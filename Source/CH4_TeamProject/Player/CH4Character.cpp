@@ -18,6 +18,8 @@
 #include "CH4_TeamProject/Game/CH4GameState.h"
 #include "CH4_TeamProject/Item/Consumable/GearItem.h"
 
+
+//생성자
 ACH4Character::ACH4Character()
 {
 
@@ -26,7 +28,7 @@ ACH4Character::ACH4Character()
 	InitializationPlayerMesh();//메쉬 함수 호출
 	InitializationCamera();//카메라 함수 호출
 	InitializationInput();//인풋 함수
-	
+
 	StimuliSource = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("StimuliSource"));
 
 	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimInstance(TEXT("/Game/Player/PlayerBluePrint/ABP_Player.ABP_Player_C"));
@@ -34,15 +36,16 @@ ACH4Character::ACH4Character()
 	{
 		GetMesh()->SetAnimInstanceClass(AnimInstance.Class);
 	}
-	
+
 	EquippableComponent = CreateDefaultSubobject<UEquippableComponent>(TEXT("EquippableComponent"));
 	EquippableComponent->SetIsReplicated(true);
 	bReplicates = true;
 }
 
+//비긴 플레이
 void ACH4Character::BeginPlay()
 {
-	Super::BeginPlay();	
+	Super::BeginPlay();
 	//맵핑 불러오기
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
 	{
@@ -63,6 +66,7 @@ void ACH4Character::BeginPlay()
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 }
 
+//틱
 void ACH4Character::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -117,21 +121,21 @@ void ACH4Character::Server_ApplyItemEffect_Implementation(AHealItem* HealItem)
 
 void ACH4Character::ApplyItemEffect(AHealItem* HealItem)
 {
-	
+
 	if (!HasAuthority())
 	{
 		UE_LOG(LogTemp, Error, TEXT("야후: 여기는 클라라서 못 지나감!"));
 		return;
 	}
-	
+
 	UE_LOG(LogTemp, Warning, TEXT("힐 되는중? 갯수까이나?"));
 	if (HealItemCount <= 0 || !HealItem) return;
-	
+
 	CurrentHP = FMath::Clamp(CurrentHP + HealItem->HealAmount, 0.0f, MaxHP);
 	HealItemCount--;
 
 	UE_LOG(LogTemp, Log, TEXT("야후: 힐 완료! 남은 개수: %d"), HealItemCount);
-	
+
 	if (HealItemCount <= 0)
 	{
 		HealItem->Destroy();
@@ -141,7 +145,7 @@ void ACH4Character::ApplyItemEffect(AHealItem* HealItem)
 
 void ACH4Character::HealLog_Implementation()
 {
-	
+
 	UE_LOG(LogTemp, Warning, TEXT("힐 추가"));
 }
 
@@ -158,25 +162,25 @@ void ACH4Character::NotifyActorBeginOverlap(AActor* OtherActor)
 {
 	Super::NotifyActorBeginOverlap(OtherActor);
 	AHealItem* LyingItem = Cast<AHealItem>(OtherActor);
-	
+
 	if (LyingItem)
 	{
 		Heal = LyingItem;
 		HealItemCount++;
-		
+
 		LyingItem->SetActorHiddenInGame(true);
 		LyingItem->SetActorEnableCollision(false);
 
 		UE_LOG(LogTemp, Log, TEXT("야후: 아이템 획득! 현재 개수: %d"), HealItemCount);
 	}
-	
+
 	AGearItem* GearItem = Cast<AGearItem>(OtherActor);
 	if (GearItem)
 	{
-		ACH4GameState* Gs =  Cast<ACH4GameState>(GamsState);
+		ACH4GameState* Gs = Cast<ACH4GameState>(GamsState);
 		Gs->AddGearPartsCount();
 		GearItem->Destroy();
-		UE_LOG(LogTemp,Error,TEXT("기어 파츠캣수:%d"),Gs->GearPartsCount);
+		UE_LOG(LogTemp, Error, TEXT("기어 파츠캣수:%d"), Gs->GearPartsCount);
 	}
 }
 
@@ -194,21 +198,37 @@ void ACH4Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	EnhancedInputComponent->BindAction(EquipAction2, ETriggerEvent::Started, this, &ACH4Character::OnEquipInput2);
 	EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this, &ACH4Character::StartSprint);
 	EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &ACH4Character::StopSprint);
-	
+
 	EnhancedInputComponent->BindAction(HealAction, ETriggerEvent::Started, this, &ACH4Character::OnApplyItemEffect);
 	EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Started, this, &ACH4Character::OnReload);
-	
+
 	EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &ACH4Character::Interact);
 }
 
+//테이크데메지
 float ACH4Character::TakeDamage(float DamageAmount, const FDamageEvent& DamageEvent,
 	AController* EventInstigator, AActor* DamageCauser)
 {
+	if (HasAuthority()) Multi_PlayAction(EPlayerActionState::Hit);
+
 	const float Damage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-
-	PlayHitAnimation();
-
+	CurrentHP = CurrentHP = FMath::Clamp(CurrentHP - Damage, 0.0f, MaxHP);
+	if (CurrentHP <= 0)
+	{
+		if (HasAuthority()) Multi_PlayAction(EPlayerActionState::Down);
+		ACH4PlayerState* PS = GetPlayerState<ACH4PlayerState>();
+		if (PS->PlayerReviveCount <= 0)
+		{
+			OnDeath();
+		}
+	}
 	return Damage;
+}
+
+//온데스
+void ACH4Character::OnDeath()
+{
+	if (HasAuthority()) Multi_PlayAction(EPlayerActionState::Dead);
 }
 
 //플레이어 메쉬
@@ -239,7 +259,7 @@ void ACH4Character::InitializationCamera()
 		SpringArm->TargetOffset = FVector(0.0f, 0.0f, 70.0f);
 		SpringArm->SocketOffset = FVector(0.0f, 25.0f, 20.0f);
 		SpringArm->SetRelativeRotation(FRotator(-10.0f, 0.0f, 0.0f));
-		
+
 
 		SpringArm->bUsePawnControlRotation = true;
 		SpringArm->bDoCollisionTest = true;
@@ -286,7 +306,7 @@ void ACH4Character::InitializationInput()
 	{
 		SprintAction = InputSprint.Object;
 	}
-	
+
 	static ConstructorHelpers::FObjectFinder<UInputAction> InputFire(TEXT("/Script/EnhancedInput.InputAction'/Game/Player/Input/Action/IA_Fire.IA_Fire'"));
 	if (InputFire.Object != nullptr)
 	{
@@ -297,13 +317,13 @@ void ACH4Character::InitializationInput()
 	{
 		EquipAction = InputEquip.Object;
 	}
-	
+
 	static ConstructorHelpers::FObjectFinder<UInputAction> InputEquip2(TEXT("/Script/EnhancedInput.InputAction'/Game/Player/Input/Action/IA_Equip2.IA_Equip2'"));
 	if (InputEquip.Object != nullptr)
 	{
 		EquipAction2 = InputEquip2.Object;
 	}
-	
+
 	static ConstructorHelpers::FObjectFinder<UInputAction> InputHeal(TEXT("/Script/EnhancedInput.InputAction'/Game/Player/Input/Action/IA_Heal.IA_Heal'"));
 	if (InputEquip.Object != nullptr)
 	{
@@ -325,7 +345,7 @@ void ACH4Character::InitializationInput()
 
 //무브
 void ACH4Character::Move(const FInputActionValue& Value)
-{
+	{
 	const FVector2D Movement = Value.Get<FVector2D>();
 
 	const FRotator ControlRot = Controller ? Controller->GetControlRotation() : FRotator::ZeroRotator;
@@ -362,7 +382,7 @@ void ACH4Character::Look(const FInputActionValue& Value)
 void ACH4Character::Fires()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Weapon: %s"),
-	EquippableComponent->CurrentWeapon ? TEXT("있음") : TEXT("없음"));
+		EquippableComponent->CurrentWeapon ? TEXT("있음") : TEXT("없음"));
 	if (EquippableComponent == nullptr)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, TEXT("컴포넌트 자체가 널입니다!"));
@@ -385,65 +405,71 @@ void ACH4Character::OnReload()
 // 몽타주 호출 함수들
 void ACH4Character::PlayHitAnimation()
 {
-	if (UPlayerAnimInstance* AnimInst = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance()))
-	{
-		AnimInst->PlayHitHeadMontage();
-	}
+	if (HasAuthority()) Multi_PlayAction(EPlayerActionState::Hit);
 }
 
 void ACH4Character::PlayPickupAnimation()
 {
-	if (UPlayerAnimInstance* AnimInst = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance()))
-	{
-		AnimInst->PlayPickupMontage();
-	}
+	if (HasAuthority()) Multi_PlayAction(EPlayerActionState::Pickup);
 }
 
 void ACH4Character::PlayDownAnimation()
 {
-	if (UPlayerAnimInstance* AnimInst = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance()))
-	{
-		AnimInst->PlayDownMontage();
-	}
+	if (HasAuthority()) Multi_PlayAction(EPlayerActionState::Down);
 }
 
 void ACH4Character::PlayDeathAnimation()
 {
-	if (UPlayerAnimInstance* AnimInst = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance()))
-	{
-		AnimInst->PlayDeathMontage();
-	}
+	if (HasAuthority()) Multi_PlayAction(EPlayerActionState::Dead);
 }
 
 void ACH4Character::PlayReviveAnimation()
 {
-	if (UPlayerAnimInstance* AnimInst = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance()))
-	{
-		AnimInst->PlayReviveMontage();
-	}
+	if (HasAuthority()) Multi_PlayAction(EPlayerActionState::Revive);
 }
 
+//멀티캐스트 구현
+void ACH4Character::Multi_PlayAction_Implementation(EPlayerActionState NewState)
+{
+	UPlayerAnimInstance* AnimInst = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+	if (AnimInst)
+	{
+		switch (NewState)
+		{
+		case EPlayerActionState::Hit:    PlayAnimMontage(AnimInst->HitHeadMontage); break;
+		case EPlayerActionState::Pickup: AnimInst->Montage_Play(AnimInst->PickupMontage); break;
+		case EPlayerActionState::Down:   AnimInst->Montage_Play(AnimInst->DownMontage);   break;
+		case EPlayerActionState::Dead:   AnimInst->Montage_Play(AnimInst->DeathMontage);  break;
+		case EPlayerActionState::Revive: AnimInst->Montage_Play(AnimInst->ReviveMontage); break;
+		}
+	}
+	UE_LOG(LogTemp, Warning, TEXT("%d"), (int32)NewState);
+}
 
 //상호작용(소생>줍기)->우선순위
 void ACH4Character::Interact()
 {
-	//플레이어를 살릴 수 있는지 체크
-	if (TryReviveNearbyPlayer())
+	if (!HasAuthority())
 	{
-		return;
+		Server_Interact();
 	}
-
-	//다운된 플레이어가 없으면 아이템 줍기
-	if (TryPickupNearbyItem())
+	else
 	{
-		return;
+		Server_Interact_Implementation();
 	}
-
-	UE_LOG(LogTemp, Warning, TEXT("상호작용 가능한 대상이 없습니다."));
 }
+
+
+void ACH4Character::Server_Interact_Implementation()
+{
+	if (TryReviveNearbyPlayer()) return;
+	if (TryPickupNearbyItem()) return;
+}
+
 
 bool ACH4Character::TryReviveNearbyPlayer()
 {
+	if (HasAuthority()) Multi_PlayAction(EPlayerActionState::Revive);
 	TArray<AActor*> IgnoreActors;
 	IgnoreActors.Add(this);
 
@@ -493,6 +519,7 @@ bool ACH4Character::TryReviveNearbyPlayer()
 
 bool ACH4Character::TryPickupNearbyItem()
 {
+	if (HasAuthority()) Multi_PlayAction(EPlayerActionState::Pickup);
 	TArray<AActor*> IgnoreActors;
 	IgnoreActors.Add(this);
 

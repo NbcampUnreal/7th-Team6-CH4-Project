@@ -19,12 +19,7 @@ public:
 	UPROPERTY(ReplicatedUsing = OnRep_LifeState, BlueprintReadOnly)
 	EPlayerLifeState LifeState = EPlayerLifeState::Alive;
 	
-	UPROPERTY(Replicated)
-	float CurrentHP;
-	
-	UPROPERTY(Replicated)
-	float MaxHP;
-	
+
 	UPROPERTY(Replicated)
 	int32 PlayerReviveCount;
 	
@@ -37,8 +32,6 @@ public:
 
 	void SetLifeState(EPlayerLifeState NewState);
 	
-	UFUNCTION(Server, Reliable)
-	void Server_SetCurrentHP(float Damage);
 	
 	void SetPlayerLifeState(EPlayerLifeState PL);
 };
