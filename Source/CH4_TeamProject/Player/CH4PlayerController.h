@@ -65,10 +65,10 @@ protected:
 	void ShowStartMenu();
 
 	UFUNCTION(BlueprintCallable, Category = "Menu")
-	void ShowGameRule();
+	virtual void ShowGameRule();
 
 	UFUNCTION(BlueprintCallable)
-	void HideCurrentWidget();
+	virtual void HideCurrentWidget();
 	
 	UFUNCTION(BlueprintCallable, Category = "Menu")
 	void ExitGame();
