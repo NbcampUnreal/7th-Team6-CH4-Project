@@ -64,6 +64,10 @@ void ACH4Character::BeginPlay()
 	}
 	GamsState = Cast<ACH4GameState>(GetWorld()->GetGameState());
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->RotationRate = FRotator(0.0f, 720.0f, 0.0f);
+	UpdateRotationMode();
 }
 
 //틱
@@ -71,6 +75,7 @@ void ACH4Character::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	UpdateAimCamera(DeltaTime);//조준 카메라 상태 업데이트
 }
 
 void ACH4Character::OnEquipInput1()
@@ -198,10 +203,15 @@ void ACH4Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	EnhancedInputComponent->BindAction(EquipAction2, ETriggerEvent::Started, this, &ACH4Character::OnEquipInput2);
 	EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this, &ACH4Character::StartSprint);
 	EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &ACH4Character::StopSprint);
+	
+	EnhancedInputComponent->BindAction(FreeLookAction, ETriggerEvent::Started, this, &ACH4Character::StartFreeLook);
+	EnhancedInputComponent->BindAction(FreeLookAction, ETriggerEvent::Completed, this, &ACH4Character::StopFreeLook);
 
 	EnhancedInputComponent->BindAction(HealAction, ETriggerEvent::Started, this, &ACH4Character::OnApplyItemEffect);
 	EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Started, this, &ACH4Character::OnReload);
 
+	EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &ACH4Character::StartAim);
+	EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &ACH4Character::StopAim);
 	EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &ACH4Character::Interact);
 }
 
@@ -255,11 +265,10 @@ void ACH4Character::InitializationCamera()
 	{
 		SpringArm->SetupAttachment(RootComponent);
 
-		SpringArm->TargetArmLength = 470.f;
+		SpringArm->TargetArmLength = DefaultArmLength;
 		SpringArm->TargetOffset = FVector(0.0f, 0.0f, 70.0f);
-		SpringArm->SocketOffset = FVector(0.0f, 25.0f, 20.0f);
+		SpringArm->SocketOffset = DefaultSocketOffset;
 		SpringArm->SetRelativeRotation(FRotator(-10.0f, 0.0f, 0.0f));
-
 
 		SpringArm->bUsePawnControlRotation = true;
 		SpringArm->bDoCollisionTest = true;
@@ -270,9 +279,27 @@ void ACH4Character::InitializationCamera()
 	{
 		Camera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
 		Camera->bUsePawnControlRotation = false;
-		Camera->FieldOfView = 80.0f;
+		Camera->FieldOfView = DefaultFOV;
 	}
 }
+
+//프리룩 사용
+void ACH4Character::StartFreeLook()
+{
+	// 조준 중에는 자유시점 막기
+	if (bIsAiming) return;
+
+	bIsFreeLook = true;
+	UpdateRotationMode();
+}
+
+//프리룩 종료
+void ACH4Character::StopFreeLook()
+{
+	bIsFreeLook = false;
+	UpdateRotationMode();
+}
+
 
 //인풋 
 void ACH4Character::InitializationInput()
@@ -312,6 +339,19 @@ void ACH4Character::InitializationInput()
 	{
 		FireAction = InputFire.Object;
 	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputAim(TEXT("/Script/EnhancedInput.InputAction'/Game/Player/Input/Action/IA_Aim.IA_Aim'"));
+	if (InputAim.Object != nullptr)
+	{
+		AimAction = InputAim.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputFreeLook(TEXT("/Script/EnhancedInput.InputAction'/Game/Player/Input/Action/IA_FreeLook.IA_FreeLook'"));
+	if (InputFreeLook.Object != nullptr)
+	{
+		FreeLookAction = InputFreeLook.Object;
+	}
+
 	static ConstructorHelpers::FObjectFinder<UInputAction> InputEquip(TEXT("/Script/EnhancedInput.InputAction'/Game/Player/Input/Action/IA_Equip.IA_Equip'"));
 	if (InputEquip.Object != nullptr)
 	{
@@ -348,11 +388,22 @@ void ACH4Character::Move(const FInputActionValue& Value)
 	{
 	const FVector2D Movement = Value.Get<FVector2D>();
 
-	const FRotator ControlRot = Controller ? Controller->GetControlRotation() : FRotator::ZeroRotator;
-	const FRotator YawOnly(0.0f, ControlRot.Yaw, 0.0f);
+	FRotator MoveBasisRotation = FRotator::ZeroRotator;
 
-	const FVector Forward = UKismetMathLibrary::GetForwardVector(YawOnly);
-	const FVector Right = UKismetMathLibrary::GetRightVector(YawOnly);
+	if (bIsFreeLook)
+	{
+		//프리룩 중에는 캐릭터가 바라보는 방향 기준으로 이동
+		MoveBasisRotation = FRotator(0.0f, GetActorRotation().Yaw, 0.0f);
+	}
+	else
+	{
+		//평소에는 카메라 방향 기준으로 이동
+		const FRotator ControlRot = Controller ? Controller->GetControlRotation() : FRotator::ZeroRotator;
+		MoveBasisRotation = FRotator(0.0f, ControlRot.Yaw, 0.0f);
+	}
+
+	const FVector Forward = UKismetMathLibrary::GetForwardVector(MoveBasisRotation);
+	const FVector Right = UKismetMathLibrary::GetRightVector(MoveBasisRotation);
 
 	AddMovementInput(Forward, Movement.Y);
 	AddMovementInput(Right, Movement.X);
@@ -379,6 +430,88 @@ void ACH4Character::Look(const FInputActionValue& Value)
 	AddControllerPitchInput(LookAxisVector.Y * GetWorld()->DeltaTimeSeconds * mouseSpeed);
 }
 
+//정조준 시작
+void ACH4Character::StartAim()
+{
+	bIsFreeLook = false;
+	bIsAiming = true;
+
+	if (bIsSprinting)
+	{
+		StopSprint();//뛰는 도중 정조준하면 뛰는거 멈춤
+	}
+	GetCharacterMovement()->MaxWalkSpeed = AimWalkSpeed;//이동속도 줄이기
+	UpdateRotationMode();//회전 방식 바꾸는 함수
+}
+
+//정조준 멈춤
+void ACH4Character::StopAim()
+{
+	bIsAiming = false;
+
+	//뛰는 도중이면 뛰는 속도 유지, 아니면 보통 걸음 속도
+	GetCharacterMovement()->MaxWalkSpeed = bIsSprinting ? SprintSpeed : WalkSpeed;
+	UpdateRotationMode();//일반 회전 방식으로 바뀜
+}
+
+//평소에는 이동방향에 따라 회전, 조준중에 카메라 방향따라 회전 전환하는 함수
+void ACH4Character::UpdateRotationMode()
+{
+	if (bIsAiming)
+	{
+		//조준
+		bUseControllerRotationYaw = true;
+		GetCharacterMovement()->bOrientRotationToMovement = false;
+	}
+	else if (bIsFreeLook)
+	{
+		//자유시점
+		bUseControllerRotationYaw = false;
+		GetCharacterMovement()->bOrientRotationToMovement = false;
+	}
+	else
+	{
+		//기본 상태
+		bUseControllerRotationYaw = true;
+		GetCharacterMovement()->bOrientRotationToMovement = false;
+	}
+}
+
+//카메라 업데이트 (정조준시)카메라 움직이기 위해서
+void ACH4Character::UpdateAimCamera(float DeltaTime)
+{
+	if (!SpringArm || !Camera) return;
+
+	const float TargetArmLength = bIsAiming ? AimArmLength : DefaultArmLength;//조준하고있나? 안하고있나 판단
+	const FVector TargetSocketOffset = bIsAiming ? AimSocketOffset : DefaultSocketOffset;//카메라 오프셋 설정 조준상황에따라서
+	const float TargetFOV = bIsAiming ? AimFOV : DefaultFOV;//시야각 설정
+
+	//카메라 거리바뀔때 부드럽게 바뀌게 
+	SpringArm->TargetArmLength = FMath::FInterpTo(
+		SpringArm->TargetArmLength,//현재카메라 거리
+		TargetArmLength,//목표 카메라 거리
+		DeltaTime,//프레임 시간
+		AimInterpSpeed//카메라 목표 도달 시간
+	);
+
+	//카메라를 거리를 줄이기도하고 옆으로 더 살짝 옮기게 
+	SpringArm->SocketOffset = FMath::VInterpTo(
+		SpringArm->SocketOffset,
+		TargetSocketOffset,
+		DeltaTime,
+		AimInterpSpeed
+	);
+	
+	//시야각도 부드럽게 바꿈
+	Camera->FieldOfView = FMath::FInterpTo(
+		Camera->FieldOfView,
+		TargetFOV,
+		DeltaTime,
+		AimInterpSpeed
+	);
+}
+
+//발사
 void ACH4Character::Fires()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Weapon: %s"),
