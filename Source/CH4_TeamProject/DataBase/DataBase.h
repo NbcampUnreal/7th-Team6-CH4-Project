@@ -19,3 +19,11 @@ enum class EGamePhase : uint8
 	Clear UMETA(DisplayName = "Clear"),
 	Lose UMETA(DisplayName = "Lose")
 };
+
+UENUM(BlueprintType)
+enum class ETeamID : uint8
+{
+	Player = 0,
+	Monster = 1,
+	NoTeam = 255
+};

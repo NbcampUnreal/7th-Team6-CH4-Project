@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GenericTeamAgentInterface.h"
-#include "TeamID.h"
+#include "CH4_TeamProject/DataBase/DataBase.h"
 #include "GameFramework/Character.h"
 #include "ZombieBase.generated.h"
 
@@ -19,6 +19,8 @@ public:
 	virtual void BeginPlay() override;
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 	virtual void OnDeath();
+	
+	virtual FGenericTeamId GetGenericTeamId() const override { return static_cast<uint8>(TeamID); }
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multi_PlayAttackMontage(UAnimMontage* MontageToPlay);
@@ -45,11 +47,14 @@ public:
 	
 	float GetAttack() { return Damage; };
 	
-	//FORCEINLINE ETeamID GetTeamID() const  { return TeamID; }
+	FORCEINLINE ETeamID GetTeamID() const  { return TeamID; }
 	
 	FTimerHandle DestroyTimerHandle;
 	
 protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Team")
+	ETeamID TeamID = ETeamID::Monster;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Montage")
 	UAnimMontage* TakeDamageMontage;
 	

@@ -3,18 +3,22 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "CH4Character.h"
+#include "GenericTeamAgentInterface.h"
 #include "GameFramework/PlayerController.h"
 #include "Components/WidgetComponent.h"
 #include "CH4PlayerController.generated.h"
 
 UCLASS(Abstract)
-class CH4_TEAMPROJECT_API ACH4PlayerController : public APlayerController
+class CH4_TEAMPROJECT_API ACH4PlayerController : public APlayerController, public IGenericTeamAgentInterface
 {
 	GENERATED_BODY()
 
 
 public:
 	ACH4PlayerController();
+	
+	virtual FGenericTeamId GetGenericTeamId() const override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	TSubclassOf<UUserWidget> HUDWidgetClass;
@@ -60,7 +64,9 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-
+	virtual void OnPossess(APawn* InPawn) override;
+	virtual void OnUnPossess() override;
+	
 	UFUNCTION(BlueprintCallable)
 	void ShowStartMenu();
 
@@ -77,6 +83,9 @@ protected:
 	virtual void BeginPlayingState() override;
 
 public:
+	UPROPERTY()
+	TObjectPtr<ACH4Character> ControlledCharacter;
+	
 	UPROPERTY()
 	UUserWidget* CurrentWidget;
 	

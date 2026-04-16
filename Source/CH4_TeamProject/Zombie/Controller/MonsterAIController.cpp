@@ -21,10 +21,22 @@ void AMonsterAIController::BeginPlay()
 	}
 }
 
+FGenericTeamId AMonsterAIController::GetGenericTeamId() const
+{
+	if (IGenericTeamAgentInterface* TeamAgentInterface = Cast<IGenericTeamAgentInterface>(GetPawn()))
+	{
+		return TeamAgentInterface->GetGenericTeamId();
+	}
+	
+	return FGenericTeamId();
+}
+
 void AMonsterAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 {
 	// 블랙보트 컴포넌트 정보 저장
 	UBlackboardComponent* BlackboardComp = GetBlackboardComponent();
+	AActor* CurrentTarget = Cast<AActor>(BlackboardComp->GetValueAsObject(TEXT("TargetActor")));
+	
 	if (BlackboardComp == nullptr)
 	{
 		return;
@@ -32,19 +44,22 @@ void AMonsterAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus 
 
 	if (Stimulus.WasSuccessfullySensed())
 	{
+		GetWorld()->GetTimerManager().ClearTimer(LoseSightTimerHandle);
 		// 감지 범위 안에 들어오면 Blackboard에 타겟 저장
 		BlackboardComp->SetValueAsObject(TEXT("TargetActor"), Actor);
 	}
 	else
 	{
-		// 감지 범위에서 벗어나고 4초 뒤 타겟 정보 삭제
-		GetWorld()->GetTimerManager().SetTimer(
-			LoseSightTimerHandle,
-			this,
-			&AMonsterAIController::ClearTarget,
-			4.0f,
-			false
-		);
+		if (Actor == CurrentTarget)
+		{
+			GetWorld()->GetTimerManager().SetTimer(
+				LoseSightTimerHandle,
+				this,
+				&AMonsterAIController::ClearTarget,
+				4.0f,
+				false
+				);
+		}
 	}
 }
 
@@ -53,10 +68,19 @@ void AMonsterAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 	
+	ControlledCharacter = Cast<AZombieBase>(InPawn);
+	
 	if (BehaviorTreeAsset)
 	{
 		RunBehaviorTree(BehaviorTreeAsset);
 	}
+}
+
+void AMonsterAIController::OnUnPossess()
+{
+	Super::OnUnPossess();
+	
+	ControlledCharacter = nullptr;
 }
 
 // 감지 범위에서 벗어나면 타겟 정보 삭제하는 함수

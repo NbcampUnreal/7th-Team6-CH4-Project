@@ -1,19 +1,19 @@
-#include "NormalZombie.h"
+#include "RunnerZombie.h"
 
-ANormalZombie::ANormalZombie()
+ARunnerZombie::ARunnerZombie()
 {
 	MaxHP = 100;
 	CurrentHP = MaxHP;
-	MoveSpeed = 100.f;
+	MoveSpeed = 200.f;
 	Damage = 30.f;
 }
 
-void ANormalZombie::BeginPlay()
+void ARunnerZombie::BeginPlay()
 {
 	Super::BeginPlay();
 }
 
-float ANormalZombie::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+float ARunnerZombie::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	
@@ -26,7 +26,7 @@ float ANormalZombie::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	return ActualDamage;
 }
 
-void ANormalZombie::OnDeath()
+void ARunnerZombie::OnDeath()
 {
 	Super::OnDeath();
 }
