@@ -3,16 +3,18 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GenericTeamAgentInterface.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
+#include "CH4_TeamProject/DataBase/DataBase.h"
 #include "CH4_TeamProject/Player/PlayerAnimInstance.h"
 #include "CH4Character.generated.h"
-
 class UEquippableComponent;
 class UPlayerAnimInstance;
 class ACH4GameState;
+
 UCLASS()
-class CH4_TEAMPROJECT_API ACH4Character : public ACharacter
+class CH4_TEAMPROJECT_API ACH4Character : public ACharacter, public IGenericTeamAgentInterface
 {
 	GENERATED_BODY()
 
@@ -20,12 +22,15 @@ public:
 
 	ACH4Character();
 
+	virtual FGenericTeamId GetGenericTeamId() const override { return static_cast<uint8>(TeamID); }
+	
 protected:
 
 	virtual void BeginPlay() override;
 
 public:
-
+	FORCEINLINE ETeamID GetTeamID() const { return TeamID; }
+	
 	virtual void Tick(float DeltaTime) override;
 
 
@@ -54,7 +59,11 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void Server_Interact();
+	
 protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Team")
+	ETeamID TeamID = ETeamID::Player;
+	
 	//카메라쪽
 	UPROPERTY(EditAnywhere)
 	class USpringArmComponent* SpringArm;

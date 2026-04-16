@@ -13,6 +13,11 @@ ACH4PlayerController::ACH4PlayerController()
 	bShowMouseCursor = true;
 }
 
+FGenericTeamId ACH4PlayerController::GetGenericTeamId() const
+{
+	return ControlledCharacter ? ControlledCharacter->GetGenericTeamId() : FGenericTeamId();
+}
+
 void ACH4PlayerController::BeginPlay()
 {
 	if (IsLocalController())
@@ -24,6 +29,20 @@ void ACH4PlayerController::BeginPlay()
 	
 	// TODO: 시작 시 어떤 메뉴를 먼저 띄울지 함수 호출 위치 결정
 	// ShowStartMenu();
+}
+
+void ACH4PlayerController::OnPossess(APawn* InPawn)
+{
+	Super::OnPossess(InPawn);
+	
+	ControlledCharacter = Cast<ACH4Character>(InPawn);
+}
+
+void ACH4PlayerController::OnUnPossess()
+{
+	Super::OnUnPossess();
+	
+	ControlledCharacter = nullptr;
 }
 
 void ACH4PlayerController::BeginPlayingState()
