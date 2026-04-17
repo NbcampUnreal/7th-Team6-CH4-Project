@@ -18,6 +18,8 @@
 #include "CH4_TeamProject/Game/CH4GameState.h"
 #include "CH4_TeamProject/Item/Consumable/ConsumableDataAsset.h"
 #include "CH4_TeamProject/Item/Consumable/GearItem.h"
+#include "Net/UnrealNetwork.h"
+#include "../Item/Equippable/Ranged Weapon/RangedWeaponDataAsset.h"
 #include "CH4_TeamProject/Item/Equippable/Equippable.h"
 #include "CH4_TeamProject/Item/ThorwbleItem/ThorwbleItems.h"
 #include "GameFramework/ProjectileMovementComponent.h"
@@ -103,6 +105,7 @@ void ACH4Character::OnEquipInput1()
 	{
 		EquippableComponent->EquipWeapon(PrimaryWeaponData1);
 		UE_LOG(LogTemp, Warning, TEXT("장착 성공! 서버 함수 호출함."));
+		UpdateCombatPose();
 	}
 }
 
@@ -690,6 +693,12 @@ bool ACH4Character::TryPickupNearbyItem()
 	return false;
 }
 
+
+void ACH4Character::OnRep_CombatPose()
+{
+	UE_LOG(LogTemp, Warning, TEXT("CombatPose changed: %d"), (int32)CurrentCombatPose);
+}
+
 void ACH4Character::ApplyItemEffect(UConsumableDataAsset* Data)
 {
 	if (!Data) 
@@ -806,8 +815,27 @@ void ACH4Character::OnThrowGrenade()
 void ACH4Character::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(ACH4Character, HealItemCount);
+
+	DOREPLIFETIME(ACH4Character, CurrentCombatPose);
+  DOREPLIFETIME(ACH4Character, HealItemCount);
 	DOREPLIFETIME(ACH4Character, GrenadeCount);
+}
+
+//애니매이션 업데이트
+void ACH4Character::UpdateCombatPose()
+{
+	if (!EquippableComponent || !EquippableComponent->CurrentWeapon)
+	{
+		CurrentCombatPose = ECombatPose::Normal;
+		return;
+	}
+
+	URangedGunDataAsset* Data = EquippableComponent->CurrentWeapon->GetGunDataAsset();
+
+	if (Data)
+	{
+		CurrentCombatPose = Data->CombatPose;
+	}
 }
 
 void ACH4Character::Server_UseHealItem_Implementation()

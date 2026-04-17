@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -38,9 +38,7 @@ public:
     
 	virtual void Attack() ;
 	virtual void Attack_Implementation_Internal() override;
-    
-    
-
+  
 	virtual void Reload_Implementation_Internal() override;
     
 	UPROPERTY(ReplicatedUsing = OnRep_FireReady)
@@ -48,18 +46,17 @@ public:
     
 	virtual void AddMaxClip(int32 AmmoItem )override;
     
-
-    
 protected:  
 	virtual void BeginPlay() override;
-    
-    
-    
+  
 	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_PlayEffects(FVector TraceStart, FVector TraceEnd, bool bHit);
     
 	void TraceShoot();
-
+	
+	UPROPERTY(EditAnywhere,Category="DataAsset")
+	URangedGunDataAsset* GunDataAsset;
+  
 	virtual int32 GetMaxAmmo()const override;
 	virtual int32 GetMaxClip() const override;
     
@@ -71,4 +68,17 @@ protected:
 	void OnRep_FireReady(); 
     
 	void ResetCoolTime();
+	
+public:
+
+	UFUNCTION(BlueprintCallable)
+	URangedGunDataAsset* GetGunDataAsset() const
+	{
+		return GunDataAsset;
+	}
+
+	void SetGunDataAsset(URangedGunDataAsset* InDataAsset)
+	{
+		GunDataAsset = InDataAsset;
+	}
 };

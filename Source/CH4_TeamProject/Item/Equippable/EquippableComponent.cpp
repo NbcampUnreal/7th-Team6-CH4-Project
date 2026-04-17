@@ -73,6 +73,11 @@ void UEquippableComponent::EquipWeapon_Implementation(UWeaponData* NewWeaponData
 	 GetOwner()->GetActorLocation(),
 	 GetOwner()->GetActorRotation(),
 	 SpawnActor);
+
+	if (CurrentWeapon)
+	{
+		CurrentWeapon->SetGunDataAsset(WeaponData);
+	}
 	
 	CurrentWeapon->WeaponData = NewWeaponData;
 	if (CurrentWeapon)

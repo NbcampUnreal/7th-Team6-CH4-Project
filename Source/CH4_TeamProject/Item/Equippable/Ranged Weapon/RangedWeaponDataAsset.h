@@ -1,9 +1,11 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "UObject/PrimaryAssetId.h"
+#include "Engine/DataAsset.h"
+#include "CH4_TeamProject/DataBase/DataBase.h"
 #include "../WeaponData.h"
 #include "RangedWeaponDataAsset.generated.h"
 
@@ -28,6 +30,11 @@ public:
 	
 	virtual int32 GetMaxAmmo() const override { return MaxAmmo; }
 	
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Equip_Gun_Weapon")
+	TSubclassOf<class ARangedWeapons> WeaponClass;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Animation")
+	ECombatPose CombatPose = ECombatPose::Rifle;
 	virtual float GetRangedLength() const override { return RangedLength; }
 	
 	virtual float GetFireRate() const override { return FireRate; }
