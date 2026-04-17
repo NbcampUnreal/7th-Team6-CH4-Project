@@ -34,4 +34,13 @@ public:
 	virtual float GetRangedLength() const { return 0.0f; }
 	
 	virtual float GetFireRate() const { return 0.0f; }
+	
+	UPROPERTY(EditAnywhere, Category = "Effects")
+	class USoundBase* FireSound; 
+
+	UPROPERTY(EditAnywhere, Category = "Effects")
+	class UParticleSystem* MuzzleFlash; 
+
+	UPROPERTY(EditAnywhere, Category = "Effects")
+	class UParticleSystem* ImpactEffect;
 };

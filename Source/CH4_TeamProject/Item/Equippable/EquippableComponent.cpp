@@ -40,6 +40,7 @@ void UEquippableComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(UEquippableComponent, CurrentWeapon);
+	DOREPLIFETIME(UEquippableComponent, UsingWeapon); 
 }
 
 void UEquippableComponent::EquipWeapon_Implementation(UWeaponData* NewWeaponData)

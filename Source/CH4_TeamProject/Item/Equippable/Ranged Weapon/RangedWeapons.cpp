@@ -124,6 +124,19 @@ void ARangedWeapons::Multicast_PlayEffects_Implementation(FVector TraceStart, FV
        0,
        2.0f
     );
+	//사운드 재생
+	if (DataAsset->FireSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, WeaponData->FireSound, TraceStart);
+	}
+	if (WeaponData->MuzzleFlash)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), WeaponData->MuzzleFlash, TraceStart);
+	}
+	if (bHit && WeaponData->ImpactEffect)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), WeaponData->ImpactEffect, TraceEnd);
+	}
 }
 // 시작점
 void ARangedWeapons::Attack()
