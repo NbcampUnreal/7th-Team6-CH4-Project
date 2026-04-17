@@ -4,10 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "Ranged Weapon/RangedWeapons.h"
 #include "EquippableComponent.generated.h"
 
-
+class AEquippable;
+class URangedGunDataAsset;
+class UMeleeWeaponData;
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class CH4_TEAMPROJECT_API UEquippableComponent : public UActorComponent
 {
@@ -18,15 +19,16 @@ public:
 	UEquippableComponent();
 	// 데이터 에셋몇개든 관리할함수
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	TMap<int32,class URangedGunDataAsset*> DataAsset;
-
+	TMap<int32, UPrimaryDataAsset*> AllWeaponDataAsset;
+	
+	
 	//장비 장착함수
 	UFUNCTION(BlueprintCallable,Server,Reliable)
-	void EquipWeapon(URangedGunDataAsset* WeaponClass);
+	void EquipWeapon(class UWeaponData* WeaponClass);
 
 	//착용중인 무기
 	UPROPERTY(Replicated)
-	TObjectPtr<ARangedWeapons> CurrentWeapon;
+	TObjectPtr<AEquippable> CurrentWeapon;
 	
 	// 컴포넌트에서 발사
 	void Fire();
@@ -39,7 +41,7 @@ public:
 	
 	//기억할 총알갯수
 	UPROPERTY()
-	TMap<TSubclassOf<ARangedWeapons>, int32> WeaponAmmoMemory;
+	TMap<TSubclassOf<AEquippable>, int32> WeaponAmmoMemory;
 
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	FTransform GetLeftHandSocketTransform() const;

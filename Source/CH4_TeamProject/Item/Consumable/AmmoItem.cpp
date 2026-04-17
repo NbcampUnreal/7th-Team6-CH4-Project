@@ -2,7 +2,10 @@
 
 
 #include "AmmoItem.h"
+
+#include "ConsumableDataAsset.h"
 #include "../Equippable/Ranged Weapon/RangedWeapons.h"
+#include "CH4_TeamProject/Item/Equippable/WeaponData.h"
 #include "CH4_TeamProject/Player/CH4Character.h"
 
 // Sets default values
@@ -16,6 +19,7 @@ AAmmoItem::AAmmoItem()
 void AAmmoItem::BeginPlay()
 {
 	Super::BeginPlay();
+	DataAsset->Type = EEffectType::Ammo;
 }
 
 // Called every frame
@@ -36,10 +40,10 @@ void AAmmoItem::NotifyActorBeginOverlap(AActor* OtherActor)
 
 		for (AActor* Actor : AttachedActors)
 		{
-			ARangedWeapons* FoundWeapon = Cast<ARangedWeapons>(Actor);
+			AEquippable* FoundWeapon = Cast<ARangedWeapons>(Actor);
 			if (FoundWeapon)
 			{
-				FoundWeapon->AddMaxClip(AmmoItem);
+				FoundWeapon->AddMaxClip(DataAsset->Value);
                 
 				UE_LOG(LogTemp, Warning, TEXT("야후: 플레이어는 몰랐지만 무기를 찾아내서 충전 완료!%d:총알"),FoundWeapon->GetMaxClip());
 				Destroy();

@@ -6,7 +6,7 @@
 #include "../Equippable.h"
 #include "RangedWeapons.generated.h"
 
-class URangedGunDataAsset;
+class UWeaponData;
 UCLASS()
 class CH4_TEAMPROJECT_API ARangedWeapons : public AEquippable
 {
@@ -40,43 +40,38 @@ public:
 	
 	int32 GetMaxAmmo () const;
 	
-	int32 GetMaxClip()const
-	{
-		return MaxClip;
-	}
 	virtual void Tick(float DeltaTime) override;
 	
-	UFUNCTION(BlueprintCallable)
-	virtual void Fire();
+	UFUNCTION()
+	virtual void Attack_Implementation() ;
 	
-	UPROPERTY(Replicated)
-	int32 CurrentAmmo;
+	virtual void Attack() ;
+	virtual void Attack_Implementation_Internal() override;
 	
-	void SetCurrentAmmo();
+	
 
+	virtual void Reload_Implementation_Internal() override;
+	
 	UPROPERTY(ReplicatedUsing = OnRep_FireReady)
 	bool bIsCoolingDown= false;
-	void AddMaxClip(int32 AmmoItem);
-	UFUNCTION(Server, Reliable, WithValidation)
-	void Server_ReLoad();
-protected:
+	
+	virtual void AddMaxClip(int32 AmmoItem )override;
+	
+
+	
+protected:	
 	virtual void BeginPlay() override;
 	
-	UPROPERTY(Replicated)
-	int32 MaxClip = 300;
 	
-	UFUNCTION(Server, Reliable, WithValidation)
-	void Server_Fire();
 	
 	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_PlayEffects(FVector TraceStart, FVector TraceEnd, bool bHit);
-
+	
 	void TraceShoot();
+
+	virtual int32 GetMaxAmmo()const override;
+	virtual int32 GetMaxClip() const override;
 	
-	UPROPERTY(EditAnywhere,Category="DataAsset")
-	URangedGunDataAsset* GunDataAsset;
-	
-		
 	void ProcessReload();
 	
 	
@@ -85,7 +80,4 @@ protected:
 	void OnRep_FireReady(); 
 	
 	void ResetCoolTime();
-	
-	
-	
 };

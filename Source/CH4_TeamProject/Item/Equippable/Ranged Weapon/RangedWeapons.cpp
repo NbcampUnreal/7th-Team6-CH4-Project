@@ -5,7 +5,6 @@
 #include "Components/StaticMeshComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "RangedWeaponDataAsset.h"
-#include "GameFramework/Character.h"
 #include "Net/UnrealNetwork.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "Perception/AISense_Hearing.h"
@@ -41,7 +40,7 @@ void ARangedWeapons::ProcessDamage(AActor* TargetActor)
 		// 중요: ApplyDamage를 호출하면 피격자의 TakeDamage가 서버에서 자동 호출됨
 		UGameplayStatics::ApplyDamage(
 			TargetActor,           
-			GunDataAsset->Damage,          
+			WeaponData->Damage,          
 			GetInstigatorController(), 
 			this,                  
 			UDamageType::StaticClass() 
@@ -55,21 +54,22 @@ void ARangedWeapons::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	DOREPLIFETIME(ARangedWeapons, CurrentAmmo);
 	DOREPLIFETIME(ARangedWeapons, MaxClip); 
 	DOREPLIFETIME(ARangedWeapons, bIsCoolingDown); 
-	
 }
 
-void ARangedWeapons::SetCurrentAmmo()
-{
-	if (GunDataAsset)
-	{
-		CurrentAmmo = GunDataAsset->MaxAmmo;
-	}
-}
 
 void ARangedWeapons::BeginPlay()
 {
 	Super::BeginPlay();
-	CurrentAmmo = GunDataAsset->MaxAmmo;
+	if (WeaponData)
+	{
+		//CurrentAmmo = Data->GetMaxAmmo();
+		CurrentAmmo =WeaponData->GetMaxAmmo();
+    
+		UE_LOG(LogTemp, Warning, TEXT("MaxAmmo: %d"),WeaponData-> GetMaxAmmo());
+		UE_LOG(LogTemp, Warning, TEXT("CurrentAmmo: %d"), CurrentAmmo);
+		UE_LOG(LogTemp, Warning, TEXT("GetMaxAmmo(): %d"), GetMaxAmmo());
+	}
+	else{UE_LOG(LogTemp, Warning, TEXT("데이터 없다")) }
 }
 
 // Called every frame
@@ -121,9 +121,10 @@ void ARangedWeapons::Server_Fire_Implementation()
 }
 
 bool ARangedWeapons::Server_Fire_Validate()
+void ARangedWeapons::Attack_Implementation_Internal()
 {
-	//  여기서 펄스면 팅김
-	return true;
+	GEngine->AddOnScreenDebugMessage(-1,10,FColor::Red,FString(TEXT("자식 호출됨")),true);
+	Attack();
 }
 
 void ARangedWeapons::Multicast_PlayEffects_Implementation(FVector TraceStart, FVector TraceEnd, bool bHit)
@@ -143,12 +144,12 @@ void ARangedWeapons::Multicast_PlayEffects_Implementation(FVector TraceStart, FV
 	);
 }
 // 시작점
-void ARangedWeapons::Fire()
+void ARangedWeapons::Attack()
 {
 	UE_LOG(LogTemp, Error, TEXT("무조건 찍혀야 하는 로그!"));
 	if (bIsCoolingDown || CurrentAmmo <= 0)
 	{
-		UE_LOG(LogTemp, Error, TEXT("총알이 부족해 혹은 딜레이중이야"));
+		UE_LOG(LogTemp, Error, TEXT("총알이 부족해 혹은 딜레이중이야 현재 총알 :%d"), CurrentAmmo);
 		return;
 	}
 	if (GetOwner() == nullptr)
@@ -157,8 +158,9 @@ void ARangedWeapons::Fire()
 		return;
 	}
 	UE_LOG(LogTemp, Warning, TEXT("1. Fire Called on Client"));
-	Server_Fire();	
+	Attack_Implementation();
 }
+
 
 void ARangedWeapons::ProcessReload()
 {
@@ -166,38 +168,23 @@ void ARangedWeapons::ProcessReload()
 	{
 		return;
 	}
-	if (!GunDataAsset || CurrentAmmo >= GunDataAsset->MaxAmmo) return;
+	if (!WeaponData || CurrentAmmo >= WeaponData->GetMaxAmmo()) return;
 	if (MaxClip <= 0){ return; }
-	int32 AmmoNeeded = GunDataAsset->MaxAmmo - CurrentAmmo;
+	int32 AmmoNeeded = WeaponData->GetMaxAmmo() - CurrentAmmo;
 	int32 AmmoToFill = FMath::Min(AmmoNeeded, MaxClip);
-	
-	if (HasAuthority()&&GunDataAsset)
+		
+	if (HasAuthority()&&WeaponData)
 	{
 		CurrentAmmo += AmmoToFill;
 		MaxClip -= AmmoToFill;
 	}
 }
 
-void ARangedWeapons::Server_ReLoad_Implementation()
-{
-	if (MaxClip <= 0)
-	{
-		return;
-	}
-	ProcessReload();
-}
-
-bool ARangedWeapons::Server_ReLoad_Validate()
-{
-	UE_LOG(LogTemp,Error,TEXT("장전 서버진입성공 남은 총알갯수%d"), MaxClip)
-	return true;
-}
-
 void ARangedWeapons::TraceShoot()
 {
 	// 서버 권한이 없으면 실행하지 않음 (이중 보안)
-	if (!HasAuthority()) return;
-	
+	if (!HasAuthority()){  UE_LOG(LogTemp,Error,TEXT("서버가 아님"))return;}
+	if (!WeaponData){UE_LOG(LogTemp,Error,TEXT(" 데이터가 유효하지않음 "))return;}
 	APlayerController* PC = Cast<APlayerController>(GetInstigatorController());
 	if (!PC){return;}
 	
@@ -206,8 +193,9 @@ void ARangedWeapons::TraceShoot()
 	
 	PC->GetPlayerViewPoint(StartLocation,ViewRotation);
 	
+	
 	StartLocation = GetActorLocation();
-	FVector EndLocation = StartLocation + (ViewRotation.Vector() * GunDataAsset->RangedLength);
+	FVector EndLocation = StartLocation + (ViewRotation.Vector() * WeaponData->GetRangedLength());
 	
 	FHitResult Hit;
 	FCollisionQueryParams Params;
@@ -230,14 +218,20 @@ void ARangedWeapons::TraceShoot()
 	}
 
 }
-
+// 데이터 에셋에서 최대 장전 발수
 int32 ARangedWeapons::GetMaxAmmo () const
 {
-	if (GunDataAsset)
+	if (WeaponData)
 	{
-		return GunDataAsset->MaxAmmo;
+		return WeaponData->GetMaxAmmo();
 	}
 	return 0;
+}
+
+// 현재 최대들고있는 총알갯수
+int32 ARangedWeapons::GetMaxClip() const
+{
+	return MaxClip;
 }
 
 void ARangedWeapons::OnRep_FireReady() 
@@ -260,3 +254,54 @@ void ARangedWeapons::AddMaxClip(int32 AmmoItem)
 	}
 	MaxClip += AmmoItem; 
 }
+
+
+void ARangedWeapons::Reload_Implementation_Internal()
+{
+	if (MaxClip <= 0)
+	{
+		UE_LOG(LogTemp, Error, TEXT("MaxClip 없어서 리턴됨")) // ← 추가
+		return;
+	}
+	ProcessReload();
+	UE_LOG(LogTemp, Error, TEXT(" 자식 장전 호출됨"))
+}
+
+void ARangedWeapons::Attack_Implementation()
+{
+	if (!WeaponData)
+	{
+		UE_LOG(LogTemp, Error, TEXT(" 데이터 유호하지않음")) 
+		return;
+	}
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Server_Fire 실행됨!"));
+    
+	
+	if(	bIsCoolingDown || CurrentAmmo <= 0)
+	{
+		GEngine->AddOnScreenDebugMessage(1, 1.f, FColor::Red,FString::Printf(TEXT("총알이없습니다")));
+		return;
+	}
+	bIsCoolingDown =true;
+	TraceShoot();
+	if (CurrentAmmo >0)
+	{
+		CurrentAmmo --;
+	}
+	GEngine->AddOnScreenDebugMessage(-1,
+		10,FColor::Red,
+		FString::Printf(
+			TEXT("남은 총알 %d"),CurrentAmmo)
+		,false);
+	// 총알 감소및
+	// 쿨타임 초기화 등등
+	GetWorldTimerManager().SetTimer
+	(TimerHandle_FireDelay,
+	this,
+	&ARangedWeapons::ResetCoolTime, 
+	WeaponData->GetFireRate(), 
+	false);
+}
+
+
+
