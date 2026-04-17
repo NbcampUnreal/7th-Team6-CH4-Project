@@ -1,10 +1,12 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "../BaseItem.h"
+#include "../../DataBase/DataBase.h"
 #include "Equippable.generated.h"
+
 
 UCLASS()
 class CH4_TEAMPROJECT_API AEquippable : public ABaseItem
@@ -64,4 +66,8 @@ public:
 	class UWeaponData* DataAsset;
 	
 	virtual void SetCurrentAmmo();
+
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Animation")
+	ECombatPose CombatPose = ECombatPose::Rifle;
 };
