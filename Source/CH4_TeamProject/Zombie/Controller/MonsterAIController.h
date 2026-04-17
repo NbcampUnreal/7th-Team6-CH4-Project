@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "CH4_TeamProject/Zombie/ZombieBase.h"
 #include "AIController.h"
 #include "MonsterAIController.generated.h"
 
@@ -11,13 +12,20 @@ class CH4_TEAMPROJECT_API AMonsterAIController : public AAIController
 	
 public:
 	AMonsterAIController();
+	
 	void BeginPlay();
 
+	virtual FGenericTeamId GetGenericTeamId() const override;
+	
+	UPROPERTY()
+	TObjectPtr<AZombieBase> ControlledCharacter;
+	
 protected:
 	UFUNCTION()
 	void OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);
 	
 	virtual void OnPossess(APawn* InPawn) override;
+	virtual void OnUnPossess() override;
 	void ClearTarget();
 
 	UPROPERTY(EditDefaultsOnly, Category = "AI")

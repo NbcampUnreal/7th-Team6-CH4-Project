@@ -1,6 +1,6 @@
 #include "ZombieAttackAnimNotify.h"
-#include "Zombie/ZombieBase.h"
-#include "Player/CH4Character.h"
+#include "CH4_TeamProject/Player/CH4Character.h"
+#include "ZombieBase.h"
 #include "GenericTeamAgentInterface.h"
 #include "DrawDebugHelpers.h"
 #include "Engine/OverlapResult.h"
