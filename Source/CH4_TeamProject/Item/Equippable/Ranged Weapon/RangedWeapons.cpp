@@ -6,6 +6,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "RangedWeaponDataAsset.h"
 #include "Net/UnrealNetwork.h"
+#include "Perception/AIPerceptionStimuliSourceComponent.h"
+#include "Perception/AISense_Hearing.h"
 
 // Sets default values
 ARangedWeapons::ARangedWeapons()
@@ -14,6 +16,8 @@ ARangedWeapons::ARangedWeapons()
 	bReplicates = true;
 	
 	PrimaryActorTick.bCanEverTick = false;
+	
+	StimuliSource = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("StimuliSource"));
 }
 
 void ARangedWeapons::Server_ApplyDamageToTarget_Implementation(AActor* TargetActor)
@@ -77,6 +81,46 @@ void ARangedWeapons::Tick(float DeltaTime)
 	}
 }
 
+void ARangedWeapons::Server_Fire_Implementation()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Server_Fire 실행됨!"));
+	if(	bIsCoolingDown || CurrentAmmo <= 0)
+	{
+		GEngine->AddOnScreenDebugMessage(1, 1.f, FColor::Red,FString::Printf(TEXT("총알이없습니다")));
+		return;
+	}
+	bIsCoolingDown =true;
+	TraceShoot();
+	if (CurrentAmmo >0)
+	{
+		CurrentAmmo --;
+	}
+	
+	UAISense_Hearing::ReportNoiseEvent(
+		GetWorld(),
+		GetActorLocation(),
+		1.0f, // Loudness
+		this,
+		0.f,
+		NAME_None
+		);
+	
+	GEngine->AddOnScreenDebugMessage(-1,
+		10,FColor::Red,
+		FString::Printf(
+			TEXT("남은 총알 %d"),CurrentAmmo)
+		,false);
+	// 총알 감소및
+	// 쿨타임 초기화 등등
+	GetWorldTimerManager().SetTimer
+	(TimerHandle_FireDelay,
+	this,
+	&ARangedWeapons::ResetCoolTime, 
+	GunDataAsset->FireRate, 
+	false);
+}
+
+bool ARangedWeapons::Server_Fire_Validate()
 void ARangedWeapons::Attack_Implementation_Internal()
 {
 	GEngine->AddOnScreenDebugMessage(-1,10,FColor::Red,FString(TEXT("자식 호출됨")),true);

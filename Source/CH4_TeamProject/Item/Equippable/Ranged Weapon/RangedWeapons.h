@@ -27,6 +27,18 @@ public:
 	void Server_ApplyDamageToTarget(AActor* TargetActor);
 	
 	void ProcessDamage(AActor* TargetActor);
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon|Mesh")
+	TObjectPtr<UStaticMeshComponent> WeaponMesh;
+	
+	UPROPERTY(VisibleAnywhere, Category = "AI")
+	class UAIPerceptionStimuliSourceComponent* StimuliSource;
+
+	int32 GetCurrentAmmo ()const
+	{
+		return CurrentAmmo; 
+	} 
+	
+	int32 GetMaxAmmo () const;
 	
 	virtual void Tick(float DeltaTime) override;
 	
