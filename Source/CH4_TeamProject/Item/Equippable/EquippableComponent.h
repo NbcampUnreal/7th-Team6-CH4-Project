@@ -36,7 +36,7 @@ public:
 	void Reload();
 	
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite,Replicated)
 	bool UsingWeapon = false;
 	
 	//기억할 총알갯수

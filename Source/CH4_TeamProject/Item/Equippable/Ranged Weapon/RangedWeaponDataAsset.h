@@ -31,5 +31,7 @@ public:
 	virtual float GetRangedLength() const override { return RangedLength; }
 	
 	virtual float GetFireRate() const override { return FireRate; }
+	
+	
 };
 	 
