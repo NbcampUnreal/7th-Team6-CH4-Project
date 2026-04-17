@@ -2,6 +2,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "CH4_TeamProject/Zombie/ZombieBase.h"
 #include "Perception/AIPerceptionComponent.h"
+#include "Perception/AISense_Damage.h"
 #include "Perception/AISense_Hearing.h"
 
 AMonsterAIController::AMonsterAIController()
@@ -45,7 +46,7 @@ void AMonsterAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus 
 
 	if (Stimulus.WasSuccessfullySensed())
 	{
-		GetWorld()->GetTimerManager().ClearTimer(LoseSightTimerHandle);
+		GetWorld()->GetTimerManager().ClearTimer(LoseSightTargetTimerHandle);
 		// 감지 범위 안에 들어오면 Blackboard에 타겟 저장
 		BlackboardComp->SetValueAsObject(TEXT("TargetActor"), Actor);
 	}
@@ -54,10 +55,18 @@ void AMonsterAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus 
 		if (Actor == CurrentTarget)
 		{
 			GetWorld()->GetTimerManager().SetTimer(
-				LoseSightTimerHandle,
+				LoseSightTargetTimerHandle,
 				this,
-				&AMonsterAIController::ClearTarget,
+				&AMonsterAIController::ClearSightTarget,
 				4.0f,
+				false
+				);
+			
+			GetWorld()->GetTimerManager().SetTimer(
+				LoseAttackTargetTimerHandle,
+				this,
+				&AMonsterAIController::ClearAttackTarget,
+				8.0f,
 				false
 				);
 		}
@@ -68,11 +77,22 @@ void AMonsterAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus 
 		// 소리를 들었다 → 소리 위치로 조사
 		if (Stimulus.WasSuccessfullySensed())
 		{
-			GetWorld()->GetTimerManager().ClearTimer(LoseSightTimerHandle);
-			GetBlackboardComponent()->SetValueAsVector(
-				TEXT("HearingLocation"), Stimulus.StimulusLocation);
+			GetWorld()->GetTimerManager().ClearTimer(LoseSightTargetTimerHandle);
+			BlackboardComp->SetValueAsVector(TEXT("HearingLocation"), Stimulus.StimulusLocation);
 		}
 		return;
+	}
+	
+	if (Stimulus.Type == UAISense::GetSenseID<UAISense_Damage>())
+	{
+		if (Stimulus.WasSuccessfullySensed())
+		{
+			GetWorld()->GetTimerManager().ClearTimer(LoseSightTargetTimerHandle);
+			GetWorld()->GetTimerManager().ClearTimer(LoseAttackTargetTimerHandle);
+			
+			BlackboardComp->SetValueAsObject(TEXT("TargetActor"), Actor);
+			BlackboardComp->SetValueAsObject(TEXT("AttackActor"), Actor);
+		}
 	}
 }
 
@@ -97,11 +117,20 @@ void AMonsterAIController::OnUnPossess()
 }
 
 // 감지 범위에서 벗어나면 타겟 정보 삭제하는 함수
-void AMonsterAIController::ClearTarget()
+void AMonsterAIController::ClearSightTarget()
 {
 	UBlackboardComponent* BlackboardComp = GetBlackboardComponent();
 	if (BlackboardComp)
 	{
 		BlackboardComp->ClearValue(TEXT("TargetActor"));
+	}
+}
+
+void AMonsterAIController::ClearAttackTarget()
+{
+	UBlackboardComponent* BlackboardComp = GetBlackboardComponent();
+	if (BlackboardComp)
+	{
+		BlackboardComp->ClearValue(TEXT("AttackActor"));
 	}
 }
