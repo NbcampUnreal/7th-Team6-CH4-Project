@@ -219,7 +219,7 @@ public:
 
 	//장비 장착 컴포넌트
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TObjectPtr<UEquippableComponent> EquippableComponent;
+	TObjectPtr<class UEquippableComponent> EquippableComponent;
 
 	UFUNCTION(BlueprintCallable)
 	void Fires();
@@ -285,7 +285,7 @@ public:
 	
 	void OnThrowGrenade();
 	
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	
 	
 	UPROPERTY()
 	FTimerHandle ExplosionTimerHandle;

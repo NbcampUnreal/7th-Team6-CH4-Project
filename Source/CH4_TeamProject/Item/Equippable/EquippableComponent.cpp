@@ -77,7 +77,7 @@ void UEquippableComponent::EquipWeapon_Implementation(UWeaponData* NewWeaponData
 
 	if (CurrentWeapon)
 	{
-		CurrentWeapon->SetGunDataAsset(WeaponData);
+		CurrentWeapon->WeaponData->SetGunDataAsset(NewWeaponData->GetGunDataAsset());
 	}
 	
 	CurrentWeapon->WeaponData = NewWeaponData;
