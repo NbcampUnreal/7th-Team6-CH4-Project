@@ -7,6 +7,8 @@
 #include "RangedWeapons.generated.h"
 
 class UWeaponData;
+
+
 UCLASS()
 class CH4_TEAMPROJECT_API ARangedWeapons : public AEquippable
 {
@@ -56,7 +58,7 @@ protected:
 	void TraceShoot();
 	
 	UPROPERTY(EditAnywhere,Category="DataAsset")
-	URangedGunDataAsset* GunDataAsset;
+	UWeaponData* GunDataAsset;
   
 	virtual int32 GetMaxAmmo()const override;
 	virtual int32 GetMaxClip() const override;
@@ -69,17 +71,5 @@ protected:
 	void OnRep_FireReady(); 
     
 	void ResetCoolTime();
-	
-public:
 
-	UFUNCTION(BlueprintCallable)
-	URangedGunDataAsset* GetGunDataAsset() const
-	{
-		return GunDataAsset;
-	}
-
-	void SetGunDataAsset(URangedGunDataAsset* InDataAsset)
-	{
-		GunDataAsset = InDataAsset;
-	}
 };

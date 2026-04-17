@@ -31,10 +31,8 @@ public:
 	virtual int32 GetMaxAmmo() const override { return MaxAmmo; }
 	
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Equip_Gun_Weapon")
-	TSubclassOf<class ARangedWeapons> WeaponClass;
+	TSubclassOf<class ARangedWeapons> GunWeaponClass;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Animation")
-	ECombatPose CombatPose = ECombatPose::Rifle;
 	virtual float GetRangedLength() const override { return RangedLength; }
 	
 	virtual float GetFireRate() const override { return FireRate; }

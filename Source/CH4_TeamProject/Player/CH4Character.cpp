@@ -830,12 +830,11 @@ void ACH4Character::UpdateCombatPose()
 		return;
 	}
 
-	URangedGunDataAsset* Data = EquippableComponent->CurrentWeapon->GetGunDataAsset();
+	ECombatPose Data = EquippableComponent->CurrentWeapon->WeaponData->GetGunDataAsset();
 
-	if (Data)
-	{
-		CurrentCombatPose = Data->CombatPose;
-	}
+
+	CurrentCombatPose = Data;
+	
 }
 
 void ACH4Character::Server_UseHealItem_Implementation()
