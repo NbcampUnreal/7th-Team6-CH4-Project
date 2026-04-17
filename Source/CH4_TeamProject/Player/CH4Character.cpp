@@ -17,6 +17,8 @@
 #include "Animation/AnimInstance.h"
 #include "CH4_TeamProject/Game/CH4GameState.h"
 #include "CH4_TeamProject/Item/Consumable/GearItem.h"
+#include "Net/UnrealNetwork.h"
+#include "../Item/Equippable/Ranged Weapon/RangedWeaponDataAsset.h"
 
 
 //생성자
@@ -96,6 +98,7 @@ void ACH4Character::OnEquipInput1()
 	{
 		EquippableComponent->EquipWeapon(PrimaryWeaponData1);
 		UE_LOG(LogTemp, Warning, TEXT("장착 성공! 서버 함수 호출함."));
+		UpdateCombatPose();
 	}
 }
 
@@ -697,4 +700,35 @@ bool ACH4Character::TryPickupNearbyItem()
 	}
 
 	return false;
+}
+
+
+void ACH4Character::OnRep_CombatPose()
+{
+	UE_LOG(LogTemp, Warning, TEXT("CombatPose changed: %d"), (int32)CurrentCombatPose);
+}
+
+
+void ACH4Character::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ACH4Character, CurrentCombatPose);
+}
+
+//애니매이션 업데이트
+void ACH4Character::UpdateCombatPose()
+{
+	if (!EquippableComponent || !EquippableComponent->CurrentWeapon)
+	{
+		CurrentCombatPose = ECombatPose::Normal;
+		return;
+	}
+
+	URangedGunDataAsset* Data = EquippableComponent->CurrentWeapon->GetGunDataAsset();
+
+	if (Data)
+	{
+		CurrentCombatPose = Data->CombatPose;
+	}
 }

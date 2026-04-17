@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -72,6 +72,7 @@ protected:
 	
 	UPROPERTY(EditAnywhere,Category="DataAsset")
 	URangedGunDataAsset* GunDataAsset;
+
 	
 		
 	void ProcessReload();
@@ -83,6 +84,17 @@ protected:
 	
 	void ResetCoolTime();
 	
-	
+public:
+
+	UFUNCTION(BlueprintCallable)
+	URangedGunDataAsset* GetGunDataAsset() const
+	{
+		return GunDataAsset;
+	}
+
+	void SetGunDataAsset(URangedGunDataAsset* InDataAsset)
+	{
+		GunDataAsset = InDataAsset;
+	}
 	
 };

@@ -1,10 +1,11 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "UObject/PrimaryAssetId.h"
 #include "Engine/DataAsset.h"
+#include "CH4_TeamProject/DataBase/DataBase.h"
 #include "RangedWeaponDataAsset.generated.h"
 
 /**
@@ -32,6 +33,9 @@ public:
 	
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Equip_Gun_Weapon")
 	TSubclassOf<class ARangedWeapons> WeaponClass;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Animation")
+	ECombatPose CombatPose = ECombatPose::Rifle;
 	
 	virtual FPrimaryAssetId GetPrimaryAssetId() const override;
 };
