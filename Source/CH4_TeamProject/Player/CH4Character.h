@@ -275,4 +275,7 @@ public:
 	void OnThrowGrenade();
 	
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	
+	UPROPERTY()
+	FTimerHandle ExplosionTimerHandle;
 };

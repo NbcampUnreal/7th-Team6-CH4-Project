@@ -1,8 +1,11 @@
 ﻿#include "ThorwbleItems.h"
+
+#include "CH4_TeamProject/Zombie/ZombieBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+
 
 AThorwbleItems::AThorwbleItems()
 {
@@ -47,11 +50,6 @@ void AThorwbleItems::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor
 
 	if (!HasAuthority()) return;
 	if (!OtherActor || OtherActor == this) return;
-
-	if (IsA(APawn::StaticClass()))
-	{
-		Explode();
-	}
 }
 
 void AThorwbleItems::Explode()

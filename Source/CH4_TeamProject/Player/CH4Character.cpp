@@ -675,8 +675,7 @@ bool ACH4Character::TryPickupNearbyItem()
 					ApplyItemEffect(ItemActor->ItemData);
 				}
 				else
-				{
-					// 👈 여기서 널이 뜬다면 에디터에서 '상속받은 변수' 칸이 비어있다는 뜻!
+				{	
 					UE_LOG(LogTemp, Error, TEXT("야후: %s의 상속된 ItemData가 비어있어!"), *Actor->GetName());
 				}
 			}
@@ -688,7 +687,6 @@ bool ACH4Character::TryPickupNearbyItem()
 			return true;
 		}
 	}
-
 	return false;
 }
 
@@ -785,6 +783,7 @@ void ACH4Character::Server_ThrowGrenade_Implementation()
 
 		UE_LOG(LogTemp, Warning, TEXT("수류탄 스폰 성공 - 위치: %s / 속도: %s"),
 			*SpawnLocation.ToString(), *ThrowVelocity.ToString());
+		GetWorld()->GetTimerManager().SetTimer(ExplosionTimerHandle,Grenade,&AThorwbleItems::Explode,3.f,false);
 	}
 	else
 	{
