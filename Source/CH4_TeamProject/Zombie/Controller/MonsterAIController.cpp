@@ -2,6 +2,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "CH4_TeamProject/Zombie/ZombieBase.h"
 #include "Perception/AIPerceptionComponent.h"
+#include "Perception/AISense_Hearing.h"
 
 AMonsterAIController::AMonsterAIController()
 {
@@ -60,6 +61,18 @@ void AMonsterAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus 
 				false
 				);
 		}
+	}
+	
+	if (Stimulus.Type == UAISense::GetSenseID<UAISense_Hearing>())
+	{
+		// 소리를 들었다 → 소리 위치로 조사
+		if (Stimulus.WasSuccessfullySensed())
+		{
+			GetWorld()->GetTimerManager().ClearTimer(LoseSightTimerHandle);
+			GetBlackboardComponent()->SetValueAsVector(
+				TEXT("HearingLocation"), Stimulus.StimulusLocation);
+		}
+		return;
 	}
 }
 

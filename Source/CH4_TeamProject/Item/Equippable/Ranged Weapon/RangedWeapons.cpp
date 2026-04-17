@@ -7,6 +7,7 @@
 #include "RangedWeaponDataAsset.h"
 #include "GameFramework/Character.h"
 #include "Net/UnrealNetwork.h"
+#include "Perception/AISense_Hearing.h"
 
 // Sets default values
 ARangedWeapons::ARangedWeapons()
@@ -132,6 +133,15 @@ void ARangedWeapons::Multicast_PlayEffects_Implementation(FVector TraceStart, FV
 // 시작점
 void ARangedWeapons::Fire()
 {
+	UAISense_Hearing::ReportNoiseEvent(
+		GetWorld(),
+		GetOwner()->GetActorLocation(),
+		1.0f, // Loudness
+		GetOwner(),
+		0.f,
+		TEXT("GunShot")
+		);
+	
 	UE_LOG(LogTemp, Error, TEXT("무조건 찍혀야 하는 로그!"));
 	if (bIsCoolingDown || CurrentAmmo <= 0)
 	{
