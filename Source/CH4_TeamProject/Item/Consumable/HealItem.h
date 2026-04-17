@@ -23,5 +23,6 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	
-	int32 HealAmount = 20;
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="Heal")
+	TObjectPtr<class UConsumableDataAsset>	DataAsset;
 };

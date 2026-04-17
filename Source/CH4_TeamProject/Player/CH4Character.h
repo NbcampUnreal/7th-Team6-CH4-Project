@@ -142,6 +142,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = "Input")
 	class UInputAction* ReloadAction;
+	
+	UPROPERTY(VisibleAnywhere, Category = "Input")
+	class UInputAction* ThrowAction;
 
 	//정조준 액션
 	UPROPERTY(VisibleAnywhere, Category = "Input")
@@ -226,10 +229,10 @@ public:
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat|Weapon")
-	class URangedGunDataAsset* PrimaryWeaponData1;
+	class UWeaponData* PrimaryWeaponData1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat|Weapon")
-	class URangedGunDataAsset* PrimaryWeaponData2;
+	class UWeaponData* PrimaryWeaponData2;
 	//장비장착 임렵함수
 	void OnEquipInput1();
 
@@ -238,23 +241,19 @@ public:
 	UFUNCTION(Server, Reliable)
 	void Server_ApplyItemEffect(class AHealItem* HealItem);
 
-	void ApplyItemEffect(class AHealItem* HealItem);
 
 	UFUNCTION(NetMulticast, Reliable)
 	void HealLog();
-
-
-
-
+	
 	void OnApplyItemEffect();
+	
 
-	UPROPERTY()
-	TObjectPtr<class AHealItem> Heal;
-
-	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
-
+	UPROPERTY(Replicated)
 	int HealItemCount = 0;
 
+	UPROPERTY(Replicated)
+	int GrenadeCount=0;
+	
 	UPROPERTY()
 	ACH4GameState* GamsState;
 
@@ -268,4 +267,26 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	void UpdateCombatPose();
+	void ApplyItemEffect(class UConsumableDataAsset* Data);
+	
+	UFUNCTION(Server,Reliable)
+	void Server_UseHealItem();
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UConsumableDataAsset* DefaultHealData;
+	
+	UFUNCTION(Server, Reliable)
+	void Server_ThrowGrenade();	
+	
+	void ThrowGrenade();
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<class AThorwbleItems> GrenadeClass;
+	
+	void OnThrowGrenade();
+	
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	
+	UPROPERTY()
+	FTimerHandle ExplosionTimerHandle;
 };

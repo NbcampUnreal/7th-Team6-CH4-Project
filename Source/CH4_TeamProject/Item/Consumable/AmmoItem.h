@@ -24,7 +24,8 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	
-	int32  AmmoItem = 30;
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="Ammo")
+	TObjectPtr<class UConsumableDataAsset> DataAsset;
 	
 	void NotifyActorBeginOverlap(AActor* OtherActor);
 	
