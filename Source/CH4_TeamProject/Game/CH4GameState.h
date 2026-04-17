@@ -1,5 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
-
+﻿
 #pragma once
 
 #include "CoreMinimal.h"
@@ -8,7 +7,6 @@
 #include "CH4_TeamProject/DataBase/DataBase.h"
 #include "CH4GameState.generated.h"
 
-
 UCLASS()
 class CH4_TEAMPROJECT_API ACH4GameState : public AGameState
 {
@@ -16,9 +14,10 @@ class CH4_TEAMPROJECT_API ACH4GameState : public AGameState
 
 public:
 	ACH4GameState();
-
-	// UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Level")
-	// float LevelDuration;
+	
+	virtual void BeginPlay() override;
+	
+	virtual void Tick(float DeltaSeconds) override;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Leve2")
 	int32 MaxLevels;
@@ -44,17 +43,33 @@ public:
 	UPROPERTY(Replicated, BlueprintReadOnly)
 	float ServerTime = 0.f;
 
-	UPROPERTY(ReplicatedUsing = OnRep_GamePhase)
+	UPROPERTY(ReplicatedUsing = OnRep_GamePhase, BlueprintReadWrite)
 	EGamePhase GamePhase;
 	
 	UPROPERTY(ReplicatedUsing = OnRep_GearPartsCount)
 	int32 GearPartsCount;
 	
+	UPROPERTY(ReplicatedUsing = OnRep_DayPhase)
+	EDayPhase DayPhase = EDayPhase::None;
+
+	UPROPERTY()
+	class ADirectionalLight* DirectionalLight;
+	
+	UPROPERTY()
+	class ASkyLight* SkyLight;
+	
+	UPROPERTY()
+	class AExponentialHeightFog* Fog;
+	
+public:
 	UFUNCTION()
 	void OnRep_GearPartsCount();
 	
 	UFUNCTION()
 	void OnRep_GamePhase();
+	
+	UFUNCTION()
+	void OnRep_DayPhase();
 	
 	int32 GetAlivePlayerCount() const{ return AlivePlayerCount; }
 	
@@ -69,15 +84,18 @@ public:
 	
 	bool CheckAlivePlayerIsZero();
 	
+	void ApplyDayPhaseChanges();
+	
+public:	
+	EGamePhase GetGamePhase() const {  return GamePhase; }
 	void SetGamePhase(EGamePhase NewPhase);
 	
-	// float GetFinalDefenceTime() const { return FinalDefenceTime; }
-	// 좀비들 정보를 저장하는 구조체를 만들어서 좀비 체력 감소도 기록할 필요가 있을 듯.
+	EDayPhase GetDayPhase() const {  return DayPhase; }
+	void SetDayPhase(EDayPhase NewPhase);
 	
-	// UPROPERTY(Replicated)
-	// float FinalDefenceTime = 5.f * 60.f;
+	void SetLightsAndFogActor();
 	
-	// UPROPERTY(Replicated)
-	// float PhaseRemainingTime;
-	
+protected:
+	UPROPERTY()
+	class ADirectionalLight* SunLight;
 };

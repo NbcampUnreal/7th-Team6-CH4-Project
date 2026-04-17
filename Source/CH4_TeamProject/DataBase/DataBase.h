@@ -19,3 +19,12 @@ enum class EGamePhase : uint8
 	Clear UMETA(DisplayName = "Clear"),
 	Lose UMETA(DisplayName = "Lose")
 };
+
+UENUM(BlueprintType)
+enum class EDayPhase : uint8
+{
+	None UMETA(DisplayName = "None"),
+	Day UMETA(DisplayName = "DayPhase"),
+	Evening UMETA(DisplayName = "Evening"),
+	Night UMETA(DisplayName = "Night")
+};

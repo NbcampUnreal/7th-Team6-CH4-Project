@@ -73,7 +73,7 @@ void ACH4GameMode::PostLogin(APlayerController* NewPlayer)
 	}
 }
 
-void ACH4GameMode::PlayGame()
+void ACH4GameMode::PlayGame() const
 {
 	UE_LOG(LogTemp, Warning, TEXT("PlayGame CALLED"));
 	
@@ -84,6 +84,7 @@ void ACH4GameMode::PlayGame()
 	}
 	
 	GetWorld()->ServerTravel(TEXT("/Game/Maps/REALSTAGE"));
+	GS->SetDayPhase(EDayPhase::Day);
 }
 
 void ACH4GameMode::EndGame(EGamePhase GP)
@@ -178,6 +179,26 @@ void ACH4GameMode::SetGameResult()
 	else if (GS && GS->AlivePlayerCount > 0 && GS->GearPartsCount == 3)
 	{
 		EndGame(EGamePhase::Clear);
+	}
+}
+
+void ACH4GameMode::SetDayPhase_Server()
+{
+	ACH4GameState* GS = Cast<ACH4GameState>(GetWorld()->GetGameState());
+	if (GS)
+	{
+		if (GS->GearPartsCount == 0) // 타이머의 특정 시점
+		{
+			GS->SetDayPhase(EDayPhase::Day);
+		}
+		else if (GS->GearPartsCount == 1)
+		{
+			GS->SetDayPhase(EDayPhase::Evening);
+		}
+		else if (GS->GearPartsCount == 2)
+		{
+			GS->SetDayPhase(EDayPhase::Night);
+		}
 	}
 }
 

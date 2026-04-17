@@ -15,32 +15,26 @@ class CH4_TEAMPROJECT_API ACH4GameMode : public AGameMode
 public:
 	ACH4GameMode();
 
-	void BeginPlay()override ;
-	void PostLogin(APlayerController* NewPlayer);
+	virtual void BeginPlay() override ;
+	virtual void PostLogin(APlayerController* NewPlayer) override;
 
 public:
-	void PlayGame();
+	void PlayGame() const;
 	void EndGame(EGamePhase GP);
 	
-    // 플레이어 관리
-    void OnPlayerDowned(ACH4PlayerState* PlayerState);   // 다운
-    void OnPlayerRevived(ACH4PlayerState* PlayerState);  // 소생
-
-    // 승패 판정
+    void OnPlayerDowned(ACH4PlayerState* PlayerState);
+    void OnPlayerRevived(ACH4PlayerState* PlayerState);
+	
     void SetGameResult();
+	void SetDayPhase_Server();
 	
 	FTimerHandle ServerTimeTimerHandle;
 
 	UFUNCTION(BlueprintCallable, Category = "GameFlow")
 	void RequestReturnToLobby();
+	
 private:
 	void UpdateMainServerTime() const;
 	bool bGameStarted = false;
 	bool bIsReturningToLobby = false;
-			
-	// void StartFinalDefenseTimer() const;	
-		
-    // 웨이브 제어 -> 웨이브 매니저?
-    // void StartFinalDefenseWave();
-    // void OnWaveCleared();
 };
