@@ -5,8 +5,10 @@
 #include "Components/StaticMeshComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "RangedWeaponDataAsset.h"
+#include "CH4_TeamProject/Zombie/ZombieBase.h"
 #include "Net/UnrealNetwork.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
+#include "Perception/AISense_Damage.h"
 #include "Perception/AISense_Hearing.h"
 
 // Sets default values
@@ -35,17 +37,27 @@ bool ARangedWeapons::Server_ApplyDamageToTarget_Validate(AActor* TargetActor)
 
 void ARangedWeapons::ProcessDamage(AActor* TargetActor)
 {
-    if (TargetActor)
-    {
-       // 중요: ApplyDamage를 호출하면 피격자의 TakeDamage가 서버에서 자동 호출됨
-       UGameplayStatics::ApplyDamage(
-          TargetActor,           
-          WeaponData->Damage,          
-          GetInstigatorController(), 
-          this,                  
-          UDamageType::StaticClass() 
-       );
-    }
+	if (TargetActor)
+	{
+		// 중요: ApplyDamage를 호출하면 피격자의 TakeDamage가 서버에서 자동 호출됨
+		UGameplayStatics::ApplyDamage(
+		   TargetActor,           
+		   WeaponData->Damage,          
+		   GetInstigatorController(), 
+		   this,                  
+		   UDamageType::StaticClass() 
+		   );
+    	
+		
+		UAISense_Damage::ReportDamageEvent(
+			GetWorld(),
+			TargetActor,
+			GetOwner(), // 공격자
+			WeaponData->Damage,
+			GetOwner()->GetActorLocation(),
+			TargetActor->GetActorLocation()
+			);
+	}
 }
 
 void ARangedWeapons::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

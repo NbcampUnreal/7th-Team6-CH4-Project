@@ -26,7 +26,8 @@ protected:
 	
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void OnUnPossess() override;
-	void ClearTarget();
+	void ClearSightTarget();
+	void ClearAttackTarget();
 
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
 	TObjectPtr<UBehaviorTree> BehaviorTreeAsset;
@@ -34,5 +35,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
 	TObjectPtr<UAIPerceptionComponent> AIPerceptionComp;
 	
-	FTimerHandle LoseSightTimerHandle;
+	FTimerHandle LoseSightTargetTimerHandle;
+	FTimerHandle LoseAttackTargetTimerHandle;
 };
