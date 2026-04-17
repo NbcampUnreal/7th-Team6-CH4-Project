@@ -8,6 +8,7 @@
 #include "InputActionValue.h"
 #include "CH4_TeamProject/DataBase/DataBase.h"
 #include "CH4_TeamProject/Player/PlayerAnimInstance.h"
+#include "CH4_TeamProject/DataBase/DataBase.h"
 #include "CH4Character.generated.h"
 class UEquippableComponent;
 class UPlayerAnimInstance;
@@ -23,14 +24,14 @@ public:
 	ACH4Character();
 
 	virtual FGenericTeamId GetGenericTeamId() const override { return static_cast<uint8>(TeamID); }
-	
+
 protected:
 
 	virtual void BeginPlay() override;
 
 public:
 	FORCEINLINE ETeamID GetTeamID() const { return TeamID; }
-	
+
 	virtual void Tick(float DeltaTime) override;
 
 
@@ -59,11 +60,11 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void Server_Interact();
-	
+
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Team")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Team")
 	ETeamID TeamID = ETeamID::Player;
-	
+
 	//카메라쪽
 	UPROPERTY(EditAnywhere)
 	class USpringArmComponent* SpringArm;
@@ -211,7 +212,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|Aim")
 	float AimWalkSpeed = 220.0f;
 	//+++++++++++++++++++++++++++++++++++
-	 
+
 	//상호작용 거리
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
 	float InteractionRadius = 1000.0f;
@@ -256,6 +257,16 @@ public:
 	UPROPERTY()
 	ACH4GameState* GamsState;
 
+public:
+	UPROPERTY(ReplicatedUsing = OnRep_CombatPose, VisibleAnywhere, BlueprintReadOnly, Category = "Animation")
+	ECombatPose CurrentCombatPose = ECombatPose::Normal;
+
+	UFUNCTION()
+	void OnRep_CombatPose();
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	void UpdateCombatPose();
 	void ApplyItemEffect(class UConsumableDataAsset* Data);
 	
 	UFUNCTION(Server,Reliable)

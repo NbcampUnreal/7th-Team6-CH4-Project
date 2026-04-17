@@ -40,6 +40,7 @@ void UEquippableComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(UEquippableComponent, CurrentWeapon);
+	DOREPLIFETIME(UEquippableComponent, UsingWeapon); 
 }
 
 void UEquippableComponent::EquipWeapon_Implementation(UWeaponData* NewWeaponData)
@@ -73,6 +74,11 @@ void UEquippableComponent::EquipWeapon_Implementation(UWeaponData* NewWeaponData
 	 GetOwner()->GetActorLocation(),
 	 GetOwner()->GetActorRotation(),
 	 SpawnActor);
+
+	if (CurrentWeapon)
+	{
+		CurrentWeapon->SetGunDataAsset(WeaponData);
+	}
 	
 	CurrentWeapon->WeaponData = NewWeaponData;
 	if (CurrentWeapon)

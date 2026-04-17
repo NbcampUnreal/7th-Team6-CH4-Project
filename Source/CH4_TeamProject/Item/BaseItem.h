@@ -35,4 +35,5 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
 	class UConsumableDataAsset* ItemData;
+	
 };
