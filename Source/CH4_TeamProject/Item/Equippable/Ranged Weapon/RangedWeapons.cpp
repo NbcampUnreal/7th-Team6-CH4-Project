@@ -7,6 +7,7 @@
 #include "RangedWeaponDataAsset.h"
 #include "GameFramework/Character.h"
 #include "Net/UnrealNetwork.h"
+#include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "Perception/AISense_Hearing.h"
 
 // Sets default values
@@ -16,6 +17,8 @@ ARangedWeapons::ARangedWeapons()
 	bReplicates = true;
 	
 	PrimaryActorTick.bCanEverTick = false;
+	
+	StimuliSource = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("StimuliSource"));
 }
 
 void ARangedWeapons::Server_ApplyDamageToTarget_Implementation(AActor* TargetActor)
@@ -81,7 +84,6 @@ void ARangedWeapons::Tick(float DeltaTime)
 void ARangedWeapons::Server_Fire_Implementation()
 {
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Server_Fire 실행됨!"));
-    
 	if(	bIsCoolingDown || CurrentAmmo <= 0)
 	{
 		GEngine->AddOnScreenDebugMessage(1, 1.f, FColor::Red,FString::Printf(TEXT("총알이없습니다")));
@@ -93,6 +95,16 @@ void ARangedWeapons::Server_Fire_Implementation()
 	{
 		CurrentAmmo --;
 	}
+	
+	UAISense_Hearing::ReportNoiseEvent(
+		GetWorld(),
+		GetActorLocation(),
+		1.0f, // Loudness
+		this,
+		0.f,
+		NAME_None
+		);
+	
 	GEngine->AddOnScreenDebugMessage(-1,
 		10,FColor::Red,
 		FString::Printf(
@@ -133,15 +145,6 @@ void ARangedWeapons::Multicast_PlayEffects_Implementation(FVector TraceStart, FV
 // 시작점
 void ARangedWeapons::Fire()
 {
-	UAISense_Hearing::ReportNoiseEvent(
-		GetWorld(),
-		GetOwner()->GetActorLocation(),
-		1.0f, // Loudness
-		GetOwner(),
-		0.f,
-		TEXT("GunShot")
-		);
-	
 	UE_LOG(LogTemp, Error, TEXT("무조건 찍혀야 하는 로그!"));
 	if (bIsCoolingDown || CurrentAmmo <= 0)
 	{

@@ -29,6 +29,9 @@ public:
 	void ProcessDamage(AActor* TargetActor);
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon|Mesh")
 	TObjectPtr<UStaticMeshComponent> WeaponMesh;
+	
+	UPROPERTY(VisibleAnywhere, Category = "AI")
+	class UAIPerceptionStimuliSourceComponent* StimuliSource;
 
 	int32 GetCurrentAmmo ()const
 	{
