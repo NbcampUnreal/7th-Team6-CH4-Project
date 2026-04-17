@@ -122,6 +122,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = "Input")
 	class UInputAction* ReloadAction;
+	
+	UPROPERTY(VisibleAnywhere, Category = "Input")
+	class UInputAction* ThrowAction;
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Stat")
@@ -148,7 +151,7 @@ public:
 
 	//상호작용 거리
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
-	float InteractionRadius = 200.0f;
+	float InteractionRadius = 1000.0f;
 
 	//장비 장착 컴포넌트
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -162,10 +165,10 @@ public:
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat|Weapon")
-	class URangedGunDataAsset* PrimaryWeaponData1;
+	class UWeaponData* PrimaryWeaponData1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat|Weapon")
-	class URangedGunDataAsset* PrimaryWeaponData2;
+	class UWeaponData* PrimaryWeaponData2;
 	//장비장착 임렵함수
 	void OnEquipInput1();
 
@@ -174,24 +177,34 @@ public:
 	UFUNCTION(Server, Reliable)
 	void Server_ApplyItemEffect(class AHealItem* HealItem);
 
-	void ApplyItemEffect(class AHealItem* HealItem);
 
 	UFUNCTION(NetMulticast, Reliable)
 	void HealLog();
-
-
-
-
+	
 	void OnApplyItemEffect();
+	
 
-	UPROPERTY()
-	TObjectPtr<class AHealItem> Heal;
-
-	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 
 	int HealItemCount = 0;
 
 	UPROPERTY()
 	ACH4GameState* GamsState;
 
+	void ApplyItemEffect(class UConsumableDataAsset* Data);
+	
+	UFUNCTION(Server,Reliable)
+	void Server_UseHealItem();
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UConsumableDataAsset* DefaultHealData;
+	
+	UFUNCTION(Server, Reliable)
+	void Server_ThrowGrenade();	
+	
+	void ThrowGrenade();
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<class AThorwbleItems> GrenadeClass;
+	
+	void OnThrowGrenade();
 };
