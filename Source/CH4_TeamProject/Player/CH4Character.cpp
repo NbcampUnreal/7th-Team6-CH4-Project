@@ -22,6 +22,7 @@
 #include "CH4_TeamProject/Item/ThorwbleItem/ThorwbleItems.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "LevelInstance/LevelInstanceTypes.h"
+#include "Net/UnrealNetwork.h"
 
 
 //생성자
@@ -592,7 +593,7 @@ void ACH4Character::ApplyItemEffect(UConsumableDataAsset* Data)
 	case EEffectType::Health:
 		{
 			HealItemCount++;
-			UE_LOG(LogTemp, Warning, TEXT("야후: 체력 회복 아이템 사용! 수치: %d"),HealItemCount);
+			UE_LOG(LogTemp, Warning, TEXT("야후: 체력 회복 아이템획득 갯수: %d"),HealItemCount);
 		}
 		break;
        
@@ -611,6 +612,11 @@ void ACH4Character::ApplyItemEffect(UConsumableDataAsset* Data)
 			}
 		}
 		break;
+	case EEffectType::Grenade:
+		{
+			GrenadeCount++;
+			UE_LOG(LogTemp, Warning, TEXT("야후: 수류탄 아이템획득 갯수: %d"),GrenadeCount);
+		}
 
 	default:
 		UE_LOG(LogTemp, Warning, TEXT("야후: 정의되지 않은 아이템 타입입니다."));
@@ -620,6 +626,11 @@ void ACH4Character::ApplyItemEffect(UConsumableDataAsset* Data)
 
 void ACH4Character::Server_ThrowGrenade_Implementation()
 {
+	if (GrenadeCount <=0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("수류탄 갯수 확인해 갯수 : %d"),GrenadeCount);
+		return;
+	}
 	if (!GrenadeClass)
 	{
 		UE_LOG(LogTemp,Error,TEXT("서버아님 수류탄 생성 불가"))
@@ -660,12 +671,24 @@ void ACH4Character::OnThrowGrenade()
 	ThrowGrenade();
 }
 
+void ACH4Character::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ACH4Character, HealItemCount);
+	DOREPLIFETIME(ACH4Character, GrenadeCount);
+}
+
 void ACH4Character::Server_UseHealItem_Implementation()
 {
+	UE_LOG(LogTemp,Error,TEXT("서버 힐요청됨"))
 	if (DefaultHealData&&HealItemCount > 0)
 	{
 		CurrentHP = FMath::Clamp(CurrentHP + DefaultHealData->Value, 0.0f, MaxHP);
 		HealItemCount--;
 		UE_LOG(LogTemp, Log, TEXT("야후: 힐 사용! 남은 체력: %f, 남은 개수: %d,힐량:%f"), CurrentHP, HealItemCount,DefaultHealData->Value);
+	}
+	else
+	{
+		UE_LOG(LogTemp,Error,TEXT(" 데이터 에셋이 유호하지않거나 힐아이템부족"))
 	}
 }

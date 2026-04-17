@@ -184,9 +184,12 @@ public:
 	void OnApplyItemEffect();
 	
 
-
+	UPROPERTY(Replicated)
 	int HealItemCount = 0;
 
+	UPROPERTY(Replicated)
+	int GrenadeCount=0;
+	
 	UPROPERTY()
 	ACH4GameState* GamsState;
 
@@ -207,4 +210,6 @@ public:
 	TSubclassOf<class AThorwbleItems> GrenadeClass;
 	
 	void OnThrowGrenade();
+	
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };

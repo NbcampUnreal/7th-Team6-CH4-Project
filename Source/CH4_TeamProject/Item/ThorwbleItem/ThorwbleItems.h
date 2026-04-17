@@ -3,11 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "CH4_TeamProject/Item/BaseItem.h"
 #include "GameFramework/Actor.h"
 #include "ThorwbleItems.generated.h"
 
 UCLASS()
-class CH4_TEAMPROJECT_API AThorwbleItems : public AActor
+class CH4_TEAMPROJECT_API AThorwbleItems : public ABaseItem
 {
 	GENERATED_BODY()
 	
