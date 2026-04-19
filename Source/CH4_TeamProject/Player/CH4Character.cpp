@@ -11,20 +11,16 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "../Item/Equippable/EquippableComponent.h"
-#include "CH4_TeamProject/Item/Consumable/HealItem.h"
-#include "../Item/Consumable/HealItem.h"
 #include "CH4_TeamProject/Player/PlayerAnimInstance.h"
 #include "Animation/AnimInstance.h"
 #include "CH4_TeamProject/Game/CH4GameState.h"
 #include "CH4_TeamProject/Item/Consumable/ConsumableDataAsset.h"
-#include "CH4_TeamProject/Item/Consumable/GearItem.h"
 #include "Net/UnrealNetwork.h"
 #include "../Item/Equippable/Ranged Weapon/RangedWeaponDataAsset.h"
 #include "CH4_TeamProject/Item/Equippable/Equippable.h"
 #include "CH4_TeamProject/Item/ThorwbleItem/ThorwbleItems.h"
 #include "GameFramework/ProjectileMovementComponent.h"
-#include "LevelInstance/LevelInstanceTypes.h"
-#include "Net/UnrealNetwork.h"
+
 
 
 //생성자
@@ -766,7 +762,13 @@ void ACH4Character::ApplyItemEffect(UConsumableDataAsset* Data)
 
 void ACH4Character::Server_ThrowGrenade_Implementation()
 {
-	if (GrenadeCount <=0)
+	if (bUSingGrenade)
+	{
+		UE_LOG(LogTemp,Error,TEXT("수류탄 쿨타임중"))
+		return;
+	}
+	bUSingGrenade = true;
+	if (GrenadeCount <= 0)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("수류탄 갯수 확인해 갯수 : %d"),GrenadeCount);
 		return;
@@ -784,6 +786,7 @@ void ACH4Character::Server_ThrowGrenade_Implementation()
 
 	if (Grenade)
 	{
+		GrenadeCount--;
 		Grenade->SetOwner(this);
 		Grenade->SetInstigator(this);
         
@@ -792,13 +795,14 @@ void ACH4Character::Server_ThrowGrenade_Implementation()
 
 		UE_LOG(LogTemp, Warning, TEXT("수류탄 스폰 성공 - 위치: %s / 속도: %s"),
 			*SpawnLocation.ToString(), *ThrowVelocity.ToString());
-		GetWorld()->GetTimerManager().SetTimer(ExplosionTimerHandle,Grenade,&AThorwbleItems::Explode,3.f,false);
+		GetWorld()->GetTimerManager().SetTimer(ExplosionTimerHandle,Grenade,&AThorwbleItems::Explode,1.5f,false);
 	}
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("수류탄 스폰 실패 - GrenadeClass: %s"),
 			*GrenadeClass->GetName());
 	}
+	GetWorld()->GetTimerManager().SetTimer(GrenadeTimer,this,&ACH4Character::CanUSingGrenade,5.f,false);
 }
 
 void ACH4Character::ThrowGrenade()
@@ -812,6 +816,11 @@ void ACH4Character::OnThrowGrenade()
 	ThrowGrenade();
 }
 
+void ACH4Character::CanUSingGrenade()
+{
+	 bUSingGrenade = false;
+}
+
 void ACH4Character::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -819,6 +828,7 @@ void ACH4Character::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	DOREPLIFETIME(ACH4Character, CurrentCombatPose);
   DOREPLIFETIME(ACH4Character, HealItemCount);
 	DOREPLIFETIME(ACH4Character, GrenadeCount);
+	DOREPLIFETIME(ACH4Character,bUSingGrenade);
 }
 
 //애니매이션 업데이트

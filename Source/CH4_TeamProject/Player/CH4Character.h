@@ -52,6 +52,7 @@ public:
 	void PlayDownAnimation();
 	void PlayDeathAnimation();
 	void PlayReviveAnimation();
+	void Multi_PlayAction_Implementation(EPlayerActionState NewState);
 
 	void OnDeath();
 
@@ -215,7 +216,7 @@ public:
 
 	//상호작용 거리
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
-	float InteractionRadius = 1000.0f;
+	float InteractionRadius = 200.0f;
 
 	//장비 장착 컴포넌트
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -285,6 +286,12 @@ public:
 	
 	void OnThrowGrenade();
 	
+	
+	bool bUSingGrenade = false;
+	
+	void CanUSingGrenade();
+	UPROPERTY()
+	FTimerHandle GrenadeTimer;
 	
 	
 	UPROPERTY()

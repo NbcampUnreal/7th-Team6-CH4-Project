@@ -7,7 +7,7 @@
 #include "CH4_TeamProject/Game/CH4PlayerState.h"
 #include "CH4_TeamProject/Player/CH4PlayerController.h"
 #include "Kismet/GameplayStatics.h"
-#include "CH4_TeamProject/Item/Consumable/ItemSpawnVolume.h"
+#include "CH4_TeamProject/Item/Consumable/ItemSpawnPoint.h"
 
 ACH4GameMode::ACH4GameMode()
 {	
@@ -32,14 +32,14 @@ void ACH4GameMode::BeginPlay()
 	Super::BeginPlay();
 	
 	TArray<AActor*> FoundVolumes;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AItemSpawnVolume::StaticClass(), FoundVolumes);
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AItemSpawnPoint::StaticClass(), FoundVolumes);
 	
 	for (AActor* Actor : FoundVolumes)
 	{
-		AItemSpawnVolume* SpawnVolume = Cast<AItemSpawnVolume>(Actor);
+		AItemSpawnPoint* SpawnVolume = Cast<AItemSpawnPoint>(Actor);
 		if (SpawnVolume)
 		{
-			SpawnVolume->SpawnAllItems();
+			SpawnVolume->SpawnItems();
 		}
 	}
 	
