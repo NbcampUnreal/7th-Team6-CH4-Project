@@ -131,6 +131,7 @@ void ACH4GameState::AddGearPartsCount()
 		{
 			ACH4GameMode* GM = Cast<ACH4GameMode>(GetWorld()->GetAuthGameMode());
 			GM->SetGameResult();
+			// GM->BeginFinalDefence();
 		}
 	}; 
 }
@@ -229,7 +230,10 @@ void ACH4GameState::SetDayPhase(EDayPhase NewPhase)
 	if (DayPhase == NewPhase) return;
 	DayPhase = NewPhase;
 	
-	if (HasAuthority())	ApplyDayPhaseChanges();
+	if (HasAuthority()) // 클라는 온랩 함수로 자동 실행됨
+	{
+		ApplyDayPhaseChanges();
+	}
 }
 
 void ACH4GameState::SetLightsAndFogActor()

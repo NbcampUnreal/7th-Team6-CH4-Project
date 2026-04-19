@@ -19,14 +19,13 @@ public:
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 
 public:
-	void PlayGame() const;
+	void PlayGame();
 	void EndGame(EGamePhase GP);
 	
     void OnPlayerDowned(ACH4PlayerState* PlayerState);
     void OnPlayerRevived(ACH4PlayerState* PlayerState);
 	
     void SetGameResult();
-	void SetDayPhase_Server();
 	
 	FTimerHandle ServerTimeTimerHandle;
 
@@ -35,6 +34,7 @@ public:
 	
 private:
 	void UpdateMainServerTime() const;
+	
 	bool bGameStarted = false;
 	bool bIsReturningToLobby = false;
 };

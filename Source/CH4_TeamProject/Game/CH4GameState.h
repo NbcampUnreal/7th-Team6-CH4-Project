@@ -51,6 +51,9 @@ public:
 	
 	UPROPERTY(ReplicatedUsing = OnRep_DayPhase)
 	EDayPhase DayPhase = EDayPhase::None;
+	
+	// UPROPERTY(Replicated)
+	// float DayPhaseTimeCount;
 
 	UPROPERTY()
 	class ADirectionalLight* DirectionalLight;

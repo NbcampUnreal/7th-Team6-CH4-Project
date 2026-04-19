@@ -73,7 +73,7 @@ void ACH4GameMode::PostLogin(APlayerController* NewPlayer)
 	}
 }
 
-void ACH4GameMode::PlayGame() const
+void ACH4GameMode::PlayGame()
 {
 	UE_LOG(LogTemp, Warning, TEXT("PlayGame CALLED"));
 	
@@ -84,7 +84,6 @@ void ACH4GameMode::PlayGame() const
 	}
 	
 	GetWorld()->ServerTravel(TEXT("/Game/Maps/REALSTAGE"));
-	GS->SetDayPhase(EDayPhase::Day);
 }
 
 void ACH4GameMode::EndGame(EGamePhase GP)
@@ -95,6 +94,7 @@ void ACH4GameMode::EndGame(EGamePhase GP)
 	if (GS)
 	{
 		GS->SetGamePhase(GP);
+		GS->SetDayPhase(EDayPhase::None);
 	}
 	
 	// 현재 월드에 존재하는 모든 PlayerController를 순회(반복)하기 위한 반복자(iterator)
@@ -172,6 +172,8 @@ void ACH4GameMode::OnPlayerRevived(ACH4PlayerState* PlayerState)
 void ACH4GameMode::SetGameResult()
 {
 	ACH4GameState* GS = Cast<ACH4GameState>(GetWorld()->GetGameState());
+	GS->SetDayPhase(EDayPhase::None);
+	
 	if (GS && GS->AlivePlayerCount <= 0)
 	{ 
 		EndGame(EGamePhase::Lose);
@@ -182,25 +184,6 @@ void ACH4GameMode::SetGameResult()
 	}
 }
 
-void ACH4GameMode::SetDayPhase_Server()
-{
-	ACH4GameState* GS = Cast<ACH4GameState>(GetWorld()->GetGameState());
-	if (GS)
-	{
-		if (GS->GearPartsCount == 0) // 타이머의 특정 시점
-		{
-			GS->SetDayPhase(EDayPhase::Day);
-		}
-		else if (GS->GearPartsCount == 1)
-		{
-			GS->SetDayPhase(EDayPhase::Evening);
-		}
-		else if (GS->GearPartsCount == 2)
-		{
-			GS->SetDayPhase(EDayPhase::Night);
-		}
-	}
-}
 
 void ACH4GameMode::RequestReturnToLobby()
 {
@@ -229,19 +212,4 @@ void ACH4GameMode::UpdateMainServerTime() const
 	}
 }
 
-// --------------------------------------------------
-// void ACH4GameMode::StartFinalDefenseTimer() const
-// {
-// 	// 구조 신호 발생 -> 디펜스 타이머 시작 (DataBase::DefenceTimer)
-// }
-
-// void ACH4GameMode::StartFinalDefenseWave()
-// {
-// 	웨이브 시작 명령
-// }
-
-// void ACH4GameMode::OnWaveCleared()
-// {
-// 	웨이브 중지, 플레이어컨트롤러 입력x, UI 변경 명령 
-// }
 

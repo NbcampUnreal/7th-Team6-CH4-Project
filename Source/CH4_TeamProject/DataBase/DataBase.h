@@ -21,6 +21,14 @@ enum class EGamePhase : uint8
 };
 
 UENUM(BlueprintType)
+enum class ETeamID : uint8
+{
+	Player = 0,
+	Monster = 1,
+	NoTeam = 255
+};
+
+UENUM(BlueprintType)
 enum class EDayPhase : uint8
 {
 	None UMETA(DisplayName = "None"),
