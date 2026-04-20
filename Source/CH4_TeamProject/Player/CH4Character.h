@@ -286,7 +286,7 @@ public:
 	
 	void OnThrowGrenade();
 	
-	
+	UPROPERTY(Replicated)
 	bool bUSingGrenade = false;
 	
 	void CanUSingGrenade();
