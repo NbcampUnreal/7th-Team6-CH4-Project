@@ -88,6 +88,12 @@ private:
 	void StartSprint();//뛰기시작
 
 	void StopSprint();//뛰기 멈춤
+	
+	UFUNCTION()
+	void PlayerInputStart();
+	
+	UFUNCTION()
+	void PlayerInputStop();
 
 	void Move(const FInputActionValue& Value);//무브함수
 
@@ -155,10 +161,10 @@ private:
 	class UInputAction* FreeLookAction;
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Stat")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Stat",Replicated)
 	float MaxHP = 100.0f;//최대체력
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player Stat")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player Stat",Replicated)
 	float CurrentHP = 100.0f;//현재 체력
 
 	//마우스 감도
@@ -166,23 +172,23 @@ public:
 	float mouseSpeed = 45.0f;
 
 	//플레이어 움직임 속도
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere,Replicated)
 	float WalkSpeed = 350.0f;
 
 	//플레이어 뛰기 속도
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement",Replicated)
 	float SprintSpeed = 600.0f;
 
 	//달리고있는중인가?
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement",Replicated)
 	bool bIsSprinting = false;
 	//++++++++++++++++++++++++++++++++++++++++++++
 	// 조준 상태
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera|Aim")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera|Aim",Replicated)
 	bool bIsAiming = false;
 
 	//프리룩 bool
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera|FreeLook")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera|FreeLook",Replicated)
 	bool bIsFreeLook = false;
 
 	// 카메라 기본값
@@ -229,10 +235,10 @@ public:
 	void OnReload();
 
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat|Weapon")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat|Weapon",Replicated)
 	class UWeaponData* PrimaryWeaponData1;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat|Weapon")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat|Weapon",Replicated)
 	class UWeaponData* PrimaryWeaponData2;
 	//장비장착 임렵함수
 	void OnEquipInput1();
@@ -259,7 +265,7 @@ public:
 	ACH4GameState* GamsState;
 
 public:
-	UPROPERTY(ReplicatedUsing = OnRep_CombatPose, VisibleAnywhere, BlueprintReadOnly, Category = "Animation")
+	UPROPERTY(ReplicatedUsing = OnRep_CombatPose, VisibleAnywhere, BlueprintReadOnly, Category = "Animation",Replicated)
 	ECombatPose CurrentCombatPose = ECombatPose::Normal;
 
 	UFUNCTION()
@@ -293,7 +299,9 @@ public:
 	UPROPERTY()
 	FTimerHandle GrenadeTimer;
 	
-	
 	UPROPERTY()
 	FTimerHandle ExplosionTimerHandle;
+	
+	UPROPERTY()
+	FTimerHandle PickupMontageTimerHandle;
 };

@@ -1,4 +1,6 @@
 #include "CH4Character.h"
+
+#include "CH4PlayerController.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "EnhancedInputComponent.h"
@@ -398,6 +400,29 @@ void ACH4Character::StopSprint()
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 }
 
+void ACH4Character::PlayerInputStart()
+{
+	UE_LOG(LogTemp, Error, TEXT("Timer Called"));
+	ACH4PlayerController* PC = Cast<ACH4PlayerController>(GetController());
+	if (PC)
+	{
+		PC->ResetIgnoreMoveInput();
+		PC->ResetIgnoreLookInput();
+	}
+	
+	GetWorld()->GetTimerManager().ClearTimer(PickupMontageTimerHandle);
+}
+
+void ACH4Character::PlayerInputStop()
+{
+	ACH4PlayerController* PC = Cast<ACH4PlayerController>(GetController());
+	if (PC)
+	{
+		PC->SetIgnoreMoveInput(true);
+		PC->SetIgnoreLookInput(true);
+	}
+}
+
 //시점
 void ACH4Character::Look(const FInputActionValue& Value)
 {
@@ -545,15 +570,34 @@ void ACH4Character::Multi_PlayAction_Implementation(EPlayerActionState NewState)
 	{
 		switch (NewState)
 		{
-		case EPlayerActionState::Hit: PlayAnimMontage(AnimInst->HitHeadMontage);
+		case EPlayerActionState::Hit:
+			PlayAnimMontage(AnimInst->HitHeadMontage);
 			break;
-		case EPlayerActionState::Pickup: AnimInst->Montage_Play(AnimInst->PickupMontage);
+		case EPlayerActionState::Pickup:
+			if (AnimInst && AnimInst->PickupMontage)
+			{
+				float PlayLength = AnimInst->Montage_Play(AnimInst->PickupMontage);
+				float Delay = FMath::Max(0.f, PlayLength - 0.3f);
+				
+				PlayerInputStop();
+			
+				GetWorld()->GetTimerManager().SetTimer(
+					PickupMontageTimerHandle,
+					this,
+					&ACH4Character::PlayerInputStart,
+					Delay,
+					false
+					);
+			}
 			break;
-		case EPlayerActionState::Down: AnimInst->Montage_Play(AnimInst->DownMontage);
+		case EPlayerActionState::Down:
+			AnimInst->Montage_Play(AnimInst->DownMontage);
 			break;
-		case EPlayerActionState::Dead: AnimInst->Montage_Play(AnimInst->DeathMontage);
+		case EPlayerActionState::Dead:
+			AnimInst->Montage_Play(AnimInst->DeathMontage);
 			break;
-		case EPlayerActionState::Revive: AnimInst->Montage_Play(AnimInst->ReviveMontage);
+		case EPlayerActionState::Revive:
+			AnimInst->Montage_Play(AnimInst->ReviveMontage);
 			break;
 		}
 	}
@@ -579,7 +623,6 @@ void ACH4Character::Server_Interact_Implementation()
 	if (TryReviveNearbyPlayer()) return;
 	if (TryPickupNearbyItem()) return;
 }
-
 
 bool ACH4Character::TryReviveNearbyPlayer()
 {
@@ -679,7 +722,7 @@ bool ACH4Character::TryPickupNearbyItem()
 				}
 			}
 			UE_LOG(LogTemp, Warning, TEXT("%s 아이템을 줍습니다."), *Actor->GetName());
-
+			
 			PlayPickupAnimation();
 			// 실제 인벤토리 처리나 Destroy는
 			Actor->Destroy();
@@ -692,6 +735,7 @@ bool ACH4Character::TryPickupNearbyItem()
 
 void ACH4Character::OnRep_CombatPose()
 {
+	CurrentCombatPose = EquippableComponent->AllCurrentWeapon->CombatPose;
 	UE_LOG(LogTemp, Warning, TEXT("CombatPose changed: %d"), (int32)CurrentCombatPose);
 }
 
@@ -829,6 +873,15 @@ void ACH4Character::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	DOREPLIFETIME(ACH4Character, HealItemCount);
 	DOREPLIFETIME(ACH4Character, GrenadeCount);
 	DOREPLIFETIME(ACH4Character,bUSingGrenade);
+	DOREPLIFETIME(ACH4Character,bIsSprinting);
+	DOREPLIFETIME(ACH4Character,bIsAiming);
+	DOREPLIFETIME(ACH4Character,bIsFreeLook);
+	DOREPLIFETIME(ACH4Character,MaxHP);
+	DOREPLIFETIME(ACH4Character,WalkSpeed);
+	DOREPLIFETIME(ACH4Character,SprintSpeed);
+	DOREPLIFETIME(ACH4Character,CurrentHP);
+	DOREPLIFETIME(ACH4Character,PrimaryWeaponData1);
+	DOREPLIFETIME(ACH4Character,PrimaryWeaponData2);
 }
 
 //애니매이션 업데이트

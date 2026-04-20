@@ -33,6 +33,15 @@ enum class ETeamID : uint8
 };
 
 UENUM(BlueprintType)
+enum class EDayPhase : uint8
+{
+	None UMETA(DisplayName = "None"),
+	Day UMETA(DisplayName = "DayPhase"),
+	Evening UMETA(DisplayName = "Evening"),
+	Night UMETA(DisplayName = "Night")
+};
+
+UENUM(BlueprintType)
 enum class ECombatPose : uint8
 {
 	Normal  UMETA(DisplayName = "Normal"),
