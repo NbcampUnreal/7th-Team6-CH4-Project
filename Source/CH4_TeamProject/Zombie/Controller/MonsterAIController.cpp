@@ -4,6 +4,7 @@
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISense_Damage.h"
 #include "Perception/AISense_Hearing.h"
+#include "Perception/AISense_Sight.h"
 
 AMonsterAIController::AMonsterAIController()
 {
@@ -43,42 +44,48 @@ void AMonsterAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus 
 	{
 		return;
 	}
-
-	if (Stimulus.WasSuccessfullySensed())
+	
+	if (Stimulus.Type == UAISense::GetSenseID<UAISense_Sight>())
 	{
-		GetWorld()->GetTimerManager().ClearTimer(LoseSightTargetTimerHandle);
-		// 감지 범위 안에 들어오면 Blackboard에 타겟 저장
-		BlackboardComp->SetValueAsObject(TEXT("TargetActor"), Actor);
-	}
-	else
-	{
-		if (Actor == CurrentTarget)
+		if (Stimulus.WasSuccessfullySensed())
 		{
-			GetWorld()->GetTimerManager().SetTimer(
-				LoseSightTargetTimerHandle,
-				this,
-				&AMonsterAIController::ClearSightTarget,
-				4.0f,
-				false
-				);
+			GetWorld()->GetTimerManager().ClearTimer(LoseSightTargetTimerHandle);
+			// 감지 범위 안에 들어오면 Blackboard에 타겟 저장
+			BlackboardComp->SetValueAsObject(TEXT("TargetActor"), Actor);
+		}
+		else
+		{
+			if (Actor == CurrentTarget)
+			{
+				GetWorld()->GetTimerManager().SetTimer(
+					LoseSightTargetTimerHandle,
+					this,
+					&AMonsterAIController::ClearSightTarget,
+					4.0f,
+					false
+					);
 			
-			GetWorld()->GetTimerManager().SetTimer(
-				LoseAttackTargetTimerHandle,
-				this,
-				&AMonsterAIController::ClearAttackTarget,
-				8.0f,
-				false
-				);
+				GetWorld()->GetTimerManager().SetTimer(
+					LoseAttackTargetTimerHandle,
+					this,
+					&AMonsterAIController::ClearAttackTarget,
+					8.0f,
+					false
+					);
+			}
 		}
 	}
 	
 	if (Stimulus.Type == UAISense::GetSenseID<UAISense_Hearing>())
 	{
-		// 소리를 들었다 → 소리 위치로 조사
+		// 소리를 감지하면 소리 위치로 이동
 		if (Stimulus.WasSuccessfullySensed())
 		{
-			GetWorld()->GetTimerManager().ClearTimer(LoseSightTargetTimerHandle);
-			BlackboardComp->SetValueAsVector(TEXT("HearingLocation"), Stimulus.StimulusLocation);
+			if (CurrentTarget == nullptr)
+			{
+				ClearHearTarget();
+				BlackboardComp->SetValueAsVector(TEXT("HearingLocation"), Stimulus.StimulusLocation);
+			}
 		}
 		return;
 	}
@@ -123,6 +130,15 @@ void AMonsterAIController::ClearSightTarget()
 	if (BlackboardComp)
 	{
 		BlackboardComp->ClearValue(TEXT("TargetActor"));
+	}
+}
+
+void AMonsterAIController::ClearHearTarget()
+{
+	UBlackboardComponent* BlackboardComp = GetBlackboardComponent();
+	if (BlackboardComp)
+	{
+		BlackboardComp->ClearValue(TEXT("HearingLocation"));
 	}
 }
 
