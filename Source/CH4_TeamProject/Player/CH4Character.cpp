@@ -826,7 +826,7 @@ void ACH4Character::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ACH4Character, CurrentCombatPose);
-  DOREPLIFETIME(ACH4Character, HealItemCount);
+	DOREPLIFETIME(ACH4Character, HealItemCount);
 	DOREPLIFETIME(ACH4Character, GrenadeCount);
 	DOREPLIFETIME(ACH4Character,bUSingGrenade);
 }
