@@ -1,9 +1,10 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "CH4_TeamProject/DataBase/DataBase.h"
 #include "BaseItem.generated.h"
 
 class USceneComponent;
@@ -36,4 +37,22 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
 	class UConsumableDataAsset* ItemData;
 	
+	//컴뱃 포즈 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
+	ECombatPose WeaponPoseType;
+
+	//카메라 쉐이크
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon|Effects")
+	TSubclassOf<class UCameraShakeBase> CamShakeClass;
+
+	UFUNCTION(BlueprintCallable, Category = "Weapon|Effects")
+	void PlayWeaponShake();
+
+protected:
+	//거리 기반 카메라 쉐이크(수류탄)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon|Effects")
+	float InnerRadius = 500.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon|Effects")
+	float OuterRadius = 2500.0f;
 };

@@ -22,6 +22,8 @@ void UEquippableComponent::Fire()
 	{
 		return;
 	}
+	CurrentWeapon->PlayWeaponShake();
+
 	CurrentWeapon->Server_Attack();
 }
 
@@ -77,6 +79,7 @@ void UEquippableComponent::EquipWeapon_Implementation(UWeaponData* NewWeaponData
 
 	if (CurrentWeapon)
 	{
+		CurrentWeapon->SetOwner(GetOwner());
 		CurrentWeapon->WeaponData->SetGunDataAsset(NewWeaponData->GetGunDataAsset());
 	}
 	
