@@ -88,6 +88,12 @@ private:
 	void StartSprint();//뛰기시작
 
 	void StopSprint();//뛰기 멈춤
+	
+	UFUNCTION()
+	void PlayerInputStart();
+	
+	UFUNCTION()
+	void PlayerInputStop();
 
 	void Move(const FInputActionValue& Value);//무브함수
 
@@ -293,7 +299,9 @@ public:
 	UPROPERTY()
 	FTimerHandle GrenadeTimer;
 	
-	
 	UPROPERTY()
 	FTimerHandle ExplosionTimerHandle;
+	
+	UPROPERTY()
+	FTimerHandle PickupMontageTimerHandle;
 };
