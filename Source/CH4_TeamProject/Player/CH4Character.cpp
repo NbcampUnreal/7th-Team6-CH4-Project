@@ -11,27 +11,31 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "../Item/Equippable/EquippableComponent.h"
-#include "CH4_TeamProject/Item/Consumable/HealItem.h"
-#include "../Item/Consumable/HealItem.h"
 #include "CH4_TeamProject/Player/PlayerAnimInstance.h"
 #include "Animation/AnimInstance.h"
 #include "CH4_TeamProject/Game/CH4GameState.h"
-#include "CH4_TeamProject/Item/Consumable/GearItem.h"
+#include "CH4_TeamProject/Item/Consumable/ConsumableDataAsset.h"
+#include "Net/UnrealNetwork.h"
+#include "../Item/Equippable/Ranged Weapon/RangedWeaponDataAsset.h"
+#include "CH4_TeamProject/Item/Equippable/Equippable.h"
+#include "CH4_TeamProject/Item/ThorwbleItem/ThorwbleItems.h"
+#include "GameFramework/ProjectileMovementComponent.h"
+
 
 
 //생성자
 ACH4Character::ACH4Character()
 {
-
 	PrimaryActorTick.bCanEverTick = true;
 
-	InitializationPlayerMesh();//메쉬 함수 호출
-	InitializationCamera();//카메라 함수 호출
-	InitializationInput();//인풋 함수
+	InitializationPlayerMesh(); //메쉬 함수 호출
+	InitializationCamera(); //카메라 함수 호출
+	InitializationInput(); //인풋 함수
 
 	StimuliSource = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("StimuliSource"));
 
-	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimInstance(TEXT("/Game/Player/PlayerBluePrint/ABP_Player.ABP_Player_C"));
+	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimInstance(
+		TEXT("/Game/Player/PlayerBluePrint/ABP_Player.ABP_Player_C"));
 	if (AnimInstance.Class)
 	{
 		GetMesh()->SetAnimInstanceClass(AnimInstance.Class);
@@ -49,7 +53,8 @@ void ACH4Character::BeginPlay()
 	//맵핑 불러오기
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
 	{
-		if (UEnhancedInputLocalPlayerSubsystem* SubSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		if (UEnhancedInputLocalPlayerSubsystem* SubSystem = ULocalPlayer::GetSubsystem<
+			UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
 			SubSystem->AddMappingContext(DefaultContext, 0);
 		}
@@ -96,6 +101,7 @@ void ACH4Character::OnEquipInput1()
 	{
 		EquippableComponent->EquipWeapon(PrimaryWeaponData1);
 		UE_LOG(LogTemp, Warning, TEXT("장착 성공! 서버 함수 호출함."));
+		UpdateCombatPose();
 	}
 }
 
@@ -120,74 +126,25 @@ void ACH4Character::OnEquipInput2()
 
 void ACH4Character::Server_ApplyItemEffect_Implementation(AHealItem* HealItem)
 {
-	ApplyItemEffect(HealItem);
 	HealLog_Implementation();
 }
 
-void ACH4Character::ApplyItemEffect(AHealItem* HealItem)
-{
 
-	if (!HasAuthority())
-	{
-		UE_LOG(LogTemp, Error, TEXT("야후: 여기는 클라라서 못 지나감!"));
-		return;
-	}
-
-	UE_LOG(LogTemp, Warning, TEXT("힐 되는중? 갯수까이나?"));
-	if (HealItemCount <= 0 || !HealItem) return;
-
-	CurrentHP = FMath::Clamp(CurrentHP + HealItem->HealAmount, 0.0f, MaxHP);
-	HealItemCount--;
-
-	UE_LOG(LogTemp, Log, TEXT("야후: 힐 완료! 남은 개수: %d"), HealItemCount);
-
-	if (HealItemCount <= 0)
-	{
-		HealItem->Destroy();
-		Heal = nullptr;
-	}
-}
 
 void ACH4Character::HealLog_Implementation()
 {
-
 	UE_LOG(LogTemp, Warning, TEXT("힐 추가"));
 }
 
 void ACH4Character::OnApplyItemEffect()
 {
 	UE_LOG(LogTemp, Warning, TEXT("야후: 4번 키 눌림!"));
-	if (Heal != nullptr)
+	if (HealItemCount > 0)
 	{
-		Server_ApplyItemEffect(Heal);
+		Server_UseHealItem(); // 서버에 힐 요청
 	}
 }
 
-void ACH4Character::NotifyActorBeginOverlap(AActor* OtherActor)
-{
-	Super::NotifyActorBeginOverlap(OtherActor);
-	AHealItem* LyingItem = Cast<AHealItem>(OtherActor);
-
-	if (LyingItem)
-	{
-		Heal = LyingItem;
-		HealItemCount++;
-
-		LyingItem->SetActorHiddenInGame(true);
-		LyingItem->SetActorEnableCollision(false);
-
-		UE_LOG(LogTemp, Log, TEXT("야후: 아이템 획득! 현재 개수: %d"), HealItemCount);
-	}
-
-	AGearItem* GearItem = Cast<AGearItem>(OtherActor);
-	if (GearItem)
-	{
-		ACH4GameState* Gs = Cast<ACH4GameState>(GamsState);
-		Gs->AddGearPartsCount();
-		GearItem->Destroy();
-		UE_LOG(LogTemp, Error, TEXT("기어 파츠캣수:%d"), Gs->GearPartsCount);
-	}
-}
 
 void ACH4Character::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -209,6 +166,7 @@ void ACH4Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 	EnhancedInputComponent->BindAction(HealAction, ETriggerEvent::Started, this, &ACH4Character::OnApplyItemEffect);
 	EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Started, this, &ACH4Character::OnReload);
+	EnhancedInputComponent->BindAction(ThrowAction, ETriggerEvent::Started, this, &ACH4Character::OnThrowGrenade);
 
 	EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &ACH4Character::StartAim);
 	EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &ACH4Character::StopAim);
@@ -217,7 +175,7 @@ void ACH4Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 //테이크데메지
 float ACH4Character::TakeDamage(float DamageAmount, const FDamageEvent& DamageEvent,
-	AController* EventInstigator, AActor* DamageCauser)
+                                AController* EventInstigator, AActor* DamageCauser)
 {
 	if (HasAuthority()) Multi_PlayAction(EPlayerActionState::Hit);
 
@@ -246,11 +204,12 @@ void ACH4Character::InitializationPlayerMesh()
 {
 	//메쉬
 	ConstructorHelpers::FObjectFinder<USkeletalMesh>
-		PlayerSkeletalMesh(TEXT("/Script/Engine.SkeletalMesh'/Game/Asset/AssetsvilleTown/Meshes/Characters/SK_citizen_male_01.SK_citizen_male_01'"));
+		PlayerSkeletalMesh(TEXT(
+			"/Script/Engine.SkeletalMesh'/Game/Asset/AssetsvilleTown/Meshes/Characters/SK_citizen_male_01.SK_citizen_male_01'"));
 	if (PlayerSkeletalMesh.Succeeded())
 	{
 		GetMesh()->SetSkeletalMesh(PlayerSkeletalMesh.Object);
-		GetMesh()->SetWorldLocationAndRotation(FVector(0, 0, -90), FRotator(0, 0, -90));//캡슐위치
+		GetMesh()->SetWorldLocationAndRotation(FVector(0, 0, -90), FRotator(0, 0, -90)); //캡슐위치
 	}
 }
 
@@ -304,37 +263,43 @@ void ACH4Character::StopFreeLook()
 //인풋 
 void ACH4Character::InitializationInput()
 {
-	static ConstructorHelpers::FObjectFinder<UInputMappingContext> InputContext(TEXT("/Script/EnhancedInput.InputMappingContext'/Game/Player/Input/IMC_Player.IMC_Player'"));
+	static ConstructorHelpers::FObjectFinder<UInputMappingContext> InputContext(
+		TEXT("/Script/EnhancedInput.InputMappingContext'/Game/Player/Input/IMC_Player.IMC_Player'"));
 	if (InputContext.Object != nullptr)
 	{
 		DefaultContext = InputContext.Object;
 	}
 
-	static ConstructorHelpers::FObjectFinder<UInputAction> InputMove(TEXT("/Script/EnhancedInput.InputAction'/Game/Player/Input/Action/IA_Move.IA_Move'"));
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputMove(
+		TEXT("/Script/EnhancedInput.InputAction'/Game/Player/Input/Action/IA_Move.IA_Move'"));
 	if (InputMove.Object != nullptr)
 	{
 		MoveAction = InputMove.Object;
 	}
 
-	static ConstructorHelpers::FObjectFinder<UInputAction> InputLook(TEXT("/Script/EnhancedInput.InputAction'/Game/Player/Input/Action/IA_Look.IA_Look'"));
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputLook(
+		TEXT("/Script/EnhancedInput.InputAction'/Game/Player/Input/Action/IA_Look.IA_Look'"));
 	if (InputLook.Object != nullptr)
 	{
 		LookAction = InputLook.Object;
 	}
 
-	static ConstructorHelpers::FObjectFinder<UInputAction> InputJump(TEXT("/Script/EnhancedInput.InputAction'/Game/Player/Input/Action/IA_Jump.IA_Jump'"));
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputJump(
+		TEXT("/Script/EnhancedInput.InputAction'/Game/Player/Input/Action/IA_Jump.IA_Jump'"));
 	if (InputJump.Object != nullptr)
 	{
 		JumpAction = InputJump.Object;
 	}
 
-	static ConstructorHelpers::FObjectFinder<UInputAction> InputSprint(TEXT("/Script/EnhancedInput.InputAction'/Game/Player/Input/Action/IA_Sprint.IA_Sprint'"));
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputSprint(
+		TEXT("/Script/EnhancedInput.InputAction'/Game/Player/Input/Action/IA_Sprint.IA_Sprint'"));
 	if (InputSprint.Object != nullptr)
 	{
 		SprintAction = InputSprint.Object;
 	}
 
-	static ConstructorHelpers::FObjectFinder<UInputAction> InputFire(TEXT("/Script/EnhancedInput.InputAction'/Game/Player/Input/Action/IA_Fire.IA_Fire'"));
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputFire(
+		TEXT("/Script/EnhancedInput.InputAction'/Game/Player/Input/Action/IA_Fire.IA_Fire'"));
 	if (InputFire.Object != nullptr)
 	{
 		FireAction = InputFire.Object;
@@ -351,41 +316,51 @@ void ACH4Character::InitializationInput()
 	{
 		FreeLookAction = InputFreeLook.Object;
 	}
-
+	
 	static ConstructorHelpers::FObjectFinder<UInputAction> InputEquip(TEXT("/Script/EnhancedInput.InputAction'/Game/Player/Input/Action/IA_Equip.IA_Equip'"));
 	if (InputEquip.Object != nullptr)
 	{
 		EquipAction = InputEquip.Object;
 	}
 
-	static ConstructorHelpers::FObjectFinder<UInputAction> InputEquip2(TEXT("/Script/EnhancedInput.InputAction'/Game/Player/Input/Action/IA_Equip2.IA_Equip2'"));
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputEquip2(
+		TEXT("/Script/EnhancedInput.InputAction'/Game/Player/Input/Action/IA_Equip2.IA_Equip2'"));
 	if (InputEquip.Object != nullptr)
 	{
 		EquipAction2 = InputEquip2.Object;
 	}
 
-	static ConstructorHelpers::FObjectFinder<UInputAction> InputHeal(TEXT("/Script/EnhancedInput.InputAction'/Game/Player/Input/Action/IA_Heal.IA_Heal'"));
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputHeal(
+		TEXT("/Script/EnhancedInput.InputAction'/Game/Player/Input/Action/IA_Heal.IA_Heal'"));
 	if (InputEquip.Object != nullptr)
 	{
 		HealAction = InputHeal.Object;
 	}
-	static ConstructorHelpers::FObjectFinder<UInputAction> InputReload(TEXT("/Script/EnhancedInput.InputAction'/Game/Player/Input/Action/IA_Reload.IA_Reload'"));
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputReload(
+		TEXT("/Script/EnhancedInput.InputAction'/Game/Player/Input/Action/IA_Reload.IA_Reload'"));
 	if (InputEquip.Object != nullptr)
 	{
 		ReloadAction = InputReload.Object;
 	}
 
-	static ConstructorHelpers::FObjectFinder<UInputAction> InputInteract(TEXT("/Script/EnhancedInput.InputAction'/Game/Player/Input/Action/IA_Interaction.IA_Interaction'"));
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputInteract(
+		TEXT("/Script/EnhancedInput.InputAction'/Game/Player/Input/Action/IA_Interaction.IA_Interaction'"));
 	if (InputInteract.Object != nullptr)
 	{
 		InteractAction = InputInteract.Object;
 	}
-
+	
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputThrow(
+		TEXT("/Script/EnhancedInput.InputAction'/Game/Player/Input/Action/IA_Throw.IA_Throw'"));
+	if (InputThrow.Object != nullptr)
+	{
+		ThrowAction = InputThrow.Object;
+	}
 }
 
 //무브
 void ACH4Character::Move(const FInputActionValue& Value)
-	{
+{
 	const FVector2D Movement = Value.Get<FVector2D>();
 
 	FRotator MoveBasisRotation = FRotator::ZeroRotator;
@@ -408,6 +383,7 @@ void ACH4Character::Move(const FInputActionValue& Value)
 	AddMovementInput(Forward, Movement.Y);
 	AddMovementInput(Right, Movement.X);
 }
+
 //뛰기시작
 void ACH4Character::StartSprint()
 {
@@ -515,7 +491,7 @@ void ACH4Character::UpdateAimCamera(float DeltaTime)
 void ACH4Character::Fires()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Weapon: %s"),
-		EquippableComponent->CurrentWeapon ? TEXT("있음") : TEXT("없음"));
+	       EquippableComponent->CurrentWeapon ? TEXT("있음") : TEXT("없음"));
 	if (EquippableComponent == nullptr)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, TEXT("컴포넌트 자체가 널입니다!"));
@@ -569,11 +545,16 @@ void ACH4Character::Multi_PlayAction_Implementation(EPlayerActionState NewState)
 	{
 		switch (NewState)
 		{
-		case EPlayerActionState::Hit:    PlayAnimMontage(AnimInst->HitHeadMontage); break;
-		case EPlayerActionState::Pickup: AnimInst->Montage_Play(AnimInst->PickupMontage); break;
-		case EPlayerActionState::Down:   AnimInst->Montage_Play(AnimInst->DownMontage);   break;
-		case EPlayerActionState::Dead:   AnimInst->Montage_Play(AnimInst->DeathMontage);  break;
-		case EPlayerActionState::Revive: AnimInst->Montage_Play(AnimInst->ReviveMontage); break;
+		case EPlayerActionState::Hit: PlayAnimMontage(AnimInst->HitHeadMontage);
+			break;
+		case EPlayerActionState::Pickup: AnimInst->Montage_Play(AnimInst->PickupMontage);
+			break;
+		case EPlayerActionState::Down: AnimInst->Montage_Play(AnimInst->DownMontage);
+			break;
+		case EPlayerActionState::Dead: AnimInst->Montage_Play(AnimInst->DeathMontage);
+			break;
+		case EPlayerActionState::Revive: AnimInst->Montage_Play(AnimInst->ReviveMontage);
+			break;
 		}
 	}
 	UE_LOG(LogTemp, Warning, TEXT("%d"), (int32)NewState);
@@ -685,16 +666,198 @@ bool ACH4Character::TryPickupNearbyItem()
 		//줍기 가능한 아이템을 태그로 구분 아이템 BP 또는 액터에 "PickupItem" 태그를 넣어두면 됨
 		if (Actor->ActorHasTag(TEXT("PickupItem")))
 		{
+			ABaseItem* ItemActor = Cast<ABaseItem>(Actor);
+			if (ItemActor)
+			{
+				if (ItemActor->ItemData) 
+				{
+					ApplyItemEffect(ItemActor->ItemData);
+				}
+				else
+				{	
+					UE_LOG(LogTemp, Error, TEXT("야후: %s의 상속된 ItemData가 비어있어!"), *Actor->GetName());
+				}
+			}
 			UE_LOG(LogTemp, Warning, TEXT("%s 아이템을 줍습니다."), *Actor->GetName());
 
 			PlayPickupAnimation();
-
 			// 실제 인벤토리 처리나 Destroy는
-			// Actor->Destroy();
-
+			Actor->Destroy();
 			return true;
 		}
 	}
-
 	return false;
+}
+
+
+void ACH4Character::OnRep_CombatPose()
+{
+	UE_LOG(LogTemp, Warning, TEXT("CombatPose changed: %d"), (int32)CurrentCombatPose);
+}
+
+void ACH4Character::ApplyItemEffect(UConsumableDataAsset* Data)
+{
+	if (!Data) 
+	{
+		UE_LOG(LogTemp, Error, TEXT("야후: 전달된 데이터가 없습니다!"));
+		return;
+	}
+
+	// 💡 디버깅용: 어떤 타입이 들어왔는지 입구에서 확인!
+	UE_LOG(LogTemp, Log, TEXT("야후: ApplyItemEffect 호출됨. 타입: %d"), (int32)Data->Type);
+
+	switch (Data->Type)
+	{
+	case EEffectType::Ammo:
+		{
+			TArray<AActor*> AttachedActors;
+			GetAttachedActors(AttachedActors);
+
+			for (AActor* Actor : AttachedActors)
+			{
+				if (AEquippable* FoundWeapon = Cast<AEquippable>(Actor))
+				{
+					FoundWeapon->AddMaxClip(Data->Value);
+					UE_LOG(LogTemp, Warning, TEXT("야후: 무기 충전 완료! 현재 총알: %d,%f"), FoundWeapon->GetMaxClip(),Data->Value);
+					return; // 무기 하나 충전했으면 종료
+				}
+			}
+			UE_LOG(LogTemp, Error, TEXT("야후: 충전할 무기를 찾지 못했습니다!"));
+		}
+		break;
+
+	case EEffectType::Health:
+		{
+			HealItemCount++;
+			UE_LOG(LogTemp, Warning, TEXT("야후: 체력 회복 아이템획득 갯수: %d"),HealItemCount);
+		}
+		break;
+       
+	case EEffectType::Gear:
+		{
+			UE_LOG(LogTemp, Error, TEXT("야후: 기어 아이템 주움 로직 진입!"));
+			
+			if (ACH4GameState* GS = GetWorld()->GetGameState<ACH4GameState>())
+			{
+				GS->AddGearPartsCount();
+				UE_LOG(LogTemp, Warning, TEXT("야후: 게임 스테이트에 기어 부품 추가 완료!"));
+			}
+			else
+			{
+				UE_LOG(LogTemp, Error, TEXT("야후: GameState를 찾을 수 없거나 ACH4GameState가 아닙니다!"));
+			}
+		}
+		break;
+	case EEffectType::Grenade:
+		{
+			GrenadeCount++;
+			UE_LOG(LogTemp, Warning, TEXT("야후: 수류탄 아이템획득 갯수: %d"),GrenadeCount);
+		}
+
+	default:
+		UE_LOG(LogTemp, Warning, TEXT("야후: 정의되지 않은 아이템 타입입니다."));
+		break;
+	}
+}
+
+void ACH4Character::Server_ThrowGrenade_Implementation()
+{
+	if (bUSingGrenade)
+	{
+		UE_LOG(LogTemp,Error,TEXT("수류탄 쿨타임중"))
+		return;
+	}
+	bUSingGrenade = true;
+	if (GrenadeCount <= 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("수류탄 갯수 확인해 갯수 : %d"),GrenadeCount);
+		return;
+	}
+	if (!GrenadeClass)
+	{
+		UE_LOG(LogTemp,Error,TEXT("서버아님 수류탄 생성 불가"))
+		return;
+	}
+	FVector SpawnLocation = GetMesh()->GetSocketLocation(TEXT("Weapon_r"));
+	FRotator SpawnRotation = GetControlRotation();
+
+	AThorwbleItems* Grenade = GetWorld()->SpawnActor<AThorwbleItems>(
+		GrenadeClass, SpawnLocation, SpawnRotation);
+
+	if (Grenade)
+	{
+		GrenadeCount--;
+		Grenade->SetOwner(this);
+		Grenade->SetInstigator(this);
+        
+		FVector ThrowVelocity = GetControlRotation().Vector() * 1500.0f;
+		Grenade->ProjectileMovement->Velocity = ThrowVelocity;
+
+		UE_LOG(LogTemp, Warning, TEXT("수류탄 스폰 성공 - 위치: %s / 속도: %s"),
+			*SpawnLocation.ToString(), *ThrowVelocity.ToString());
+		GetWorld()->GetTimerManager().SetTimer(ExplosionTimerHandle,Grenade,&AThorwbleItems::Explode,1.5f,false);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("수류탄 스폰 실패 - GrenadeClass: %s"),
+			*GrenadeClass->GetName());
+	}
+	GetWorld()->GetTimerManager().SetTimer(GrenadeTimer,this,&ACH4Character::CanUSingGrenade,5.f,false);
+}
+
+void ACH4Character::ThrowGrenade()
+{
+	Server_ThrowGrenade();
+}
+
+void ACH4Character::OnThrowGrenade()
+{
+	UE_LOG(LogTemp,Error,TEXT("G키 입력 성공"))
+	ThrowGrenade();
+}
+
+void ACH4Character::CanUSingGrenade()
+{
+	 bUSingGrenade = false;
+}
+
+void ACH4Character::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ACH4Character, CurrentCombatPose);
+	DOREPLIFETIME(ACH4Character, HealItemCount);
+	DOREPLIFETIME(ACH4Character, GrenadeCount);
+	DOREPLIFETIME(ACH4Character,bUSingGrenade);
+}
+
+//애니매이션 업데이트
+void ACH4Character::UpdateCombatPose()
+{
+	if (!EquippableComponent || !EquippableComponent->CurrentWeapon)
+	{
+		CurrentCombatPose = ECombatPose::Normal;
+		return;
+	}
+
+	ECombatPose Data = EquippableComponent->CurrentWeapon->WeaponData->GetGunDataAsset();
+
+
+	CurrentCombatPose = Data;
+	
+}
+
+void ACH4Character::Server_UseHealItem_Implementation()
+{
+	UE_LOG(LogTemp,Error,TEXT("서버 힐요청됨"))
+	if (DefaultHealData&&HealItemCount > 0)
+	{
+		CurrentHP = FMath::Clamp(CurrentHP + DefaultHealData->Value, 0.0f, MaxHP);
+		HealItemCount--;
+		UE_LOG(LogTemp, Log, TEXT("야후: 힐 사용! 남은 체력: %f, 남은 개수: %d,힐량:%f"), CurrentHP, HealItemCount,DefaultHealData->Value);
+	}
+	else
+	{
+		UE_LOG(LogTemp,Error,TEXT(" 데이터 에셋이 유호하지않거나 힐아이템부족"))
+	}
 }

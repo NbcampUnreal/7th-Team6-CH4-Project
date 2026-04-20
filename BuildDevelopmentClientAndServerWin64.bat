@@ -7,7 +7,7 @@ title [Development] 프로젝트 빌드
 :: 프로젝트, 엔진 위치 등 빌드 관련 설정
 :: ============================
 set PROJECT_NAME=CH4_TeamProject
-set ENGINE_PATH="C:\UE_5.6_Custom\Engine"
+set ENGINE_PATH="C:\UECustomEG\UE_5.6_Custom\Engine"
 set CONFIG=Development
 set BUILD_PLATFORM=Win64
 set PROJECT_PATH=%~dp0%PROJECT_NAME%.uproject

@@ -7,10 +7,9 @@
 #include "Ranged Weapon/RangedWeaponDataAsset.h"
 #include "Ranged Weapon/RangedWeapons.h"
 #include "Components/StaticMeshComponent.h"
+#include "Equippable.h"
 
 
-class URangedGunDataAsset;
-// Sets default values for this component's properties
 UEquippableComponent::UEquippableComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
@@ -23,7 +22,7 @@ void UEquippableComponent::Fire()
 	{
 		return;
 	}
-	CurrentWeapon->Fire();
+	CurrentWeapon->Server_Attack();
 }
 
 void UEquippableComponent::Reload()
@@ -32,7 +31,8 @@ void UEquippableComponent::Reload()
 	{
 		return;
 	}
-	CurrentWeapon->Server_ReLoad();
+	
+	CurrentWeapon->Server_Reload();
 }
 
 
@@ -40,23 +40,24 @@ void UEquippableComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(UEquippableComponent, CurrentWeapon);
+	DOREPLIFETIME(UEquippableComponent, UsingWeapon); 
 }
 
-void UEquippableComponent::EquipWeapon_Implementation(URangedGunDataAsset* WeaponData)
+void UEquippableComponent::EquipWeapon_Implementation(UWeaponData* NewWeaponData)
 {
-	if (!GetOwner()->HasAuthority() || !WeaponData)
+	if (!GetOwner()->HasAuthority() || !NewWeaponData)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("EquipWeapon Called!"));
 		return;
 	}
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("EquipWeapon Called!"));
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("함수 호출 성공"));
 
 	UWorld* World = GetWorld();
 	if (!World)
 	{
 		return;
 	}
-
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("월드 존재함"));
 	if (CurrentWeapon)
 	{	
 		WeaponAmmoMemory.Add(CurrentWeapon->GetClass(), CurrentWeapon->CurrentAmmo);
@@ -68,12 +69,18 @@ void UEquippableComponent::EquipWeapon_Implementation(URangedGunDataAsset* Weapo
 	SpawnActor.Instigator = Cast<APawn>(GetOwner());
 	SpawnActor.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-	CurrentWeapon = World->SpawnActor<ARangedWeapons>
-	(WeaponData->WeaponClass,
+	CurrentWeapon = World->SpawnActor<AEquippable>
+	(NewWeaponData->WeaponClass,
 	 GetOwner()->GetActorLocation(),
 	 GetOwner()->GetActorRotation(),
 	 SpawnActor);
+
+	if (CurrentWeapon)
+	{
+		CurrentWeapon->WeaponData->SetGunDataAsset(NewWeaponData->GetGunDataAsset());
+	}
 	
+	CurrentWeapon->WeaponData = NewWeaponData;
 	if (CurrentWeapon)
 	{
 		ACharacter* MyCharacter = Cast<ACharacter>(GetOwner());
@@ -89,9 +96,9 @@ void UEquippableComponent::EquipWeapon_Implementation(URangedGunDataAsset* Weapo
 	}
 	if (CurrentWeapon)
 	{
-		if (WeaponAmmoMemory.Contains(WeaponData->WeaponClass))
+		if (WeaponAmmoMemory.Contains(NewWeaponData->WeaponClass))
 		{
-			CurrentWeapon->CurrentAmmo = (WeaponAmmoMemory[WeaponData->WeaponClass]);
+			CurrentWeapon->CurrentAmmo = (WeaponAmmoMemory[NewWeaponData->WeaponClass]);
 		}
 		else
 		{
@@ -99,7 +106,8 @@ void UEquippableComponent::EquipWeapon_Implementation(URangedGunDataAsset* Weapo
 		}
 	}
 }
-	
+
+// 헌호님 작성 코드	
 FTransform UEquippableComponent::GetLeftHandSocketTransform() const
 {
 	if (CurrentWeapon && CurrentWeapon->WeaponMesh)

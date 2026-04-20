@@ -1,5 +1,9 @@
 
 #pragma once
+#include "CoreMinimal.h"
+#include "DataBase.generated.h"
+
+
 
 UENUM(BlueprintType)
 enum class EPlayerLifeState : uint8
@@ -36,3 +40,14 @@ enum class EDayPhase : uint8
 	Evening UMETA(DisplayName = "Evening"),
 	Night UMETA(DisplayName = "Night")
 };
+
+UENUM(BlueprintType)
+enum class ECombatPose : uint8
+{
+	Normal  UMETA(DisplayName = "Normal"),
+	Melee   UMETA(DisplayName = "Melee"),
+	Pistol  UMETA(DisplayName = "Pistol"),
+	Shotgun UMETA(DisplayName = "Shotgun"),
+	Rifle   UMETA(DisplayName = "Rifle")
+};
+
