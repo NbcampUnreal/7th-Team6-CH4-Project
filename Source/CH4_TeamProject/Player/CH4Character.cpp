@@ -85,41 +85,10 @@ void ACH4Character::Tick(float DeltaTime)
 
 	UpdateAimCamera(DeltaTime);//조준 카메라 상태 업데이트
 	
-	FVector CapsuleLoc = GetCapsuleComponent()->GetComponentLocation();
-	FVector MeshLoc = GetMesh()->GetComponentLocation();
-	float Diff = FVector::Dist(CapsuleLoc, MeshLoc);
-
-	// 무기 장착 전후 차이가 크면 여기서 잡힘
-	if (Diff > 100.f)
-	{
-		UE_LOG(LogTemp, Error, TEXT("[이상감지] 캡슐-메시 차이 너무 큼: %.2f"), Diff);
-		UE_LOG(LogTemp, Error, TEXT("[캡슐위치] %s"), *CapsuleLoc.ToString());
-		UE_LOG(LogTemp, Error, TEXT("[메시위치] %s"), *MeshLoc.ToString());
-	}
-
-	// 캐릭터 루트 컴포넌트 스케일
-	FVector RootScale = GetRootComponent()->GetComponentScale();
-	UE_LOG(LogTemp, Warning, TEXT("[RootScale] %s"), *RootScale.ToString());
-
-	// 무브먼트 속도
-	FVector Velocity = GetVelocity();
-	UE_LOG(LogTemp, Warning, TEXT("[Velocity] %s"), *Velocity.ToString());
 }
 
 void ACH4Character::OnEquipInput1()
 {
-	UE_LOG(LogTemp, Error, TEXT("호출은 성공"));
-
-	if (EquippableComponent == nullptr)
-	{
-		UE_LOG(LogTemp, Error, TEXT("실패 원인: EquippableComponent가 비어있음!"));
-	}
-
-	if (PrimaryWeaponData1 == nullptr)
-	{
-		UE_LOG(LogTemp, Error, TEXT("실패 원인: PrimaryWeaponData가 비어있음! 에디터에서 할당했는지 확인하세요."));
-	}
-
 	if (EquippableComponent && PrimaryWeaponData1)
 	{
 		EquippableComponent->EquipWeapon(PrimaryWeaponData1);

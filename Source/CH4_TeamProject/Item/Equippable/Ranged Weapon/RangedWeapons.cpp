@@ -113,58 +113,35 @@ void ARangedWeapons::Attack_Implementation_Internal()
 void ARangedWeapons::Multicast_PlayEffects_Implementation(FVector TraceStart, FVector TraceEnd, bool bHit)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("Multicast 실행됨!"));
-	FColor LineColor = bHit ? FColor::Red : FColor::Green;
 
-	DrawDebugLine(
-		GetWorld(),
-		TraceStart, // 서버에서 받은 시작점
-		TraceEnd,
-		LineColor,
-		false,
-		2.0f,
-		0,
-		2.0f
-	);
-	//사운드 재생
-	if (DataAsset->FireSound)
+	FColor LineColor = bHit ? FColor::Red : FColor::Green;
+	DrawDebugLine(GetWorld(), TraceStart, TraceEnd, LineColor, false, 2.0f, 0, 2.0f);
+
+	if (!WeaponData) return; // ← 하나로 통일
+
+	// 사운드
+	if (WeaponData->FireSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, WeaponData->FireSound, TraceStart);
 	}
+
+	// 머즐플래시
 	if (WeaponData->MuzzleFlash)
 	{
 		if (!WeaponMesh)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("컴포넌트 없음"))
+			UE_LOG(LogTemp, Warning, TEXT("컴포넌트 없음"));
 			return;
 		}
-		if (!WeaponData)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("데이터가 유효하지않음"))
 
-			return;
-		}
-		if (!WeaponData->MuzzleFlash)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("이펙트가 없음"))
-			return;
-		}
-		
-		FBoxSphereBounds MeshBounds = WeaponMesh->CalcBounds(WeaponMesh->GetComponentTransform());
-		FVector WeaponLoc = WeaponMesh->GetComponentLocation();
-		FVector ForwardVector = WeaponMesh->GetForwardVector();
-
-
-		float HalfLength = MeshBounds.BoxExtent.X;
-
-
-		FVector FinalSpawnLoc = WeaponLoc + (ForwardVector * HalfLength);
-
+		FVector MuzzleLoc = WeaponMesh->GetSocketLocation(TEXT("Muzzle"));
+		FRotator MuzzleRot = WeaponMesh->GetSocketRotation(TEXT("Muzzle"));
 
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
 			GetWorld(),
 			WeaponData->MuzzleFlash,
-			FinalSpawnLoc,
-			WeaponMesh->GetComponentRotation()
+			MuzzleLoc,
+			MuzzleRot
 		);
 	}
 }
