@@ -100,7 +100,7 @@ void ARangedWeapons::Attack_Implementation_Internal()
 	UAISense_Hearing::ReportNoiseEvent(
 		GetWorld(),
 		GetActorLocation(),
-		1.0f, // Loudness
+		1.0f, 
 		this,
 		0.f,
 		NAME_None
