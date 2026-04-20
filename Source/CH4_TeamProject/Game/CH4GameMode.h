@@ -17,8 +17,7 @@ public:
 
 	virtual void BeginPlay() override ;
 	virtual void PostLogin(APlayerController* NewPlayer) override;
-
-public:
+	
 	void PlayGame();
 	void EndGame(EGamePhase GP);
 	
@@ -33,7 +32,7 @@ public:
 	void RequestReturnToLobby();
 	
 private:
-	void UpdateMainServerTime() const;
+	// void UpdateMainServerTime() const;
 	
 	bool bGameStarted = false;
 	bool bIsReturningToLobby = false;

@@ -14,17 +14,13 @@ class CH4_TEAMPROJECT_API ACH4GameState : public AGameState
 
 public:
 	ACH4GameState();
-	
 	virtual void BeginPlay() override;
 	
-	virtual void Tick(float DeltaSeconds) override;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Leve2")
 	int32 MaxLevels;
 
 	UPROPERTY(VisibleAnyWhere, BlueprintReadWrite, Category = "Score")
 	int32 Score;
-	
 
 	UFUNCTION(BlueprintPure, Category = "Score")
 	int32 GetScore() const;
@@ -36,11 +32,20 @@ public:
 	FORCEINLINE float GetServerTime() const { return ServerTime; }
 	FORCEINLINE void SetServerTime(const float NewTime) { ServerTime = NewTime; }
 
+private:
+	FTimerHandle ServerTimeHandle;
+	
+	const float TotalDayPhaseCycleTime = 7.f * 60.f;
+	
+	const float DayTime = 2.5f * 60.f;
+	const float EveningTime = 0.5f * 60.f;
+	const float NightTime = 4.f * 60.f;
+	
 public:	
 	UPROPERTY(Replicated)
 	int32 AlivePlayerCount = 0;
 	
-	UPROPERTY(Replicated, BlueprintReadOnly)
+	UPROPERTY(ReplicatedUsing = OnRep_ServerTime, BlueprintReadOnly)
 	float ServerTime = 0.f;
 
 	UPROPERTY(ReplicatedUsing = OnRep_GamePhase, BlueprintReadWrite)
@@ -51,9 +56,6 @@ public:
 	
 	UPROPERTY(ReplicatedUsing = OnRep_DayPhase)
 	EDayPhase DayPhase = EDayPhase::None;
-	
-	// UPROPERTY(Replicated)
-	// float DayPhaseTimeCount;
 
 	UPROPERTY()
 	class ADirectionalLight* DirectionalLight;
@@ -74,6 +76,12 @@ public:
 	UFUNCTION()
 	void OnRep_DayPhase();
 	
+	UFUNCTION()
+	void OnRep_ServerTime();
+	
+	void UpdateLapsedTime();
+	
+public:
 	int32 GetAlivePlayerCount() const{ return AlivePlayerCount; }
 	
 	UFUNCTION(Server, Reliable)
@@ -87,7 +95,8 @@ public:
 	
 	bool CheckAlivePlayerIsZero();
 	
-	void ApplyDayPhaseChanges();
+	void ApplyDayPhaseChanges(EDayPhase DP);
+	void FindLightAndFog();
 	
 public:	
 	EGamePhase GetGamePhase() const {  return GamePhase; }
@@ -96,9 +105,9 @@ public:
 	EDayPhase GetDayPhase() const {  return DayPhase; }
 	void SetDayPhase(EDayPhase NewPhase);
 	
-	void SetLightsAndFogActor();
+	// void SetLightsAndFogActor();
 	
-protected:
-	UPROPERTY()
-	class ADirectionalLight* SunLight;
+// protected:
+// 	UPROPERTY()
+// 	class ADirectionalLight* SunLight;
 };

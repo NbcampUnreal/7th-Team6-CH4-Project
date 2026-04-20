@@ -4,6 +4,7 @@
 #include "CH4_TeamProject/Player/CH4PlayerController.h"
 #include "CH4_TeamProject/DataBase/DataBase.h"
 #include "EngineUtils.h" 
+#include "InterchangeResult.h"
 #include "Components/ExponentialHeightFogComponent.h"
 #include "Engine/DirectionalLight.h"
 #include "Components/LightComponent.h"
@@ -15,7 +16,7 @@
 ACH4GameState::ACH4GameState()
 {
 	bReplicates = true;
-	PrimaryActorTick.bCanEverTick = false;
+	// PrimaryActorTick.bCanEverTick = false;
 	
 	GamePhase = EGamePhase::None;
 	GearPartsCount = 0;
@@ -34,21 +35,51 @@ void ACH4GameState::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	SetLightsAndFogActor();
-	
-	if (DirectionalLight == nullptr || SkyLight == nullptr || Fog == nullptr)
+	if (HasAuthority())
 	{
-		SetActorTickEnabled(true);
-		UE_LOG(LogTemp, Error, TEXT("틱함수가 활성화 됨"))
+		GetWorldTimerManager().SetTimer(
+			ServerTimeHandle,
+			this,
+			&ACH4GameState::UpdateLapsedTime,
+			1.0f,   // 1초 단위
+			true);
+	}
+	
+	FindLightAndFog();
+}
+
+void ACH4GameState::UpdateLapsedTime()
+{
+	// ElapsedTime += 1.f;
+	UE_LOG(LogTemp, Warning, TEXT("DayPhase 경과 시간 : %d"), ElapsedTime);
+	
+	if (ElapsedTime >= TotalDayPhaseCycleTime)
+		ElapsedTime = 0;
+	
+	EDayPhase NewPhase = DayPhase;
+	
+	if (ElapsedTime < DayTime)
+	{
+		NewPhase = EDayPhase::Day;
+	}
+	else if (ElapsedTime < DayTime + EveningTime)
+	{
+		NewPhase = EDayPhase::Evening;
+	}
+	else
+	{
+		NewPhase = EDayPhase::Night;
+	}
+	
+	if (DayPhase != NewPhase)
+	{
+		DayPhase = NewPhase;
+	
+		OnRep_DayPhase(); 
+		// 서버에서는 OnRep 자동 호출 x -> 서버에서 DayPhaseChang 실행 -> 클라에 변수 자동 복제 -> 클라에서 실행
 	}
 }
 
-void ACH4GameState::Tick(float DeltaSeconds)
-{
-	Super::Tick(DeltaSeconds);
-	
-	SetLightsAndFogActor();
-}
 
 void ACH4GameState::AddScore(int32 Amount)
 {
@@ -109,7 +140,12 @@ void ACH4GameState::OnRep_GamePhase() // 변경 시 자동 호출
 
 void ACH4GameState::OnRep_DayPhase()
 {
-	ApplyDayPhaseChanges();
+	ApplyDayPhaseChanges(DayPhase);
+}
+
+void ACH4GameState::OnRep_ServerTime()
+{
+	// Todo : UI 갱신
 }
 
 void ACH4GameState::AddAlivePlayerCount_Implementation()
@@ -160,15 +196,17 @@ void ACH4GameState::SetGamePhase(EGamePhase NewPhase)
 	GamePhase = NewPhase;
 }
 
-void ACH4GameState::ApplyDayPhaseChanges()
+void ACH4GameState::ApplyDayPhaseChanges(EDayPhase DP)
 {
 	if (!DirectionalLight || !SkyLight || !Fog)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("DayPhase cannot be reflected."));
+		UE_LOG(LogTemp, Warning, TEXT("라이트 가져오기 실패(ApplyDayPhaseChanges 함수)."));
+		GetWorldTimerManager().SetTimerForNextTick(this, &ACH4GameState::FindLightAndFog);
+		
 		return;
 	}
 
-	switch (DayPhase)
+	switch (DP)
 	{
 		case EDayPhase::None:
 			{
@@ -222,7 +260,46 @@ void ACH4GameState::ApplyDayPhaseChanges()
 				break;
 			}
 	}
-	SkyLight->GetLightComponent()->RecaptureSky(); // 갱신
+	SkyLight->GetLightComponent()->RecaptureSky(); // 바꾼 값 갱신
+}
+
+void ACH4GameState::FindLightAndFog()
+{
+	for (TActorIterator<ADirectionalLight> It(GetWorld()); It; ++It)
+	{
+		DirectionalLight = *It;
+		UE_LOG(LogTemp, Warning, TEXT("DirectionalLight Actor is found."));
+		
+		if (DirectionalLight == nullptr) 
+			UE_LOG(LogTemp, Error, TEXT("DirectionalLight Actor is not found."));
+		break;
+	}
+	
+	for (TActorIterator<ASkyLight> It(GetWorld()); It; ++It)
+	{
+		SkyLight = *It;
+		UE_LOG(LogTemp, Warning, TEXT("SkyLight Actor is found."));
+		
+		if (SkyLight == nullptr) 
+			UE_LOG(LogTemp, Error, TEXT("SkyLight Actor is not found."));
+		break;
+	}
+	
+	for (TActorIterator<AExponentialHeightFog> It(GetWorld()); It; ++It)
+	{
+		Fog = *It;
+		UE_LOG(LogTemp, Warning, TEXT("Fog Actor is found."));
+		
+		if (Fog == nullptr) 
+			UE_LOG(LogTemp, Error, TEXT("Fog Actor is not found."));
+		break;
+	}
+	
+	if (DirectionalLight == nullptr || SkyLight == nullptr || Fog == nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("날씨 액터 못찾음."));
+		GetWorldTimerManager().SetTimerForNextTick(this, &ACH4GameState::FindLightAndFog);
+	}
 }
 
 void ACH4GameState::SetDayPhase(EDayPhase NewPhase)
@@ -230,49 +307,17 @@ void ACH4GameState::SetDayPhase(EDayPhase NewPhase)
 	if (DayPhase == NewPhase) return;
 	DayPhase = NewPhase;
 	
-	if (HasAuthority()) // 클라는 온랩 함수로 자동 실행됨
+	if (HasAuthority()) // 서버에서 따로 실행
 	{
-		ApplyDayPhaseChanges();
+		ApplyDayPhaseChanges(NewPhase);
 	}
 }
 
-void ACH4GameState::SetLightsAndFogActor()
-{
-	if (!GetWorld()) return;
-	
-	for (TActorIterator<ADirectionalLight> It(GetWorld()); It; ++It)
-	{
-		DirectionalLight = *It;
-		UE_LOG(LogTemp, Warning, TEXT("DirectionalLight Actor is finded."));
-		
-		if (DirectionalLight == nullptr) 
-			UE_LOG(LogTemp, Error, TEXT("DirectionalLight Actor is notfinded."));
-		break;
-	}
-	
-	for (TActorIterator<ASkyLight> It(GetWorld()); It; ++It)
-	{
-		SkyLight = *It;
-		UE_LOG(LogTemp, Warning, TEXT("SkyLight Actor is finded."));
-		
-		if (SkyLight == nullptr) 
-			UE_LOG(LogTemp, Error, TEXT("SkyLight Actor is notfinded."));
-		break;
-	}
-	
-	for (TActorIterator<AExponentialHeightFog> It(GetWorld()); It; ++It)
-	{
-		Fog = *It;
-		UE_LOG(LogTemp, Warning, TEXT("Fog Actor is finded."));
-		
-		if (Fog == nullptr) 
-			UE_LOG(LogTemp, Error, TEXT("Fog Actor is notfinded."));
-		break;
-	}
-	
-	if (DirectionalLight != nullptr && SkyLight != nullptr && Fog != nullptr)
-	{
-		SetActorTickEnabled(false);
-		UE_LOG(LogTemp, Error, TEXT("게임 스테이트의 틱함수 꺼짐"));
-	}
-} 
+// void ACH4GameState::SetLightsAndFogActor()
+// {
+// 	if (!GetWorld()) return;
+// 	
+//
+// 	
+//
+// } 

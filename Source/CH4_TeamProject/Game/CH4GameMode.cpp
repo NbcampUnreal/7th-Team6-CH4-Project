@@ -48,6 +48,8 @@ void ACH4GameMode::BeginPlay()
 		ACH4PlayerController* PC = Cast<ACH4PlayerController>(It->Get());
 		PC->Client_EnablePlayerInput();
 	}
+	
+	
 }
 
 void ACH4GameMode::PostLogin(APlayerController* NewPlayer)
@@ -81,6 +83,7 @@ void ACH4GameMode::PlayGame()
 	if (GS)
 	{
 		GS->SetGamePhase(EGamePhase::StartStage);
+		GS->SetDayPhase(EDayPhase::Day);
 	}
 	
 	GetWorld()->ServerTravel(TEXT("/Game/Maps/REALSTAGE"));
@@ -204,12 +207,12 @@ void ACH4GameMode::RequestReturnToLobby()
 	GetWorld()->ServerTravel(LobbyMapPath);
 }
 
-void ACH4GameMode::UpdateMainServerTime() const
-{
-	if (ACH4GameState* GS = GetGameState<ACH4GameState>())
-	{
-		GS->SetServerTime(GetWorld()->GetTimeSeconds());
-	}
-}
+// void ACH4GameMode::UpdateMainServerTime() const
+// {
+// 	if (ACH4GameState* GS = GetGameState<ACH4GameState>())
+// 	{
+// 		GS->SetServerTime(GetWorld()->GetTimeSeconds());
+// 	}
+// }
 
 
