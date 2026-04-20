@@ -39,5 +39,7 @@ enum class ECombatPose : uint8
 	Melee   UMETA(DisplayName = "Melee"),
 	Pistol  UMETA(DisplayName = "Pistol"),
 	Shotgun UMETA(DisplayName = "Shotgun"),
-	Rifle   UMETA(DisplayName = "Rifle")
+	Rifle   UMETA(DisplayName = "Rifle"),
+	MuchineGun UMETA(DisplayName = "MuchineGun"),
+	BOOM UMETA(DisplayName = "BOOM")
 };
