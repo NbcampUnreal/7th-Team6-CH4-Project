@@ -42,6 +42,7 @@ void UEquippableComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(UEquippableComponent, CurrentWeapon);
+	DOREPLIFETIME(UEquippableComponent, AllCurrentWeapon);
 	DOREPLIFETIME(UEquippableComponent, UsingWeapon); 
 }
 
@@ -81,19 +82,23 @@ void UEquippableComponent::EquipWeapon_Implementation(UWeaponData* NewWeaponData
 	{
 		CurrentWeapon->SetOwner(GetOwner());
 		CurrentWeapon->WeaponData->SetGunDataAsset(NewWeaponData->GetGunDataAsset());
+		CurrentWeapon->WeaponData = NewWeaponData;
+		CurrentWeapon->OnRep_WeaponData();
 	}
 	
-	CurrentWeapon->WeaponData = NewWeaponData;
-	if (CurrentWeapon)
+	if (CurrentWeapon)	
 	{
 		ACharacter* MyCharacter = Cast<ACharacter>(GetOwner());
 		if (MyCharacter)
 		{
 			CurrentWeapon->AttachToComponent
 			(MyCharacter->GetMesh(),
-			FAttachmentTransformRules::SnapToTargetIncludingScale,
+			FAttachmentTransformRules::SnapToTargetNotIncludingScale ,
 			FName("Weapon_r")
 			);
+			CurrentWeapon->WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			CurrentWeapon->WeaponMesh->SetCollisionResponseToAllChannels(ECR_Ignore);
+			CurrentWeapon->bCollisionDisabled = true;
 		}
 		UsingWeapon = true;
 	}
@@ -108,6 +113,7 @@ void UEquippableComponent::EquipWeapon_Implementation(UWeaponData* NewWeaponData
 			CurrentWeapon->SetCurrentAmmo();
 		}
 	}
+	
 }
 
 // 헌호님 작성 코드	

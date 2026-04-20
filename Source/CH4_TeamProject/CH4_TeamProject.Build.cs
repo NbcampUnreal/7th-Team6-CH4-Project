@@ -17,7 +17,8 @@ public class CH4_TeamProject : ModuleRules
 			"UMG",
       "NavigationSystem",
       "AIModule",
-      "GameplayTasks"
+      "GameplayTasks",
+      "Niagara"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });

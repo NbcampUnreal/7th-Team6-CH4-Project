@@ -21,6 +21,7 @@
 #include "../Item/Equippable/Ranged Weapon/RangedWeaponDataAsset.h"
 #include "CH4_TeamProject/Item/Equippable/Equippable.h"
 #include "CH4_TeamProject/Item/ThorwbleItem/ThorwbleItems.h"
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 
 
@@ -83,6 +84,26 @@ void ACH4Character::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	UpdateAimCamera(DeltaTime);//조준 카메라 상태 업데이트
+	
+	FVector CapsuleLoc = GetCapsuleComponent()->GetComponentLocation();
+	FVector MeshLoc = GetMesh()->GetComponentLocation();
+	float Diff = FVector::Dist(CapsuleLoc, MeshLoc);
+
+	// 무기 장착 전후 차이가 크면 여기서 잡힘
+	if (Diff > 100.f)
+	{
+		UE_LOG(LogTemp, Error, TEXT("[이상감지] 캡슐-메시 차이 너무 큼: %.2f"), Diff);
+		UE_LOG(LogTemp, Error, TEXT("[캡슐위치] %s"), *CapsuleLoc.ToString());
+		UE_LOG(LogTemp, Error, TEXT("[메시위치] %s"), *MeshLoc.ToString());
+	}
+
+	// 캐릭터 루트 컴포넌트 스케일
+	FVector RootScale = GetRootComponent()->GetComponentScale();
+	UE_LOG(LogTemp, Warning, TEXT("[RootScale] %s"), *RootScale.ToString());
+
+	// 무브먼트 속도
+	FVector Velocity = GetVelocity();
+	UE_LOG(LogTemp, Warning, TEXT("[Velocity] %s"), *Velocity.ToString());
 }
 
 void ACH4Character::OnEquipInput1()
@@ -763,7 +784,7 @@ void ACH4Character::ApplyItemEffect(UConsumableDataAsset* Data)
 				{
 					FoundWeapon->AddMaxClip(Data->Value);
 					UE_LOG(LogTemp, Warning, TEXT("야후: 무기 충전 완료! 현재 총알: %d,%f"), FoundWeapon->GetMaxClip(),Data->Value);
-					return; // 무기 하나 충전했으면 종료
+					return; 
 				}
 			}
 			UE_LOG(LogTemp, Error, TEXT("야후: 충전할 무기를 찾지 못했습니다!"));
@@ -811,7 +832,6 @@ void ACH4Character::Server_ThrowGrenade_Implementation()
 		UE_LOG(LogTemp,Error,TEXT("수류탄 쿨타임중"))
 		return;
 	}
-	bUSingGrenade = true;
 	if (GrenadeCount <= 0)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("수류탄 갯수 확인해 갯수 : %d"),GrenadeCount);
@@ -840,6 +860,7 @@ void ACH4Character::Server_ThrowGrenade_Implementation()
 		UE_LOG(LogTemp, Warning, TEXT("수류탄 스폰 성공 - 위치: %s / 속도: %s"),
 			*SpawnLocation.ToString(), *ThrowVelocity.ToString());
 		GetWorld()->GetTimerManager().SetTimer(ExplosionTimerHandle,Grenade,&AThorwbleItems::Explode,1.5f,false);
+		bUSingGrenade = true;
 	}
 	else
 	{
