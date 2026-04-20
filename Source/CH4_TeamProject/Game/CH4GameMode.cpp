@@ -48,6 +48,8 @@ void ACH4GameMode::BeginPlay()
 		ACH4PlayerController* PC = Cast<ACH4PlayerController>(It->Get());
 		PC->Client_EnablePlayerInput();
 	}
+	
+	
 }
 
 void ACH4GameMode::PostLogin(APlayerController* NewPlayer)
@@ -81,6 +83,7 @@ void ACH4GameMode::PlayGame()
 	if (GS)
 	{
 		GS->SetGamePhase(EGamePhase::StartStage);
+		GS->SetDayPhase(EDayPhase::Day);
 	}
 	
 	GetWorld()->ServerTravel(TEXT("/Game/Maps/REALSTAGE"));
@@ -94,6 +97,7 @@ void ACH4GameMode::EndGame(EGamePhase GP)
 	if (GS)
 	{
 		GS->SetGamePhase(GP);
+		GS->SetDayPhase(EDayPhase::None);
 	}
 	
 	// 현재 월드에 존재하는 모든 PlayerController를 순회(반복)하기 위한 반복자(iterator)
@@ -171,6 +175,8 @@ void ACH4GameMode::OnPlayerRevived(ACH4PlayerState* PlayerState)
 void ACH4GameMode::SetGameResult()
 {
 	ACH4GameState* GS = Cast<ACH4GameState>(GetWorld()->GetGameState());
+	GS->SetDayPhase(EDayPhase::None);
+	
 	if (GS && GS->AlivePlayerCount <= 0)
 	{ 
 		EndGame(EGamePhase::Lose);
@@ -180,6 +186,7 @@ void ACH4GameMode::SetGameResult()
 		EndGame(EGamePhase::Clear);
 	}
 }
+
 
 void ACH4GameMode::RequestReturnToLobby()
 {
@@ -200,27 +207,12 @@ void ACH4GameMode::RequestReturnToLobby()
 	GetWorld()->ServerTravel(LobbyMapPath);
 }
 
-void ACH4GameMode::UpdateMainServerTime() const
-{
-	if (ACH4GameState* GS = GetGameState<ACH4GameState>())
-	{
-		GS->SetServerTime(GetWorld()->GetTimeSeconds());
-	}
-}
-
-// --------------------------------------------------
-// void ACH4GameMode::StartFinalDefenseTimer() const
+// void ACH4GameMode::UpdateMainServerTime() const
 // {
-// 	// 구조 신호 발생 -> 디펜스 타이머 시작 (DataBase::DefenceTimer)
+// 	if (ACH4GameState* GS = GetGameState<ACH4GameState>())
+// 	{
+// 		GS->SetServerTime(GetWorld()->GetTimeSeconds());
+// 	}
 // }
 
-// void ACH4GameMode::StartFinalDefenseWave()
-// {
-// 	웨이브 시작 명령
-// }
-
-// void ACH4GameMode::OnWaveCleared()
-// {
-// 	웨이브 중지, 플레이어컨트롤러 입력x, UI 변경 명령 
-// }
 

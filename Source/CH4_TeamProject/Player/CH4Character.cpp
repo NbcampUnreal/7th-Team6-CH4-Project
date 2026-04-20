@@ -735,6 +735,7 @@ bool ACH4Character::TryPickupNearbyItem()
 
 void ACH4Character::OnRep_CombatPose()
 {
+	CurrentCombatPose = EquippableComponent->AllCurrentWeapon->CombatPose;
 	UE_LOG(LogTemp, Warning, TEXT("CombatPose changed: %d"), (int32)CurrentCombatPose);
 }
 
@@ -872,6 +873,15 @@ void ACH4Character::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	DOREPLIFETIME(ACH4Character, HealItemCount);
 	DOREPLIFETIME(ACH4Character, GrenadeCount);
 	DOREPLIFETIME(ACH4Character,bUSingGrenade);
+	DOREPLIFETIME(ACH4Character,bIsSprinting);
+	DOREPLIFETIME(ACH4Character,bIsAiming);
+	DOREPLIFETIME(ACH4Character,bIsFreeLook);
+	DOREPLIFETIME(ACH4Character,MaxHP);
+	DOREPLIFETIME(ACH4Character,WalkSpeed);
+	DOREPLIFETIME(ACH4Character,SprintSpeed);
+	DOREPLIFETIME(ACH4Character,CurrentHP);
+	DOREPLIFETIME(ACH4Character,PrimaryWeaponData1);
+	DOREPLIFETIME(ACH4Character,PrimaryWeaponData2);
 }
 
 //애니매이션 업데이트

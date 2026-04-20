@@ -34,6 +34,7 @@ void AItemSpawnPoint::SpawnItems()
 
 	auto SpawnHelper = [&](TSubclassOf<AActor> Class, int32 Min, int32 Max)
 	{
+		int32 SpawnFalseCount = 0;
 		if (!Class) return;
 		int32 Count = FMath::RandRange(Min, Max);
 		for (int32 i = 0; i < Count; ++i)
@@ -52,10 +53,16 @@ void AItemSpawnPoint::SpawnItems()
 			}
 			else
 			{
+				SpawnFalseCount++;
 				UE_LOG(LogTemp, Error, TEXT("%s 스폰 실패"), *Class->GetName());
 			}
 		}
-	};
+		
+		for (int32 i = 0; i < SpawnFalseCount; ++i)
+		{
+			// 스폰 실패한 아이템종류 구해서 다시스폰??
+		}
+	};	
 
 	SpawnHelper(AmmoClass, SpawnItemData->MinAmmoItem, SpawnItemData->MaxAmmoItem);
 	SpawnHelper(HealClass, SpawnItemData->MinHeelItem, SpawnItemData->MaxHeelItem);

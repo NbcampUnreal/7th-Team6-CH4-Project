@@ -45,9 +45,6 @@ void AThorwbleItems::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor
                            UPrimitiveComponent* OtherComp,
                            FVector NormalImpulse, const FHitResult& Hit)
 {
-	UE_LOG(LogTemp, Warning, TEXT("OnHit 발생! OtherActor: %s"),
-	       OtherActor ? *OtherActor->GetName() : TEXT("None"));
-
 	if (!HasAuthority()) return;
 	if (!OtherActor || OtherActor == this) return;
 }

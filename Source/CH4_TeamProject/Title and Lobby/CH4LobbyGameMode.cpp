@@ -62,6 +62,6 @@ void ACH4LobbyGameMode::SetReadyPlayerCount()
 	if (ReadyPlayerCount >= MaxPlayerCount)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("모두 준비됨! 맵 이동 시작..."));
-		World->ServerTravel(TEXT("/Game/Maps/REALSTAGE"));
+		World->ServerTravel(TEXT("/Game/Maps/L_Stage1"));
 	}
 }
