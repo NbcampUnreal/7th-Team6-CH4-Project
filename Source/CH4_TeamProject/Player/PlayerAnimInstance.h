@@ -138,6 +138,7 @@ protected:
 	//특정 행동 검사(상태 마다 안되는것 되는것 판단)
 	bool CanPlayAction(EPlayerActionState NewAction) const;
 
+	// ToDo 일단 서버에서 몽타주 재생이없음 
 	//몽타주 재생을 담당하는 공통 함수
 	bool TryPlayMontage(UAnimMontage* Montage, EPlayerActionState NewAction, bool bStopOtherMontages = false);
 
@@ -209,4 +210,7 @@ public:
 	//샷건 장전 몽타주
 	UFUNCTION(BlueprintCallable, Category = "Animation")
 	bool PlayShotgunReloadMontage();
+	
+	UFUNCTION()
+	void AnimNotify_ClearAction();
 };

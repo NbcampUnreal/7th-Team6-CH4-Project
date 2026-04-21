@@ -86,13 +86,38 @@ void ACH4Character::Tick(float DeltaTime)
 	UpdateAimCamera(DeltaTime);//조준 카메라 상태 업데이트
 }
 
+//포즈 상태 업데이트 
+void ACH4Character::Server_UpdateCombatPose_Implementation()
+{
+	if (!EquippableComponent || !EquippableComponent->CurrentWeapon)
+	{
+		CurrentCombatPose = ECombatPose::Normal;
+		return;
+	}
+	UE_LOG(LogTemp,Error,TEXT("서버에서 포즈변경 실행됨"))
+	ECombatPose Data = EquippableComponent->CurrentWeapon->WeaponData->GetGunDataAsset();
+	CurrentCombatPose = Data;	
+	UpdateCombatPose();
+}
+
+void ACH4Character::UpdateCombatPose_Implementation()
+{
+	UE_LOG(LogTemp,Error,TEXT("수동온랩함수 호출완료"))
+	OnRep_CombatPose();
+}
+
+void ACH4Character::OnRep_CombatPose()
+{
+	//CurrentCombatPose = EquippableComponent->AllCurrentWeapon->CombatPose;
+	UE_LOG(LogTemp, Warning, TEXT("CombatPose changed: %d"), (int32)CurrentCombatPose);
+}
 void ACH4Character::OnEquipInput1()
 {
 	if (EquippableComponent && PrimaryWeaponData1)
 	{
 		EquippableComponent->Server_EquipWeapon(PrimaryWeaponData1);
 		UE_LOG(LogTemp, Warning, TEXT("장착 성공! 서버 함수 호출함."));
-		UpdateCombatPose();
+		Server_UpdateCombatPose();
 	}
 }
 
@@ -101,7 +126,7 @@ void ACH4Character::OnEquipInput2()
 	if (EquippableComponent && PrimaryWeaponData2)
 	{
 		EquippableComponent->Server_EquipWeapon(PrimaryWeaponData2);
-		UpdateCombatPose();
+		Server_UpdateCombatPose();
 	}
 }
 
@@ -110,7 +135,7 @@ void ACH4Character::OnEquipInput3()
 	if (EquippableComponent && PrimaryWeaponData3)
 	{
 		EquippableComponent->Server_EquipWeapon(PrimaryWeaponData3);
-		UpdateCombatPose();
+		Server_UpdateCombatPose();
 	}
 }
 
@@ -119,7 +144,7 @@ void ACH4Character::OnEquipInput4()
 	if (EquippableComponent && PrimaryWeaponData4)
 	{
 		EquippableComponent->Server_EquipWeapon(PrimaryWeaponData4);
-		UpdateCombatPose();
+		Server_UpdateCombatPose();
 	}
 }
 
@@ -590,31 +615,12 @@ void ACH4Character::Fires()
 	EquippableComponent->Fire();
 
 	//현재 무기 포즈에 따라 발사 몽타주 실행
-	if (HasAuthority())
+	if (!HasAuthority())
 	{
-		switch (CurrentCombatPose)
-		{
-		case ECombatPose::Pistol:
-			UE_LOG(LogTemp, Warning, TEXT("PistolFire Multi_PlayAction"));
-			Multi_PlayAction(EPlayerActionState::PistolFire);
-			break;
-
-		case ECombatPose::Rifle:
-		case ECombatPose::MuchineGun:
-			UE_LOG(LogTemp, Warning, TEXT("RifleFire Multi_PlayAction"));
-			Multi_PlayAction(EPlayerActionState::RifleFire);
-			break;
-
-		case ECombatPose::Shotgun:
-			UE_LOG(LogTemp, Warning, TEXT("ShotgunFire Multi_PlayAction"));
-			Multi_PlayAction(EPlayerActionState::ShotgunFire);
-			break;
-
-		default:
-			UE_LOG(LogTemp, Warning, TEXT("발사 몽타주 분기 실패 - CurrentCombatPose 확인"));
-			break;
-		}
+		Server_FireMontage();
+		return;
 	}
+	FireMontagePose();
 }
 
 void ACH4Character::OnReload()
@@ -635,33 +641,12 @@ void ACH4Character::OnReload()
 
 	//현재 전투 포즈 확인용 로그
 	UE_LOG(LogTemp, Warning, TEXT("Reload CurrentCombatPose: %d"), (int32)CurrentCombatPose);
-
-	//현재 무기 포즈에 따라 장전 몽타주 실행
-	if (HasAuthority())
+	if (!HasAuthority())
 	{
-		switch (CurrentCombatPose)
-		{
-		case ECombatPose::Pistol:
-			UE_LOG(LogTemp, Warning, TEXT("PistolReload Multi_PlayAction")); 
-			Multi_PlayAction(EPlayerActionState::PistolReload);
-			break;
-
-		case ECombatPose::Rifle:
-			UE_LOG(LogTemp, Warning, TEXT("RifleReload Multi_PlayAction"));
-			Multi_PlayAction(EPlayerActionState::RifleReload);
-			break;
-		case ECombatPose::Shotgun:
-			UE_LOG(LogTemp, Warning, TEXT("ShotgunReload Multi_PlayAction"));
-			Multi_PlayAction(EPlayerActionState::ShotgunReload);
-			break;
-
-		default:
-			UE_LOG(LogTemp, Warning, TEXT("장전 몽타주 분기 실패 - CurrentCombatPose 확인"));
-			break;
-		}
+		Server_ReloadMontage();
+		return;
 	}
-
-	// 실제 장전
+	ReloadMontage();
 	EquippableComponent->Reload();
 }
 
@@ -701,6 +686,8 @@ void ACH4Character::PlayReviveAnimation()
 {
 	if (HasAuthority()) Multi_PlayAction(EPlayerActionState::Revive);
 }
+
+
 
 //멀티캐스트 구현
 void ACH4Character::Multi_PlayAction_Implementation(EPlayerActionState NewState)
@@ -752,6 +739,7 @@ void ACH4Character::Multi_PlayAction_Implementation(EPlayerActionState NewState)
 		case EPlayerActionState::Revive:
 			AnimInst->Montage_Play(AnimInst->ReviveMontage);
 			break;
+			
 		case EPlayerActionState::PistolFire:
 			AnimInst->PlayPistolFireMontage();
 			break;
@@ -916,11 +904,7 @@ bool ACH4Character::TryPickupNearbyItem()
 }
 
 
-void ACH4Character::OnRep_CombatPose()
-{
-	//CurrentCombatPose = EquippableComponent->AllCurrentWeapon->CombatPose;
-	UE_LOG(LogTemp, Warning, TEXT("CombatPose changed: %d"), (int32)CurrentCombatPose);
-}
+
 
 void ACH4Character::ApplyItemEffect(UConsumableDataAsset* Data)
 {
@@ -1054,6 +1038,70 @@ void ACH4Character::CanUSingGrenade()
 	bUSingGrenade = false;
 }
 
+void ACH4Character::FireMontagePose()
+{
+	switch (CurrentCombatPose)
+	{
+	case ECombatPose::Pistol:
+		UE_LOG(LogTemp, Warning, TEXT("PistolFire Multi_PlayAction"));
+		Multi_PlayAction(EPlayerActionState::PistolFire);
+		break;
+
+	case ECombatPose::Rifle:
+	case ECombatPose::MuchineGun:
+		UE_LOG(LogTemp, Warning, TEXT("RifleFire Multi_PlayAction"));
+		Multi_PlayAction(EPlayerActionState::RifleFire);
+		break;
+
+	case ECombatPose::Shotgun:
+		UE_LOG(LogTemp, Warning, TEXT("ShotgunFire Multi_PlayAction"));
+		Multi_PlayAction(EPlayerActionState::ShotgunFire);
+		break;
+
+	default:
+		UE_LOG(LogTemp, Warning, TEXT("발사 몽타주 분기 실패 - CurrentCombatPose 확인"));
+		break;
+	}
+}
+
+void ACH4Character::ReloadMontage()
+{
+	//현재 무기 포즈에 따라 장전 몽타주 실행
+	if (HasAuthority())
+	{
+		switch (CurrentCombatPose)
+		{
+		case ECombatPose::Pistol:
+			UE_LOG(LogTemp, Warning, TEXT("PistolReload Multi_PlayAction")); 
+			Multi_PlayAction(EPlayerActionState::PistolReload);
+			break;
+
+		case ECombatPose::Rifle:
+			UE_LOG(LogTemp, Warning, TEXT("RifleReload Multi_PlayAction"));
+			Multi_PlayAction(EPlayerActionState::RifleReload);
+			break;
+		case ECombatPose::Shotgun:
+			UE_LOG(LogTemp, Warning, TEXT("ShotgunReload Multi_PlayAction"));
+			Multi_PlayAction(EPlayerActionState::ShotgunReload);
+			break;
+
+		default:
+			UE_LOG(LogTemp, Warning, TEXT("장전 몽타주 분기 실패 - CurrentCombatPose 확인"));
+			break;
+		}
+	}
+}
+
+void ACH4Character::Server_ReloadMontage_Implementation()
+{
+	ReloadMontage();
+}
+
+void ACH4Character::Server_FireMontage_Implementation()
+{
+	FireMontagePose();
+}
+
 void ACH4Character::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -1071,18 +1119,8 @@ void ACH4Character::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	DOREPLIFETIME(ACH4Character, CurrentHP);
 	DOREPLIFETIME(ACH4Character, PrimaryWeaponData1);
 	DOREPLIFETIME(ACH4Character, PrimaryWeaponData2);
-}
-
-//포즈 상태 업데이트 
-void ACH4Character::UpdateCombatPose_Implementation()
-{
-	if (!EquippableComponent || !EquippableComponent->CurrentWeapon)
-	{
-		CurrentCombatPose = ECombatPose::Normal;
-		return;
-	}
-	ECombatPose Data = EquippableComponent->CurrentWeapon->WeaponData->GetGunDataAsset();
-	CurrentCombatPose = Data;	
+	DOREPLIFETIME(ACH4Character, PrimaryWeaponData3);
+	DOREPLIFETIME(ACH4Character, PrimaryWeaponData4);
 }
 
 void ACH4Character::Server_UseHealItem_Implementation()

@@ -76,9 +76,12 @@ bool UPlayerAnimInstance::CanPlayAction(EPlayerActionState NewAction) const
 	case EPlayerActionState::ShotgunFire:
 		
 		//발사 중에는 같은 발사,죽음,다운,피격 허용
-		return (NewAction == EPlayerActionState::PistolFire ||
+		return (NewAction == EPlayerActionState::PistolFire||
 			NewAction == EPlayerActionState::RifleFire ||
-			NewAction == EPlayerActionState::ShotgunFire ||
+			NewAction == EPlayerActionState::ShotgunFire||
+			NewAction == EPlayerActionState::PistolReload||
+			NewAction == EPlayerActionState::RifleReload ||
+			NewAction == EPlayerActionState::ShotgunReload ||
 			NewAction == EPlayerActionState::Dead ||
 			NewAction == EPlayerActionState::Down ||
 			NewAction == EPlayerActionState::Hit);
@@ -232,6 +235,13 @@ bool UPlayerAnimInstance::PlayShotgunReloadMontage()
 	//샷건 장전은 기존 몽타주를 끊고 재생
 	return TryPlayMontage(ShotgunReloadMontage, EPlayerActionState::ShotgunReload, true);
 }
+
+void UPlayerAnimInstance::AnimNotify_ClearAction()
+{
+	ClearActionState();
+}
+
+
 
 void UPlayerAnimInstance::SetDownState(bool bNewIsDown)
 {

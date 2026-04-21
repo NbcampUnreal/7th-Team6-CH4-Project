@@ -46,14 +46,19 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Animation")
 	ECombatPose CombatPose = ECombatPose::Rifle;
-
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	ECombatPose TestCombatPose;
+	
 	virtual ECombatPose GetGunDataAsset() const 
 	{
-		return CombatPose;
+		return TestCombatPose;
 	}
 
-	virtual void SetGunDataAsset(ECombatPose NewCombatPose) 
+	virtual ECombatPose SetGunDataAsset(ECombatPose NewCombatPose) 
 	{
 		CombatPose = NewCombatPose;
+		return CombatPose;
 	}
+	
 };
