@@ -312,4 +312,7 @@ public:
 	
 	UPROPERTY()
 	FTimerHandle PickupMontageTimerHandle;
+	
+	UPROPERTY()
+	USoundBase* StepSound;
 };
