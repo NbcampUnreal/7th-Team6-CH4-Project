@@ -14,7 +14,9 @@ class CH4_TEAMPROJECT_API ACH4GameState : public AGameState
 
 public:
 	ACH4GameState();
+	
 	virtual void BeginPlay() override;
+	virtual void Tick( float DeltaTime ) override;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Leve2")
 	int32 MaxLevels;
@@ -40,6 +42,13 @@ private:
 	const float DayTime = 2.5f * 60.f;
 	const float EveningTime = 0.5f * 60.f;
 	const float NightTime = 4.f * 60.f;
+	
+	int32 DayCount = 0;
+	
+	EDayPhase RecentPhase;
+	
+	UPROPERTY(EditAnywhere, Category = "Sound")
+	USoundBase* ZombieSound;
 	
 public:	
 	UPROPERTY(Replicated)
@@ -98,16 +107,13 @@ public:
 	void ApplyDayPhaseChanges(EDayPhase DP);
 	void FindLightAndFog();
 	
+	UFUNCTION()
+	void PlayZombieSound();
+	
 public:	
 	EGamePhase GetGamePhase() const {  return GamePhase; }
 	void SetGamePhase(EGamePhase NewPhase);
 	
 	EDayPhase GetDayPhase() const {  return DayPhase; }
 	void SetDayPhase(EDayPhase NewPhase);
-	
-	// void SetLightsAndFogActor();
-	
-// protected:
-// 	UPROPERTY()
-// 	class ADirectionalLight* SunLight;
 };
