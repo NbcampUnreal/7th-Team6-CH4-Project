@@ -24,9 +24,9 @@ public:
 
 	//장비 장착함수
 	UFUNCTION(BlueprintCallable, Server, Reliable)
-	void EquipWeapon(class UWeaponData* WeaponClass);
+	void Server_EquipWeapon(class UWeaponData* WeaponClass);
 
-	//착용중인 무기
+	//착용중인 무기	
 	UPROPERTY(Replicated)
 	TObjectPtr<AEquippable> CurrentWeapon;
 

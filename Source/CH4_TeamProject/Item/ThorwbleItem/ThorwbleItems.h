@@ -6,7 +6,7 @@
 #include "CH4_TeamProject/Item/BaseItem.h"
 #include "GameFramework/Actor.h"
 #include "ThorwbleItems.generated.h"
-
+class UNiagaraSystem;
 UCLASS()
 class CH4_TEAMPROJECT_API AThorwbleItems : public ABaseItem
 {
@@ -40,7 +40,10 @@ public:
 	float ExplosionRadius = 300.0f;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Explosion")
-	class UParticleSystem* ExplosionEffect;
+	UNiagaraSystem* ExplosionEffect;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Explosion")
+	USoundBase* ExplosionSound;
 	
 	void Explode();
 	

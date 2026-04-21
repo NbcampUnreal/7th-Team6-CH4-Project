@@ -89,6 +89,9 @@ private:
 
 	void StopSprint();//뛰기 멈춤
 	
+	UFUNCTION(Server, Reliable)
+	void Server_SetSprinting(bool bSprint);
+	
 	UFUNCTION()
 	void PlayerInputStart();
 	
@@ -180,8 +183,12 @@ public:
 	float SprintSpeed = 600.0f;
 
 	//달리고있는중인가?
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement",Replicated)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement", ReplicatedUsing = OnRep_IsSprinting)
 	bool bIsSprinting = false;
+	
+	UFUNCTION()
+	void OnRep_IsSprinting();
+	
 	//++++++++++++++++++++++++++++++++++++++++++++
 	// 조준 상태
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera|Aim",Replicated)
@@ -265,7 +272,7 @@ public:
 	ACH4GameState* GamsState;
 
 public:
-	UPROPERTY(ReplicatedUsing = OnRep_CombatPose, VisibleAnywhere, BlueprintReadOnly, Category = "Animation",Replicated)
+	UPROPERTY(ReplicatedUsing = OnRep_CombatPose, VisibleAnywhere, BlueprintReadOnly, Category = "Animation")
 	ECombatPose CurrentCombatPose = ECombatPose::Normal;
 
 	UFUNCTION()
@@ -273,6 +280,7 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	UFUNCTION(Server, Reliable)
 	void UpdateCombatPose();
 	void ApplyItemEffect(class UConsumableDataAsset* Data);
 	

@@ -5,7 +5,8 @@
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
-
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 
 AThorwbleItems::AThorwbleItems()
 {
@@ -77,10 +78,28 @@ void AThorwbleItems::Explode()
 
 void AThorwbleItems::Multi_PlayExplosionEffects_Implementation()
 {
-	if (ExplosionEffect)
+	if (ExplosionEffect) // 데이터 에셋이나 헤더에 선언된 나이아가라 시스템
 	{
-		UGameplayStatics::SpawnEmitterAtLocation(
-			GetWorld(), ExplosionEffect, GetActorLocation());
+		// 현재 수류탄이 있는 바로 그 위치!
+		FVector SpawnLocation = GetActorLocation();
+		FRotator SpawnRotation = GetActorRotation();
+
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(),
+			ExplosionEffect,
+			SpawnLocation,
+			SpawnRotation,
+			FVector(1.0f), // 크기 조절 (더 크게 하고 싶으면 2.0f ㅋㅋㅋ)
+			true,          // Auto Destroy (다 재생되면 메모리에서 삭제 ㅡㅡb)
+			true,          // Auto Activate
+			ENCPoolMethod::None,
+			true
+		);
+	}
+	
+	if (ExplosionSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, ExplosionSound, GetActorLocation());
 	}
 	UE_LOG(LogTemp, Error, TEXT("수류탄 터짐"));
 }

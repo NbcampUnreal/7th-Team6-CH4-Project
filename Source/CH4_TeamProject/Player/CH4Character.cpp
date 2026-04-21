@@ -21,8 +21,8 @@
 #include "../Item/Equippable/Ranged Weapon/RangedWeaponDataAsset.h"
 #include "CH4_TeamProject/Item/Equippable/Equippable.h"
 #include "CH4_TeamProject/Item/ThorwbleItem/ThorwbleItems.h"
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
-
 
 
 //생성자
@@ -81,27 +81,15 @@ void ACH4Character::BeginPlay()
 void ACH4Character::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	
 	UpdateAimCamera(DeltaTime);//조준 카메라 상태 업데이트
 }
 
 void ACH4Character::OnEquipInput1()
 {
-	UE_LOG(LogTemp, Error, TEXT("호출은 성공"));
-
-	if (EquippableComponent == nullptr)
-	{
-		UE_LOG(LogTemp, Error, TEXT("실패 원인: EquippableComponent가 비어있음!"));
-	}
-
-	if (PrimaryWeaponData1 == nullptr)
-	{
-		UE_LOG(LogTemp, Error, TEXT("실패 원인: PrimaryWeaponData가 비어있음! 에디터에서 할당했는지 확인하세요."));
-	}
-
 	if (EquippableComponent && PrimaryWeaponData1)
 	{
-		EquippableComponent->EquipWeapon(PrimaryWeaponData1);
+		EquippableComponent->Server_EquipWeapon(PrimaryWeaponData1);
 		UE_LOG(LogTemp, Warning, TEXT("장착 성공! 서버 함수 호출함."));
 		UpdateCombatPose();
 	}
@@ -121,7 +109,7 @@ void ACH4Character::OnEquipInput2()
 
 	if (EquippableComponent && PrimaryWeaponData2)
 	{
-		EquippableComponent->EquipWeapon(PrimaryWeaponData2);
+		EquippableComponent->Server_EquipWeapon(PrimaryWeaponData2);
 		UE_LOG(LogTemp, Warning, TEXT("장착 성공! 서버 함수 호출함."));
 	}
 }
@@ -130,7 +118,6 @@ void ACH4Character::Server_ApplyItemEffect_Implementation(AHealItem* HealItem)
 {
 	HealLog_Implementation();
 }
-
 
 
 void ACH4Character::HealLog_Implementation()
@@ -162,7 +149,7 @@ void ACH4Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	EnhancedInputComponent->BindAction(EquipAction2, ETriggerEvent::Started, this, &ACH4Character::OnEquipInput2);
 	EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this, &ACH4Character::StartSprint);
 	EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &ACH4Character::StopSprint);
-	
+
 	EnhancedInputComponent->BindAction(FreeLookAction, ETriggerEvent::Started, this, &ACH4Character::StartFreeLook);
 	EnhancedInputComponent->BindAction(FreeLookAction, ETriggerEvent::Completed, this, &ACH4Character::StopFreeLook);
 
@@ -313,12 +300,13 @@ void ACH4Character::InitializationInput()
 		AimAction = InputAim.Object;
 	}
 
-	static ConstructorHelpers::FObjectFinder<UInputAction> InputFreeLook(TEXT("/Script/EnhancedInput.InputAction'/Game/Player/Input/Action/IA_FreeLook.IA_FreeLook'"));
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputFreeLook(
+		TEXT("/Script/EnhancedInput.InputAction'/Game/Player/Input/Action/IA_FreeLook.IA_FreeLook'"));
 	if (InputFreeLook.Object != nullptr)
 	{
 		FreeLookAction = InputFreeLook.Object;
 	}
-	
+
 	static ConstructorHelpers::FObjectFinder<UInputAction> InputEquip(TEXT("/Script/EnhancedInput.InputAction'/Game/Player/Input/Action/IA_Equip.IA_Equip'"));
 	if (InputEquip.Object != nullptr)
 	{
@@ -351,7 +339,7 @@ void ACH4Character::InitializationInput()
 	{
 		InteractAction = InputInteract.Object;
 	}
-	
+
 	static ConstructorHelpers::FObjectFinder<UInputAction> InputThrow(
 		TEXT("/Script/EnhancedInput.InputAction'/Game/Player/Input/Action/IA_Throw.IA_Throw'"));
 	if (InputThrow.Object != nullptr)
@@ -391,13 +379,42 @@ void ACH4Character::StartSprint()
 {
 	bIsSprinting = true;
 	GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+	
+	if (HasAuthority())
+	{
+		return;
+	}
+	
+	Server_SetSprinting(bIsSprinting);
 }
 
 //뛰기 멈출때
 void ACH4Character::StopSprint()
 {
+	// SimulatedProxy : 
+	// 리플리케이티드 변수를 수정한다고해서, 서버가 알지 못함.
+	// -> Server-> RPC호출.
+	
 	bIsSprinting = false;
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+	
+	if (HasAuthority())
+	{
+		return;
+	}
+	
+	Server_SetSprinting(bIsSprinting);
+}
+
+void ACH4Character::Server_SetSprinting_Implementation(bool bSprint)
+{
+	bIsSprinting = bSprint;  // Replicated → 타 클라에 전파
+	GetCharacterMovement()->MaxWalkSpeed = bSprint ? SprintSpeed : WalkSpeed;
+}
+
+void ACH4Character::OnRep_IsSprinting()
+{
+	GetCharacterMovement()->MaxWalkSpeed = bIsSprinting ? SprintSpeed : WalkSpeed;
 }
 
 void ACH4Character::PlayerInputStart()
@@ -409,7 +426,7 @@ void ACH4Character::PlayerInputStart()
 		PC->ResetIgnoreMoveInput();
 		PC->ResetIgnoreLookInput();
 	}
-	
+
 	GetWorld()->GetTimerManager().ClearTimer(PickupMontageTimerHandle);
 }
 
@@ -439,10 +456,10 @@ void ACH4Character::StartAim()
 
 	if (bIsSprinting)
 	{
-		StopSprint();//뛰는 도중 정조준하면 뛰는거 멈춤
+		StopSprint(); //뛰는 도중 정조준하면 뛰는거 멈춤
 	}
-	GetCharacterMovement()->MaxWalkSpeed = AimWalkSpeed;//이동속도 줄이기
-	UpdateRotationMode();//회전 방식 바꾸는 함수
+	GetCharacterMovement()->MaxWalkSpeed = AimWalkSpeed; //이동속도 줄이기
+	UpdateRotationMode(); //회전 방식 바꾸는 함수
 }
 
 //정조준 멈춤
@@ -452,7 +469,7 @@ void ACH4Character::StopAim()
 
 	//뛰는 도중이면 뛰는 속도 유지, 아니면 보통 걸음 속도
 	GetCharacterMovement()->MaxWalkSpeed = bIsSprinting ? SprintSpeed : WalkSpeed;
-	UpdateRotationMode();//일반 회전 방식으로 바뀜
+	UpdateRotationMode(); //일반 회전 방식으로 바뀜
 }
 
 //평소에는 이동방향에 따라 회전, 조준중에 카메라 방향따라 회전 전환하는 함수
@@ -483,16 +500,16 @@ void ACH4Character::UpdateAimCamera(float DeltaTime)
 {
 	if (!SpringArm || !Camera) return;
 
-	const float TargetArmLength = bIsAiming ? AimArmLength : DefaultArmLength;//조준하고있나? 안하고있나 판단
-	const FVector TargetSocketOffset = bIsAiming ? AimSocketOffset : DefaultSocketOffset;//카메라 오프셋 설정 조준상황에따라서
-	const float TargetFOV = bIsAiming ? AimFOV : DefaultFOV;//시야각 설정
+	const float TargetArmLength = bIsAiming ? AimArmLength : DefaultArmLength; //조준하고있나? 안하고있나 판단
+	const FVector TargetSocketOffset = bIsAiming ? AimSocketOffset : DefaultSocketOffset; //카메라 오프셋 설정 조준상황에따라서
+	const float TargetFOV = bIsAiming ? AimFOV : DefaultFOV; //시야각 설정
 
 	//카메라 거리바뀔때 부드럽게 바뀌게 
 	SpringArm->TargetArmLength = FMath::FInterpTo(
-		SpringArm->TargetArmLength,//현재카메라 거리
-		TargetArmLength,//목표 카메라 거리
-		DeltaTime,//프레임 시간
-		AimInterpSpeed//카메라 목표 도달 시간
+		SpringArm->TargetArmLength, //현재카메라 거리
+		TargetArmLength, //목표 카메라 거리
+		DeltaTime, //프레임 시간
+		AimInterpSpeed //카메라 목표 도달 시간
 	);
 
 	//카메라를 거리를 줄이기도하고 옆으로 더 살짝 옮기게 
@@ -502,7 +519,7 @@ void ACH4Character::UpdateAimCamera(float DeltaTime)
 		DeltaTime,
 		AimInterpSpeed
 	);
-	
+
 	//시야각도 부드럽게 바꿈
 	Camera->FieldOfView = FMath::FInterpTo(
 		Camera->FieldOfView,
@@ -578,16 +595,16 @@ void ACH4Character::Multi_PlayAction_Implementation(EPlayerActionState NewState)
 			{
 				float PlayLength = AnimInst->Montage_Play(AnimInst->PickupMontage);
 				float Delay = FMath::Max(0.f, PlayLength - 0.3f);
-				
+
 				PlayerInputStop();
-			
+
 				GetWorld()->GetTimerManager().SetTimer(
 					PickupMontageTimerHandle,
 					this,
 					&ACH4Character::PlayerInputStart,
 					Delay,
 					false
-					);
+				);
 			}
 			break;
 		case EPlayerActionState::Down:
@@ -627,11 +644,11 @@ void ACH4Character::Server_Interact_Implementation()
 bool ACH4Character::TryReviveNearbyPlayer()
 {
 	if (HasAuthority()) Multi_PlayAction(EPlayerActionState::Revive);
-	TArray<AActor*> IgnoreActors;
+	TArray<AActor *> IgnoreActors;
 	IgnoreActors.Add(this);
 
-	TArray<AActor*> OutActors;
-	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+	TArray<AActor *> OutActors;
+	TArray<TEnumAsByte<EObjectTypeQuery> > ObjectTypes;
 	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn));
 
 	const bool bHit = UKismetSystemLibrary::SphereOverlapActors(
@@ -677,11 +694,11 @@ bool ACH4Character::TryReviveNearbyPlayer()
 bool ACH4Character::TryPickupNearbyItem()
 {
 	if (HasAuthority()) Multi_PlayAction(EPlayerActionState::Pickup);
-	TArray<AActor*> IgnoreActors;
+	TArray<AActor *> IgnoreActors;
 	IgnoreActors.Add(this);
 
-	TArray<AActor*> OutActors;
-	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+	TArray<AActor *> OutActors;
+	TArray<TEnumAsByte<EObjectTypeQuery> > ObjectTypes;
 	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldDynamic));
 
 	const bool bHit = UKismetSystemLibrary::SphereOverlapActors(
@@ -712,17 +729,17 @@ bool ACH4Character::TryPickupNearbyItem()
 			ABaseItem* ItemActor = Cast<ABaseItem>(Actor);
 			if (ItemActor)
 			{
-				if (ItemActor->ItemData) 
+				if (ItemActor->ItemData)
 				{
 					ApplyItemEffect(ItemActor->ItemData);
 				}
 				else
-				{	
+				{
 					UE_LOG(LogTemp, Error, TEXT("야후: %s의 상속된 ItemData가 비어있어!"), *Actor->GetName());
 				}
 			}
 			UE_LOG(LogTemp, Warning, TEXT("%s 아이템을 줍습니다."), *Actor->GetName());
-			
+
 			PlayPickupAnimation();
 			// 실제 인벤토리 처리나 Destroy는
 			Actor->Destroy();
@@ -735,13 +752,13 @@ bool ACH4Character::TryPickupNearbyItem()
 
 void ACH4Character::OnRep_CombatPose()
 {
-	CurrentCombatPose = EquippableComponent->AllCurrentWeapon->CombatPose;
+	//CurrentCombatPose = EquippableComponent->AllCurrentWeapon->CombatPose;
 	UE_LOG(LogTemp, Warning, TEXT("CombatPose changed: %d"), (int32)CurrentCombatPose);
 }
 
 void ACH4Character::ApplyItemEffect(UConsumableDataAsset* Data)
 {
-	if (!Data) 
+	if (!Data)
 	{
 		UE_LOG(LogTemp, Error, TEXT("야후: 전달된 데이터가 없습니다!"));
 		return;
@@ -754,7 +771,7 @@ void ACH4Character::ApplyItemEffect(UConsumableDataAsset* Data)
 	{
 	case EEffectType::Ammo:
 		{
-			TArray<AActor*> AttachedActors;
+			TArray<AActor *> AttachedActors;
 			GetAttachedActors(AttachedActors);
 
 			for (AActor* Actor : AttachedActors)
@@ -762,8 +779,10 @@ void ACH4Character::ApplyItemEffect(UConsumableDataAsset* Data)
 				if (AEquippable* FoundWeapon = Cast<AEquippable>(Actor))
 				{
 					FoundWeapon->AddMaxClip(Data->Value);
+
 					UE_LOG(LogTemp, Warning, TEXT("야후: 무기 충전 완료! 현재 총알: %d,%f"), FoundWeapon->GetMaxClip(),Data->Value);
-					return; // 무기 하나 충전했으면 종료
+					return; 
+
 				}
 			}
 			UE_LOG(LogTemp, Error, TEXT("야후: 충전할 무기를 찾지 못했습니다!"));
@@ -773,14 +792,14 @@ void ACH4Character::ApplyItemEffect(UConsumableDataAsset* Data)
 	case EEffectType::Health:
 		{
 			HealItemCount++;
-			UE_LOG(LogTemp, Warning, TEXT("야후: 체력 회복 아이템획득 갯수: %d"),HealItemCount);
+			UE_LOG(LogTemp, Warning, TEXT("야후: 체력 회복 아이템획득 갯수: %d"), HealItemCount);
 		}
 		break;
-       
+
 	case EEffectType::Gear:
 		{
 			UE_LOG(LogTemp, Error, TEXT("야후: 기어 아이템 주움 로직 진입!"));
-			
+
 			if (ACH4GameState* GS = GetWorld()->GetGameState<ACH4GameState>())
 			{
 				GS->AddGearPartsCount();
@@ -795,7 +814,7 @@ void ACH4Character::ApplyItemEffect(UConsumableDataAsset* Data)
 	case EEffectType::Grenade:
 		{
 			GrenadeCount++;
-			UE_LOG(LogTemp, Warning, TEXT("야후: 수류탄 아이템획득 갯수: %d"),GrenadeCount);
+			UE_LOG(LogTemp, Warning, TEXT("야후: 수류탄 아이템획득 갯수: %d"), GrenadeCount);
 		}
 
 	default:
@@ -808,20 +827,23 @@ void ACH4Character::Server_ThrowGrenade_Implementation()
 {
 	if (bUSingGrenade)
 	{
-		UE_LOG(LogTemp,Error,TEXT("수류탄 쿨타임중"))
+		UE_LOG(LogTemp, Error, TEXT("수류탄 쿨타임중"))
 		return;
 	}
-	bUSingGrenade = true;
+
 	if (GrenadeCount <= 0)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("수류탄 갯수 확인해 갯수 : %d"),GrenadeCount);
+		UE_LOG(LogTemp, Warning, TEXT("수류탄 갯수 확인해 갯수 : %d"), GrenadeCount);
 		return;
 	}
+
 	if (!GrenadeClass)
 	{
-		UE_LOG(LogTemp,Error,TEXT("서버아님 수류탄 생성 불가"))
+		UE_LOG(LogTemp, Error, TEXT("서버아님 수류탄 생성 불가"))
 		return;
 	}
+
+
 	FVector SpawnLocation = GetMesh()->GetSocketLocation(TEXT("Weapon_r"));
 	FRotator SpawnRotation = GetControlRotation();
 
@@ -833,20 +855,21 @@ void ACH4Character::Server_ThrowGrenade_Implementation()
 		GrenadeCount--;
 		Grenade->SetOwner(this);
 		Grenade->SetInstigator(this);
-        
+
 		FVector ThrowVelocity = GetControlRotation().Vector() * 1500.0f;
 		Grenade->ProjectileMovement->Velocity = ThrowVelocity;
 
 		UE_LOG(LogTemp, Warning, TEXT("수류탄 스폰 성공 - 위치: %s / 속도: %s"),
 			*SpawnLocation.ToString(), *ThrowVelocity.ToString());
 		GetWorld()->GetTimerManager().SetTimer(ExplosionTimerHandle,Grenade,&AThorwbleItems::Explode,1.5f,false);
+		bUSingGrenade = true;
 	}
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("수류탄 스폰 실패 - GrenadeClass: %s"),
-			*GrenadeClass->GetName());
+		       *GrenadeClass->GetName());
 	}
-	GetWorld()->GetTimerManager().SetTimer(GrenadeTimer,this,&ACH4Character::CanUSingGrenade,5.f,false);
+	GetWorld()->GetTimerManager().SetTimer(GrenadeTimer, this, &ACH4Character::CanUSingGrenade, 5.f, false);
 }
 
 void ACH4Character::ThrowGrenade()
@@ -856,13 +879,13 @@ void ACH4Character::ThrowGrenade()
 
 void ACH4Character::OnThrowGrenade()
 {
-	UE_LOG(LogTemp,Error,TEXT("G키 입력 성공"))
+	UE_LOG(LogTemp, Error, TEXT("G키 입력 성공"))
 	ThrowGrenade();
 }
 
 void ACH4Character::CanUSingGrenade()
 {
-	 bUSingGrenade = false;
+	bUSingGrenade = false;
 }
 
 void ACH4Character::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -872,45 +895,41 @@ void ACH4Character::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	DOREPLIFETIME(ACH4Character, CurrentCombatPose);
 	DOREPLIFETIME(ACH4Character, HealItemCount);
 	DOREPLIFETIME(ACH4Character, GrenadeCount);
-	DOREPLIFETIME(ACH4Character,bUSingGrenade);
-	DOREPLIFETIME(ACH4Character,bIsSprinting);
-	DOREPLIFETIME(ACH4Character,bIsAiming);
-	DOREPLIFETIME(ACH4Character,bIsFreeLook);
-	DOREPLIFETIME(ACH4Character,MaxHP);
-	DOREPLIFETIME(ACH4Character,WalkSpeed);
-	DOREPLIFETIME(ACH4Character,SprintSpeed);
-	DOREPLIFETIME(ACH4Character,CurrentHP);
-	DOREPLIFETIME(ACH4Character,PrimaryWeaponData1);
-	DOREPLIFETIME(ACH4Character,PrimaryWeaponData2);
+	DOREPLIFETIME(ACH4Character, bUSingGrenade);
+	DOREPLIFETIME(ACH4Character, bIsSprinting);
+	DOREPLIFETIME(ACH4Character, bIsAiming);
+	DOREPLIFETIME(ACH4Character, bIsFreeLook);
+	DOREPLIFETIME(ACH4Character, MaxHP);
+	DOREPLIFETIME(ACH4Character, WalkSpeed);
+	DOREPLIFETIME(ACH4Character, SprintSpeed);
+	DOREPLIFETIME(ACH4Character, CurrentHP);
+	DOREPLIFETIME(ACH4Character, PrimaryWeaponData1);
+	DOREPLIFETIME(ACH4Character, PrimaryWeaponData2);
 }
 
-//애니매이션 업데이트
-void ACH4Character::UpdateCombatPose()
+//포즈 상태 업데이트 
+void ACH4Character::UpdateCombatPose_Implementation()
 {
 	if (!EquippableComponent || !EquippableComponent->CurrentWeapon)
 	{
 		CurrentCombatPose = ECombatPose::Normal;
 		return;
 	}
-
 	ECombatPose Data = EquippableComponent->CurrentWeapon->WeaponData->GetGunDataAsset();
-
-
-	CurrentCombatPose = Data;
-	
+	CurrentCombatPose = Data;	
 }
 
 void ACH4Character::Server_UseHealItem_Implementation()
 {
-	UE_LOG(LogTemp,Error,TEXT("서버 힐요청됨"))
-	if (DefaultHealData&&HealItemCount > 0)
+	UE_LOG(LogTemp, Error, TEXT("서버 힐요청됨"))
+	if (DefaultHealData && HealItemCount > 0)
 	{
 		CurrentHP = FMath::Clamp(CurrentHP + DefaultHealData->Value, 0.0f, MaxHP);
 		HealItemCount--;
-		UE_LOG(LogTemp, Log, TEXT("야후: 힐 사용! 남은 체력: %f, 남은 개수: %d,힐량:%f"), CurrentHP, HealItemCount,DefaultHealData->Value);
+		UE_LOG(LogTemp, Log, TEXT("야후: 힐 사용! 남은 체력: %f, 남은 개수: %d,힐량:%f"), CurrentHP, HealItemCount, DefaultHealData->Value);
 	}
 	else
 	{
-		UE_LOG(LogTemp,Error,TEXT(" 데이터 에셋이 유호하지않거나 힐아이템부족"))
+		UE_LOG(LogTemp, Error, TEXT(" 데이터 에셋이 유호하지않거나 힐아이템부족"))
 	}
 }

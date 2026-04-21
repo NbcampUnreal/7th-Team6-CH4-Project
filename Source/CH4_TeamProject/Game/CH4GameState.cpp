@@ -13,6 +13,7 @@
 #include "Engine/ExponentialHeightFog.h"
 #include "Engine/SkyLight.h"
 #include "Net/UnrealNetwork.h"
+#include <Misc\OutputDeviceNull.h>
 
 ACH4GameState::ACH4GameState()
 {
@@ -69,25 +70,22 @@ void ACH4GameState::UpdateLapsedTime()
 	
 	EDayPhase NewPhase = DayPhase;
 	
-	if (ElapsedTime < DayTime)
-	{
-		NewPhase = EDayPhase::Day;
-	}
-	else if (ElapsedTime < DayTime + EveningTime)
-	{
-		NewPhase = EDayPhase::Evening;
-	}
-	else
-	{
-		NewPhase = EDayPhase::Night;
-	}
-	
+	// 단계 판별 로직
+	if (ElapsedTime < DayTime) NewPhase = EDayPhase::Day;
+	else if (ElapsedTime < DayTime + EveningTime) NewPhase = EDayPhase::Evening;
+	else NewPhase = EDayPhase::Night;
+
+	// 단계가 바뀌었을 때만 실행
 	if (DayPhase != NewPhase)
 	{
+		// 핵심: 서버에서 값을 변경합니다. 
+		// ReplicatedUsing 설정 덕분에 클라이언트들은 자동으로 OnRep_DayPhase를 호출합니다.
 		DayPhase = NewPhase;
-	
-		OnRep_DayPhase(); 
-		// 서버에서는 OnRep 자동 호출 x -> 서버에서 DayPhaseChang 실행 -> 클라에 변수 자동 복제 -> 클라에서 실행
+
+		// 서버(호스트)는 OnRep이 자동으로 실행되지 않으므로 직접 호출해줍니다.
+		OnRep_DayPhase();
+
+		UE_LOG(LogTemp, Warning, TEXT("서버: DayPhase 단계 변경 -> %d"), (int32)DayPhase);
 	}
 }
 
@@ -152,6 +150,18 @@ void ACH4GameState::OnRep_GamePhase() // 변경 시 자동 호출
 void ACH4GameState::OnRep_DayPhase()
 {
 	ApplyDayPhaseChanges(DayPhase);
+
+	ACH4PlayerController* PC = Cast<ACH4PlayerController>(GetWorld()->GetFirstPlayerController());
+
+	if (PC && PC->CurrentMenuWidget)
+	{
+		FOutputDeviceNull ar;
+		FString command = FString::Printf(TEXT("UpdateDayUI %d"), (int32)DayPhase);
+
+		PC->CurrentMenuWidget->CallFunctionByNameWithArguments(*command, ar, NULL, true);
+
+		UE_LOG(LogTemp, Warning, TEXT("C++에서 위젯 UpdateDayUI 호출 완료! 단계: %d"), (int32)DayPhase);
+	}
 }
 
 void ACH4GameState::OnRep_ServerTime()
