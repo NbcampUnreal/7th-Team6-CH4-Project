@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GenericTeamAgentInterface.h"
+#include "NiagaraSystem.h"
 #include "CH4_TeamProject/DataBase/DataBase.h"
 #include "GameFramework/Character.h"
 #include "ZombieBase.generated.h"
@@ -44,6 +45,9 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
 	float Damage;
+	
+	UPROPERTY(EditAnywhere)
+	UNiagaraSystem* TakeDamageEffect;
 	
 	float GetAttack() { return Damage; };
 	
