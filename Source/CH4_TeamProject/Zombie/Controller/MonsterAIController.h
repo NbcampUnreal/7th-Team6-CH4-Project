@@ -27,6 +27,7 @@ protected:
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void OnUnPossess() override;
 	void ClearSightTarget();
+	void ClearHearTarget();
 	void ClearAttackTarget();
 
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
