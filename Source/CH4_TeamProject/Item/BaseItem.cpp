@@ -22,7 +22,7 @@ ABaseItem::ABaseItem()
 	MeshComponent->SetCollisionProfileName(TEXT("NoCollision"));
 	
 	Tags.Add(TEXT("PickupItem"));
-	
+	MeshComponent->SetIsReplicated(true);
 	bReplicates = true;
 }
 
