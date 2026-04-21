@@ -120,7 +120,9 @@ void ACH4PlayerController::HideCurrentWidget()
 
 void ACH4PlayerController::StartGame()
 {
-	UE_LOG(LogTemp,Error,TEXT("호출됨?"))
+	UE_LOG(LogTemp, Warning, TEXT("=== StartGame 호출됨! HUD 생성을 시작합니다 ==="));
+
+	// 1. 기존에 떠 있는 모든 위젯 정리
 	if (UGameViewportClient* ViewportClient = GetWorld()->GetGameViewport())
 	{
 		ViewportClient->RemoveAllViewportWidgets();
@@ -132,16 +134,29 @@ void ACH4PlayerController::StartGame()
 		CurrentMenuWidget = nullptr;
 	}
 
-	// 3. 게임 화면이 나왔으니 다시 HUD(체력바 등)를 띄워줌
-	CurrentMenuWidget = CreateWidget<UUserWidget>(this, HUDWidgetClass);
+	// 2. HUD 생성 (클래스 유효성 먼저 확인)
 	if (HUDWidgetClass)
 	{
-		CurrentMenuWidget->AddToViewport();
+		CurrentMenuWidget = CreateWidget<UUserWidget>(this, HUDWidgetClass);
 
-		// 4. ★핵심: 입력 모드를 게임 전용으로! (이걸 안 하면 화면만 비고 조작이 안 됨)
-		FInputModeGameOnly InputMode;
-		SetInputMode(InputMode);
-		bShowMouseCursor = false;
+		if (CurrentMenuWidget)
+		{
+			CurrentMenuWidget->AddToViewport();
+			UE_LOG(LogTemp, Log, TEXT("HUD 생성 및 뷰포트 추가 완료: %s"), *CurrentMenuWidget->GetName());
+
+			// 3. 입력 모드 설정
+			FInputModeGameOnly InputMode;
+			SetInputMode(InputMode);
+			bShowMouseCursor = false;
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("HUD 위젯 인스턴스 생성 실패!"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("HUDWidgetClass가 설정되지 않았습니다! (에디터 확인 필요)"));
 	}
 }
 

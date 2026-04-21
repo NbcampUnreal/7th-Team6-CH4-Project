@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -17,7 +17,8 @@ class CH4_TEAMPROJECT_API ACH4PlayerController : public APlayerController, publi
 
 public:
 	ACH4PlayerController();
-	
+
+
 	virtual FGenericTeamId GetGenericTeamId() const override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
