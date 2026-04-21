@@ -13,7 +13,8 @@ void AZombieSpawnPoint::BeginPlay()
 	Super::BeginPlay();
 }
 
-void AZombieSpawnPoint::SpawnZombie()
+void AZombieSpawnPoint::SpawnZombie(
+	int32 NormalZombieMinCount, int32 NormalZombieMaxCount, int32 RunningZombieMinCount, int32 RunningZombieMaxCount, int32 TankZombieMinCount, int32 TankZombieMaxCount)
 {
 	if (!GetWorld())
 	{
@@ -50,7 +51,7 @@ void AZombieSpawnPoint::SpawnZombie()
 		}
 	};
 
-	SpawnHelper(NormalZombieClass, 8, 10);
-	SpawnHelper(RunnerZombieClass, 4, 6);
-	SpawnHelper(TankZombieClass, 1, 1);
+	SpawnHelper(NormalZombieClass, NormalZombieMinCount, NormalZombieMaxCount);
+	SpawnHelper(RunnerZombieClass, RunningZombieMinCount, RunningZombieMaxCount);
+	SpawnHelper(TankZombieClass, TankZombieMinCount, TankZombieMaxCount);
 }
