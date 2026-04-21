@@ -56,6 +56,14 @@ public:
 
 	void OnDeath();
 
+	bool IsReloading() const;//장전 생태 확인
+
+	//장전,발사
+	void PlayPistolFireAnimation();
+	void PlayRifleFireAnimation();
+	void PlayPistolReloadAnimation();
+	void PlayRifleReloadAnimation();
+
 	UFUNCTION(NetMulticast, Reliable)
 	void Multi_PlayAction(EPlayerActionState NewState);
 
