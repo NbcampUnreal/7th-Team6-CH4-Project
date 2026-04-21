@@ -51,7 +51,7 @@ void ACH4GameMode::BeginPlay()
 		AZombieSpawnPoint* ZombieSpawnVolume = Cast<AZombieSpawnPoint>(Actor);
 		if (ZombieSpawnVolume)
 		{
-			ZombieSpawnVolume->SpawnZombie();
+			ZombieSpawnVolume->SpawnZombie(5, 10, 4, 6, 1, 1);
 		}
 	}
 	

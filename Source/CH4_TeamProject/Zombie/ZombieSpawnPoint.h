@@ -22,7 +22,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn")
 	TSubclassOf<AActor> TankZombieClass;
 	
-	void SpawnZombie();
+	void SpawnZombie(int32 NormalZombieMinCount, int32 NormalZombieMixCount, int32 RunningZombieMinCount, int32 RunningZombieMaxCount, int32 TankZombieMinCount, int32 TankZombieMaxCount);
 	
 protected:
 	virtual void BeginPlay() override;

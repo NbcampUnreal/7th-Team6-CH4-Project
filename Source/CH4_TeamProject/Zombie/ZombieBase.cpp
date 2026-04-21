@@ -128,6 +128,13 @@ void AZombieBase::Multi_PlayAttackMontage_Implementation(UAnimMontage* MontageTo
 	PlayAnimMontage(MontageToPlay);
 }
 
+void AZombieBase::SetZombieStat(float NewHP, float NewDamage, float NewSpeed)
+{
+	MaxHP = NewHP;
+	Damage = NewDamage;
+	MoveSpeed = NewSpeed;
+}
+
 void AZombieBase::DestroyZombie()
 {
 	Destroy();
