@@ -4,8 +4,8 @@ ANormalZombie::ANormalZombie()
 {
 	MaxHP = 100;
 	CurrentHP = MaxHP;
-	MoveSpeed = 100.f;
-	Damage = 30.f;
+	MoveSpeed = 200.f;
+	Damage = 20.f;
 }
 
 void ANormalZombie::BeginPlay()

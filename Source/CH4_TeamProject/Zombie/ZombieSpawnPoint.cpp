@@ -50,6 +50,7 @@ void AZombieSpawnPoint::SpawnZombie()
 		}
 	};
 
-	SpawnHelper(NormalZombieClass, 8, 15);
-	SpawnHelper(RunnerZombieClass, 3, 8);
+	SpawnHelper(NormalZombieClass, 8, 10);
+	SpawnHelper(RunnerZombieClass, 4, 6);
+	SpawnHelper(TankZombieClass, 1, 1);
 }

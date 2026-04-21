@@ -2,10 +2,10 @@
 
 ARunnerZombie::ARunnerZombie()
 {
-	MaxHP = 100;
+	MaxHP = 80;
 	CurrentHP = MaxHP;
-	MoveSpeed = 200.f;
-	Damage = 30.f;
+	MoveSpeed = 400.f;
+	Damage = 15.f;
 }
 
 void ARunnerZombie::BeginPlay()
