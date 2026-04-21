@@ -19,7 +19,9 @@ enum class EPlayerActionState : uint8
 	PistolFire		UMETA(DisplayName = "PistolFire"),
 	RifleFire		UMETA(DisplayName = "RifleFire"),
 	PistolReload	UMETA(DisplayName = "PistolReload"),
-	RifleReload		UMETA(DisplayName = "RifleReload")
+	RifleReload		UMETA(DisplayName = "RifleReload"),
+	MeleeAttack     UMETA(DisPlayName = "MeleeAttack"),
+	DrinkHealItem   UMETA(DisPlayName = "DrinkHealItem")
 };
 
 UCLASS()
@@ -113,6 +115,14 @@ public:
 	//라이플 장전용 몽타주
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Montage")
 	TObjectPtr<class UAnimMontage> RifleReloadMontage;
+	
+	// 근접무기용 몽타주
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Montage")
+	TObjectPtr<class UAnimMontage> MeleeAttackMontage;
+	
+	// 체력 회복 아이템 마시기 몽타주
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Montage")
+	TObjectPtr<class UAnimMontage> DrinkHealItemMontage;
 
 protected:
 	//특정 행동 검사(상태 마다 안되는것 되는것 판단)
@@ -173,4 +183,12 @@ public:
 	// 라이플 장전 몽타주
 	UFUNCTION(BlueprintCallable, Category = "Animation")
 	bool PlayRifleReloadMontage();
+	
+	// 근접 공격 몽타주
+	UFUNCTION(BlueprintCallable, Category = "Animation")
+	bool PlayMeleeAttackMontage();
+	
+	// 체력 회복 아이템 마시기 몽타주
+	UFUNCTION(BlueprintCallable, Category = "Animation")
+	bool PlayDrinkHealItemMontage();
 };

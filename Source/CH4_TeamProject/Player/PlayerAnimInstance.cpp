@@ -205,6 +205,18 @@ bool UPlayerAnimInstance::PlayRifleReloadMontage()
 	return TryPlayMontage(RifleReloadMontage, EPlayerActionState::RifleReload, true);
 }
 
+bool UPlayerAnimInstance::PlayMeleeAttackMontage()
+{
+	// 근접 공격 몽타주 재생
+	return TryPlayMontage(MeleeAttackMontage, EPlayerActionState::MeleeAttack, true);
+}
+
+bool UPlayerAnimInstance::PlayDrinkHealItemMontage()
+{
+	// 체력 회복 아이템 사용하기 몽타주
+	return TryPlayMontage(DrinkHealItemMontage, EPlayerActionState::DrinkHealItem, true);
+}
+
 void UPlayerAnimInstance::SetDownState(bool bNewIsDown)
 {
 	//다운 유지 상태
