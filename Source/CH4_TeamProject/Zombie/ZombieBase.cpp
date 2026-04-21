@@ -1,4 +1,6 @@
 ﻿#include "ZombieBase.h"
+
+#include "NiagaraFunctionLibrary.h"
 #include "Controller/MonsterAIController.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -95,6 +97,12 @@ void AZombieBase::Multi_PlayDeathMontage_Implementation(UAnimMontage* MontageToP
 
 void AZombieBase::Multi_PlayTakeDamageMontage_Implementation(UAnimMontage* MontageToPlay)
 {
+	UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+	GetWorld(),
+	TakeDamageEffect,
+	GetActorLocation()
+	);
+	
 	PlayAnimMontage(MontageToPlay);
 }
 
