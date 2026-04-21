@@ -4,6 +4,7 @@
 #include "Controller/MonsterAIController.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 AZombieBase::AZombieBase()
 {
@@ -28,6 +29,22 @@ void AZombieBase::BeginPlay()
 	Super::BeginPlay();
 	// 좀비 이동속도 설정
 	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
+	
+	GetWorld()->GetTimerManager().SetTimer(
+		PlaySoundHandle,
+		this,
+		&AZombieBase::CurrentSoundPlay,
+		20.f,
+		true
+		);
+}
+
+void AZombieBase::CurrentSoundPlay()
+{
+	UGameplayStatics::SpawnSoundAttached(
+	CurrentSound,
+	GetRootComponent()
+	);
 }
 
 float AZombieBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)

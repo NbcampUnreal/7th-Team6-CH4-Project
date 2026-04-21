@@ -279,6 +279,7 @@ public:
 	void OnRep_CombatPose();
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	void PlayerDestroy();
 
 	UFUNCTION(Server, Reliable)
 	void UpdateCombatPose();
@@ -313,6 +314,8 @@ public:
 	UPROPERTY()
 	FTimerHandle PickupMontageTimerHandle;
 	
-	UPROPERTY()
+	FTimerHandle PlayerDestroyTimerHandle;
+  
+  UPROPERTY()
 	USoundBase* StepSound;
 };
