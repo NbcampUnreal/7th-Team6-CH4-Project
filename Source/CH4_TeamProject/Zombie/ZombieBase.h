@@ -18,6 +18,7 @@ public:
 	AZombieBase();
 	
 	virtual void BeginPlay() override;
+	void CurrentSoundPlay();
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 	virtual void OnDeath();
 	
@@ -49,11 +50,15 @@ public:
 	UPROPERTY(EditAnywhere)
 	UNiagaraSystem* TakeDamageEffect;
 	
+	UPROPERTY(EditAnywhere)
+	USoundBase* CurrentSound;
+	
 	float GetAttack() { return Damage; };
 	
 	FORCEINLINE ETeamID GetTeamID() const  { return TeamID; }
 	
 	FTimerHandle DestroyTimerHandle;
+	FTimerHandle PlaySoundHandle;
 	
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Team")

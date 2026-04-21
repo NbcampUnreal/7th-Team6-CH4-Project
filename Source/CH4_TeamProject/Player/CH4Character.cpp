@@ -612,6 +612,19 @@ void ACH4Character::Multi_PlayAction_Implementation(EPlayerActionState NewState)
 			break;
 		case EPlayerActionState::Dead:
 			AnimInst->Montage_Play(AnimInst->DeathMontage);
+			
+			PlayerInputStop();
+			
+			GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			
+			GetWorldTimerManager().SetTimer(
+				PlayerDestroyTimerHandle,
+				this,
+				&ACH4Character::PlayerDestroy,
+				2.0f,
+				false
+				);
 			break;
 		case EPlayerActionState::Revive:
 			AnimInst->Montage_Play(AnimInst->ReviveMontage);
@@ -932,4 +945,9 @@ void ACH4Character::Server_UseHealItem_Implementation()
 	{
 		UE_LOG(LogTemp, Error, TEXT(" 데이터 에셋이 유호하지않거나 힐아이템부족"))
 	}
+}
+
+void ACH4Character::PlayerDestroy()
+{
+	Destroy();
 }
