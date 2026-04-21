@@ -98,22 +98,32 @@ void ACH4Character::OnEquipInput1()
 
 void ACH4Character::OnEquipInput2()
 {
-	if (EquippableComponent == nullptr)
-	{
-		UE_LOG(LogTemp, Error, TEXT("실패 원인: EquippableComponent가 비어있음!"));
-	}
-
-	if (PrimaryWeaponData2 == nullptr)
-	{
-		UE_LOG(LogTemp, Error, TEXT("실패 원인: PrimaryWeaponData가 비어있음! 에디터에서 할당했는지 확인하세요."));
-	}
-
 	if (EquippableComponent && PrimaryWeaponData2)
 	{
 		EquippableComponent->Server_EquipWeapon(PrimaryWeaponData2);
-		UE_LOG(LogTemp, Warning, TEXT("장착 성공! 서버 함수 호출함."));
+		UpdateCombatPose();
 	}
 }
+
+void ACH4Character::OnEquipInput3()
+{
+	if (EquippableComponent && PrimaryWeaponData3)
+	{
+		EquippableComponent->Server_EquipWeapon(PrimaryWeaponData3);
+		UpdateCombatPose();
+	}
+}
+
+void ACH4Character::OnEquipInput4()
+{
+	if (EquippableComponent && PrimaryWeaponData4)
+	{
+		EquippableComponent->Server_EquipWeapon(PrimaryWeaponData4);
+		UpdateCombatPose();
+	}
+}
+
+
 
 void ACH4Character::Server_ApplyItemEffect_Implementation(AHealItem* HealItem)
 {
@@ -148,6 +158,8 @@ void ACH4Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &ACH4Character::Fires);
 	EnhancedInputComponent->BindAction(EquipAction, ETriggerEvent::Started, this, &ACH4Character::OnEquipInput1);
 	EnhancedInputComponent->BindAction(EquipAction2, ETriggerEvent::Started, this, &ACH4Character::OnEquipInput2);
+	EnhancedInputComponent->BindAction(EquipAction3, ETriggerEvent::Started, this, &ACH4Character::OnEquipInput3);
+	EnhancedInputComponent->BindAction(EquipAction4, ETriggerEvent::Started, this, &ACH4Character::OnEquipInput4);
 	EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this, &ACH4Character::StartSprint);
 	EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &ACH4Character::StopSprint);
 
@@ -320,7 +332,21 @@ void ACH4Character::InitializationInput()
 	{
 		EquipAction2 = InputEquip2.Object;
 	}
-
+	
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputEquip3(
+		TEXT("/Script/EnhancedInput.InputAction'/Game/Player/Input/Action/IA_Equip3.IA_Equip3'"));
+	if (InputEquip.Object != nullptr)
+	{
+		EquipAction3 = InputEquip3.Object;
+	}
+	
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputEquip4(
+		TEXT("/Script/EnhancedInput.InputAction'/Game/Player/Input/Action/IA_Equip4.IA_Equip4'"));
+	if (InputEquip.Object != nullptr)
+	{
+		EquipAction4 = InputEquip4.Object;
+	}
+	
 	static ConstructorHelpers::FObjectFinder<UInputAction> InputHeal(
 		TEXT("/Script/EnhancedInput.InputAction'/Game/Player/Input/Action/IA_Heal.IA_Heal'"));
 	if (InputEquip.Object != nullptr)

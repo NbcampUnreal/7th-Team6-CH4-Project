@@ -151,6 +151,12 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = "Input")
 	class UInputAction* EquipAction2;
+	
+	UPROPERTY(VisibleAnywhere, Category = "Input")
+	class UInputAction* EquipAction3;
+
+	UPROPERTY(VisibleAnywhere, Category = "Input")
+	class UInputAction* EquipAction4;
 
 	UPROPERTY(VisibleAnywhere, Category = "Input")
 	class UInputAction* HealAction;
@@ -255,11 +261,23 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat|Weapon",Replicated)
 	class UWeaponData* PrimaryWeaponData2;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat|Weapon",Replicated)
+    class UWeaponData* PrimaryWeaponData3;
+    
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat|Weapon",Replicated)
+    class UWeaponData* PrimaryWeaponData4;
 	//장비장착 임렵함수
 	void OnEquipInput1();
 
 	void OnEquipInput2();
 
+	void OnEquipInput3();
+
+	void OnEquipInput4();
+	
+	
+	
 	UFUNCTION(Server, Reliable)
 	void Server_ApplyItemEffect(class AHealItem* HealItem);
 
