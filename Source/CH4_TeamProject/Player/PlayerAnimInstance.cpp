@@ -59,27 +59,44 @@ bool UPlayerAnimInstance::CanPlayAction(EPlayerActionState NewAction) const
 	switch (CurrentActionState)
 	{
 	case EPlayerActionState::None:
-		
+
 		return true;
 
 	case EPlayerActionState::Hit:
-		
+
 		return (NewAction == EPlayerActionState::Dead || NewAction == EPlayerActionState::Down);
 
 	case EPlayerActionState::Pickup:
-		
+
 		return (NewAction == EPlayerActionState::Dead || NewAction == EPlayerActionState::Down);
 
+		//발사 중 상태
+	case EPlayerActionState::PistolFire:
+	case EPlayerActionState::RifleFire:
+		//발사 중에는 죽음,다운만 허용
+		return (NewAction == EPlayerActionState::PistolFire ||
+			NewAction == EPlayerActionState::RifleFire ||
+			NewAction == EPlayerActionState::Dead ||
+			NewAction == EPlayerActionState::Down ||
+			NewAction == EPlayerActionState::Hit);
+
+		//장전 중 상태
+	case EPlayerActionState::PistolReload:
+	case EPlayerActionState::RifleReload:
+		// 장전 중에는 죽음,다운,피격 허용
+		return (NewAction == EPlayerActionState::Dead ||
+			NewAction == EPlayerActionState::Down ||
+			NewAction == EPlayerActionState::Hit);
 	case EPlayerActionState::Down:
-		
+
 		return (NewAction == EPlayerActionState::Dead || NewAction == EPlayerActionState::Revive);
 
 	case EPlayerActionState::Revive:
-		
+
 		return (NewAction == EPlayerActionState::Dead);
 
 	case EPlayerActionState::Dead:
-		
+
 		return false;
 
 	default:
@@ -92,18 +109,22 @@ bool UPlayerAnimInstance::TryPlayMontage(UAnimMontage* Montage, EPlayerActionSta
 	// 몽타주 없으면 재생 불가
 	if (!Montage)
 	{
+		UE_LOG(LogTemp, Error, TEXT("TryPlayMontage 실패 - Montage가 NULL, NewAction: %d"), (int32)NewAction); // [추가]
 		return false;
 	}
 
 	//현 상태에서 재생가능한지 확인
 	if (!CanPlayAction(NewAction))
 	{
-		return false;
+		UE_LOG(LogTemp, Error, TEXT("TryPlayMontage 실패 - CanPlayAction 막힘, CurrentActionState: %d, NewAction: %d"),
+			(int32)CurrentActionState, (int32)NewAction); // [추가]
+		return true;
 	}
 
 	//몽타주 중복재생 막기
 	if (Montage_IsPlaying(Montage))
 	{
+		UE_LOG(LogTemp, Warning, TEXT("TryPlayMontage 실패 - 이미 재생 중인 몽타주, NewAction: %d"), (int32)NewAction); // [추가]
 		return false;
 	}
 
@@ -115,15 +136,18 @@ bool UPlayerAnimInstance::TryPlayMontage(UAnimMontage* Montage, EPlayerActionSta
 
 	//실제 몽타주 재생
 	const float PlayResult = Montage_Play(Montage);
+	UE_LOG(LogTemp, Warning, TEXT("Montage_Play 결과: %f, NewAction: %d"), PlayResult, (int32)NewAction); // [추가]
 
 	//재생 성공 시 현재 액션 상태 갱신
 	if (PlayResult > 0.0f)
 	{
 		CurrentActionState = NewAction;
+		UE_LOG(LogTemp, Warning, TEXT("TryPlayMontage 성공 - CurrentActionState 변경: %d"), (int32)CurrentActionState); // [추가]
 		return true;
 	}
 
 	//재생 실패
+	UE_LOG(LogTemp, Error, TEXT("TryPlayMontage 실패 - Montage_Play 결과가 0 이하, NewAction: %d"), (int32)NewAction); // [추가]
 	return false;
 }
 
@@ -155,6 +179,30 @@ bool UPlayerAnimInstance::PlayReviveMontage()
 {
 	//부활도 기존 몽타주 중지 후 재생
 	return TryPlayMontage(ReviveMontage, EPlayerActionState::Revive, true);
+}
+
+bool UPlayerAnimInstance::PlayPistolFireMontage()
+{
+	//권총 발사는 보통 다른 행동을 강제로 끊지는 않음
+	return TryPlayMontage(PistolFireMontage, EPlayerActionState::PistolFire, false);
+}
+
+bool UPlayerAnimInstance::PlayRifleFireMontage()
+{
+	//라이플 발사는 보통 다른 행동을 강제로 끊지는 않음
+	return TryPlayMontage(RifleFireMontage, EPlayerActionState::RifleFire, false);
+}
+
+bool UPlayerAnimInstance::PlayPistolReloadMontage()
+{
+	//권총 장전은 기존 몽타주를 끊고 재생
+	return TryPlayMontage(PistolReloadMontage, EPlayerActionState::PistolReload, true);
+}
+
+bool UPlayerAnimInstance::PlayRifleReloadMontage()
+{
+	//라이플 장전은 기존 몽타주를 끊고 재생
+	return TryPlayMontage(RifleReloadMontage, EPlayerActionState::RifleReload, true);
 }
 
 void UPlayerAnimInstance::SetDownState(bool bNewIsDown)

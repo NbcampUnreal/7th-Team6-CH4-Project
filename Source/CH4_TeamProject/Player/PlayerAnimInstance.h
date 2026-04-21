@@ -6,7 +6,7 @@
 
 
 //현재 캐릭터가 어떤 행동 상태인지 구분하기 위한 enum
- UENUM(BlueprintType)
+UENUM(BlueprintType)
 enum class EPlayerActionState : uint8
 {
 	None	UMETA(DisplayName = "None"),//0
@@ -14,7 +14,12 @@ enum class EPlayerActionState : uint8
 	Pickup	UMETA(DisplayName = "Pickup"),//2
 	Down	UMETA(DisplayName = "Down"),//3
 	Dead	UMETA(DisplayName = "Dead"),//4
-	Revive	UMETA(DisplayName = "Revive")//5
+	Revive	UMETA(DisplayName = "Revive"),//5
+
+	PistolFire		UMETA(DisplayName = "PistolFire"),
+	RifleFire		UMETA(DisplayName = "RifleFire"),
+	PistolReload	UMETA(DisplayName = "PistolReload"),
+	RifleReload		UMETA(DisplayName = "RifleReload")
 };
 
 UCLASS()
@@ -31,14 +36,14 @@ protected:
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
 protected:
-	
+
 	//이 AnimInstance를 소유한 캐릭터
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")
 	class ACharacter* Owner;
 
-	
+
 	//캐릭터의 이동 컴포넌트
-	
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")
 	class UCharacterMovementComponent* Movement;
 
@@ -51,22 +56,22 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")
 	float MoveSpeed = 350.0f;
 
-	
+
 	//캐릭터가 공중에 떠 있는지 여부 점프 / 낙하 애니메이션 전환에 사용
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")
 	bool bIsFalling = false;
 
-	
-	 //다운 상태 유지 여부
+
+	//다운 상태 유지 여부
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State")
 	bool bIsDown = false;
 
-	
+
 	//죽은 상태 유지 여부 true면 DeadLoop 또는 사망 상태 유지 포즈로 전환 가능
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State")
 	bool bIsDead = false;
 
-	
+
 	//현재 재생 중인 액션 상태 중복 재생 방지, 상태 기반 제한, 충돌 처리에 사용
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State")
 	EPlayerActionState CurrentActionState = EPlayerActionState::None;
@@ -91,6 +96,23 @@ public:
 	//부활 시작용 몽타주
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Montage")
 	TObjectPtr<class UAnimMontage> ReviveMontage;
+
+	//============총기 관련==========
+	//권총 발사용 몽타주
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Montage")
+	TObjectPtr<class UAnimMontage> PistolFireMontage;
+
+	//라이플 발사용 몽타주
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Montage")
+	TObjectPtr<class UAnimMontage> RifleFireMontage;
+
+	//권총 장전용 몽타주
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Montage")
+	TObjectPtr<class UAnimMontage> PistolReloadMontage;
+
+	//라이플 장전용 몽타주
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Montage")
+	TObjectPtr<class UAnimMontage> RifleReloadMontage;
 
 protected:
 	//특정 행동 검사(상태 마다 안되는것 되는것 판단)
@@ -135,4 +157,20 @@ public:
 	//현재 액션 상태를 반환 디버깅이나 조건 분기용
 	UFUNCTION(BlueprintPure, Category = "Animation")
 	EPlayerActionState GetCurrentActionState() const { return CurrentActionState; }
+
+	// 권총 발사 몽타주
+	UFUNCTION(BlueprintCallable, Category = "Animation")
+	bool PlayPistolFireMontage();
+
+	// 라이플 발사 몽타주
+	UFUNCTION(BlueprintCallable, Category = "Animation")
+	bool PlayRifleFireMontage();
+
+	// 권총 장전 몽타주
+	UFUNCTION(BlueprintCallable, Category = "Animation")
+	bool PlayPistolReloadMontage();
+
+	// 라이플 장전 몽타주
+	UFUNCTION(BlueprintCallable, Category = "Animation")
+	bool PlayRifleReloadMontage();
 };
