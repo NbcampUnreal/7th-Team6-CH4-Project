@@ -21,7 +21,7 @@ enum class EPlayerActionState : uint8
 	PistolReload	UMETA(DisplayName = "PistolReload"),
 	RifleReload		UMETA(DisplayName = "RifleReload"),
 	MeleeAttack     UMETA(DisPlayName = "MeleeAttack"),
-	DrinkHealItem   UMETA(DisPlayName = "DrinkHealItem")
+	DrinkHealItem   UMETA(DisPlayName = "DrinkHealItem"),
 	ShotgunFire		UMETA(DisplayName = "ShotgunFire"),
 	ShotgunReload	UMETA(DisplayName = "ShotgunReload")
 };
