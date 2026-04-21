@@ -73,9 +73,12 @@ bool UPlayerAnimInstance::CanPlayAction(EPlayerActionState NewAction) const
 		//발사 중 상태
 	case EPlayerActionState::PistolFire:
 	case EPlayerActionState::RifleFire:
-		//발사 중에는 죽음,다운만 허용
+	case EPlayerActionState::ShotgunFire:
+		
+		//발사 중에는 같은 발사,죽음,다운,피격 허용
 		return (NewAction == EPlayerActionState::PistolFire ||
 			NewAction == EPlayerActionState::RifleFire ||
+			NewAction == EPlayerActionState::ShotgunFire ||
 			NewAction == EPlayerActionState::Dead ||
 			NewAction == EPlayerActionState::Down ||
 			NewAction == EPlayerActionState::Hit);
@@ -83,6 +86,7 @@ bool UPlayerAnimInstance::CanPlayAction(EPlayerActionState NewAction) const
 		//장전 중 상태
 	case EPlayerActionState::PistolReload:
 	case EPlayerActionState::RifleReload:
+	case EPlayerActionState::ShotgunReload:
 		// 장전 중에는 죽음,다운,피격 허용
 		return (NewAction == EPlayerActionState::Dead ||
 			NewAction == EPlayerActionState::Down ||
@@ -215,6 +219,16 @@ bool UPlayerAnimInstance::PlayDrinkHealItemMontage()
 {
 	// 체력 회복 아이템 사용하기 몽타주
 	return TryPlayMontage(DrinkHealItemMontage, EPlayerActionState::DrinkHealItem, true);
+bool UPlayerAnimInstance::PlayShotgunFireMontage()
+{
+	//샷건 발사는 다른 행동을 강제로 끊지는 않음
+	return TryPlayMontage(ShotgunFireMontage, EPlayerActionState::ShotgunFire, false);
+}
+
+bool UPlayerAnimInstance::PlayShotgunReloadMontage()
+{
+	//샷건 장전은 기존 몽타주를 끊고 재생
+	return TryPlayMontage(ShotgunReloadMontage, EPlayerActionState::ShotgunReload, true);
 }
 
 void UPlayerAnimInstance::SetDownState(bool bNewIsDown)
