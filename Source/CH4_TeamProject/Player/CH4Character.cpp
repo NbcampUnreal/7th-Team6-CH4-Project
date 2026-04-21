@@ -22,6 +22,7 @@
 #include "CH4_TeamProject/Item/Equippable/Equippable.h"
 #include "CH4_TeamProject/Item/ThorwbleItem/ThorwbleItems.h"
 #include "Components/CapsuleComponent.h"
+#include "DSP/AudioDebuggingUtilities.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 
 
@@ -740,6 +741,13 @@ void ACH4Character::Multi_PlayAction_Implementation(EPlayerActionState NewState)
 		case EPlayerActionState::RifleReload:
 			AnimInst->PlayRifleReloadMontage();
 			break;
+			
+		case EPlayerActionState::MeleeAttack:
+			AnimInst->PlayMeleeAttackMontage();
+			break;
+			
+		case EPlayerActionState::DrinkHealItem:
+			AnimInst->PlayDrinkHealItemMontage();
 
 		case EPlayerActionState::ShotgunFire:
 			AnimInst->PlayShotgunFireMontage();
