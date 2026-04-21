@@ -19,6 +19,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn")
 	TSubclassOf<AActor> RunnerZombieClass;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn")
+	TSubclassOf<AActor> TankZombieClass;
+	
 	void SpawnZombie();
 	
 protected:
