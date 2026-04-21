@@ -530,17 +530,16 @@ void ACH4Character::UpdateAimCamera(float DeltaTime)
 }
 
 //발사
-//발사
 void ACH4Character::Fires()
 {
-	// [추가] 컴포넌트가 없으면 종료
+	// 컴포넌트가 없으면 종료
 	if (EquippableComponent == nullptr)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, TEXT("컴포넌트 자체가 널입니다!"));
 		return;
 	}
 
-	// [추가] 현재 무기가 없으면 종료
+	//현재 무기가 없으면 종료
 	if (EquippableComponent->CurrentWeapon == nullptr)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, TEXT("컴포넌트는 있는데 총이 없습니다!"));
@@ -574,12 +573,18 @@ void ACH4Character::Fires()
 			break;
 
 		case ECombatPose::Rifle:
-			Multi_PlayAction(EPlayerActionState::RifleFire);
+		case ECombatPose::MuchineGun:
 			UE_LOG(LogTemp, Warning, TEXT("RifleFire Multi_PlayAction"));
+			Multi_PlayAction(EPlayerActionState::RifleFire);
+			break;
+
+		case ECombatPose::Shotgun:
+			UE_LOG(LogTemp, Warning, TEXT("ShotgunFire Multi_PlayAction"));
+			Multi_PlayAction(EPlayerActionState::ShotgunFire);
 			break;
 
 		default:
-			UE_LOG(LogTemp, Warning, TEXT("발사 몽타주 분기 실패 - CurrentCombatPose 확인")); 
+			UE_LOG(LogTemp, Warning, TEXT("발사 몽타주 분기 실패 - CurrentCombatPose 확인"));
 			break;
 		}
 	}
@@ -587,7 +592,7 @@ void ACH4Character::Fires()
 
 void ACH4Character::OnReload()
 {
-	// [추가] 컴포넌트 또는 현재 무기가 없으면 종료
+	//컴포넌트 또는 현재 무기가 없으면 종료
 	if (EquippableComponent == nullptr || EquippableComponent->CurrentWeapon == nullptr)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("장전 실패 - 무기 또는 컴포넌트가 없음"));
@@ -601,7 +606,7 @@ void ACH4Character::OnReload()
 		return;
 	}
 
-	// [추가] 현재 전투 포즈 확인용 로그
+	//현재 전투 포즈 확인용 로그
 	UE_LOG(LogTemp, Warning, TEXT("Reload CurrentCombatPose: %d"), (int32)CurrentCombatPose);
 
 	//현재 무기 포즈에 따라 장전 몽타주 실행
@@ -610,17 +615,21 @@ void ACH4Character::OnReload()
 		switch (CurrentCombatPose)
 		{
 		case ECombatPose::Pistol:
-			UE_LOG(LogTemp, Warning, TEXT("PistolReload Multi_PlayAction")); // [추가]
+			UE_LOG(LogTemp, Warning, TEXT("PistolReload Multi_PlayAction")); 
 			Multi_PlayAction(EPlayerActionState::PistolReload);
 			break;
 
 		case ECombatPose::Rifle:
-			UE_LOG(LogTemp, Warning, TEXT("RifleReload Multi_PlayAction")); // [추가]
+			UE_LOG(LogTemp, Warning, TEXT("RifleReload Multi_PlayAction"));
 			Multi_PlayAction(EPlayerActionState::RifleReload);
+			break;
+		case ECombatPose::Shotgun:
+			UE_LOG(LogTemp, Warning, TEXT("ShotgunReload Multi_PlayAction"));
+			Multi_PlayAction(EPlayerActionState::ShotgunReload);
 			break;
 
 		default:
-			UE_LOG(LogTemp, Warning, TEXT("장전 몽타주 분기 실패 - CurrentCombatPose 확인")); // [추가]
+			UE_LOG(LogTemp, Warning, TEXT("장전 몽타주 분기 실패 - CurrentCombatPose 확인"));
 			break;
 		}
 	}
@@ -730,6 +739,14 @@ void ACH4Character::Multi_PlayAction_Implementation(EPlayerActionState NewState)
 
 		case EPlayerActionState::RifleReload:
 			AnimInst->PlayRifleReloadMontage();
+			break;
+
+		case EPlayerActionState::ShotgunFire:
+			AnimInst->PlayShotgunFireMontage();
+			break;
+
+		case EPlayerActionState::ShotgunReload:
+			AnimInst->PlayShotgunReloadMontage();
 			break;
 		}
 	}
