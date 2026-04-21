@@ -19,7 +19,9 @@ enum class EPlayerActionState : uint8
 	PistolFire		UMETA(DisplayName = "PistolFire"),
 	RifleFire		UMETA(DisplayName = "RifleFire"),
 	PistolReload	UMETA(DisplayName = "PistolReload"),
-	RifleReload		UMETA(DisplayName = "RifleReload")
+	RifleReload		UMETA(DisplayName = "RifleReload"),
+	ShotgunFire		UMETA(DisplayName = "ShotgunFire"),
+	ShotgunReload	UMETA(DisplayName = "ShotgunReload")
 };
 
 UCLASS()
@@ -114,6 +116,14 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Montage")
 	TObjectPtr<class UAnimMontage> RifleReloadMontage;
 
+	//샷건 발사용 몽타주
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Montage")
+	TObjectPtr<class UAnimMontage> ShotgunFireMontage;
+
+	//샷건 장전용 몽타주
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Montage")
+	TObjectPtr<class UAnimMontage> ShotgunReloadMontage;
+
 protected:
 	//특정 행동 검사(상태 마다 안되는것 되는것 판단)
 	bool CanPlayAction(EPlayerActionState NewAction) const;
@@ -173,4 +183,12 @@ public:
 	// 라이플 장전 몽타주
 	UFUNCTION(BlueprintCallable, Category = "Animation")
 	bool PlayRifleReloadMontage();
+
+	//샷건 발사 몽타주
+	UFUNCTION(BlueprintCallable, Category = "Animation")
+	bool PlayShotgunFireMontage();
+
+	//샷건 장전 몽타주
+	UFUNCTION(BlueprintCallable, Category = "Animation")
+	bool PlayShotgunReloadMontage();
 };
