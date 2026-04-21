@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "CH4_TeamProject/DataBase/DataBase.h"
 #include "Engine/DataAsset.h"
 #include "WeaponData.generated.h"
 
@@ -21,7 +22,7 @@ public:
 	UPROPERTY(EditAnywhere, Category="Common")
 	TSubclassOf<AEquippable> WeaponClass;
 
-	UPROPERTY(EditAnywhere, Category="Common")
+	UPROPERTY(EditAnywhere, Category="Weapon|visual")
 	TObjectPtr<UStaticMesh> StaticMesh;
 	
 	UPROPERTY(EditAnywhere, Category="Common")
@@ -39,10 +40,9 @@ public:
 	class USoundBase* FireSound; 
 
 	UPROPERTY(EditAnywhere, Category = "Effects")
-	class UParticleSystem* MuzzleFlash; 
+	class UNiagaraSystem* MuzzleFlash; 
 
-	UPROPERTY(EditAnywhere, Category = "Effects")
-	class UParticleSystem* ImpactEffect;
+
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Animation")
 	ECombatPose CombatPose = ECombatPose::Rifle;

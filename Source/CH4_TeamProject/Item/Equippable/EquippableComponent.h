@@ -26,7 +26,7 @@ public:
 	UFUNCTION(BlueprintCallable, Server, Reliable)
 	void EquipWeapon(class UWeaponData* WeaponClass);
 
-	//착용중인 무기
+	//착용중인 무기	
 	UPROPERTY(Replicated)
 	TObjectPtr<AEquippable> CurrentWeapon;
 

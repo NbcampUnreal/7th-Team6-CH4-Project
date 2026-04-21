@@ -18,9 +18,11 @@ public:
 	AEquippable();
 
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Data")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Data",ReplicatedUsing = OnRep_WeaponData)
 	TObjectPtr<class UWeaponData> WeaponData;
 	
+	UFUNCTION()
+	void OnRep_WeaponData();
 	
 protected:
 	// Called when the game starts or when spawned
@@ -62,7 +64,7 @@ public:
 	virtual int32 GetMaxAmmo () const {return 0;}
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
 	
-	UPROPERTY(EditAnywhere,Category="DataAsset")
+	UPROPERTY(EditAnywhere,Category="DataAsset",Replicated)
 	class UWeaponData* DataAsset;
 	
 	virtual void SetCurrentAmmo();
@@ -70,4 +72,14 @@ public:
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Animation")
 	ECombatPose CombatPose = ECombatPose::Rifle;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
+	TObjectPtr<USceneComponent> DefaultSceneRoot;	
+	
+	UPROPERTY(ReplicatedUsing = OnRep_WeaponMeshCollision)
+	bool bCollisionDisabled = false;
+	
+	UFUNCTION()
+	void OnRep_WeaponMeshCollision();
+
 };

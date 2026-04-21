@@ -21,6 +21,7 @@
 #include "../Item/Equippable/Ranged Weapon/RangedWeaponDataAsset.h"
 #include "CH4_TeamProject/Item/Equippable/Equippable.h"
 #include "CH4_TeamProject/Item/ThorwbleItem/ThorwbleItems.h"
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 
 
@@ -83,22 +84,11 @@ void ACH4Character::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	UpdateAimCamera(DeltaTime);//조준 카메라 상태 업데이트
+	
 }
 
 void ACH4Character::OnEquipInput1()
 {
-	UE_LOG(LogTemp, Error, TEXT("호출은 성공"));
-
-	if (EquippableComponent == nullptr)
-	{
-		UE_LOG(LogTemp, Error, TEXT("실패 원인: EquippableComponent가 비어있음!"));
-	}
-
-	if (PrimaryWeaponData1 == nullptr)
-	{
-		UE_LOG(LogTemp, Error, TEXT("실패 원인: PrimaryWeaponData가 비어있음! 에디터에서 할당했는지 확인하세요."));
-	}
-
 	if (EquippableComponent && PrimaryWeaponData1)
 	{
 		EquippableComponent->EquipWeapon(PrimaryWeaponData1);
@@ -763,7 +753,7 @@ void ACH4Character::ApplyItemEffect(UConsumableDataAsset* Data)
 				{
 					FoundWeapon->AddMaxClip(Data->Value);
 					UE_LOG(LogTemp, Warning, TEXT("야후: 무기 충전 완료! 현재 총알: %d,%f"), FoundWeapon->GetMaxClip(),Data->Value);
-					return; // 무기 하나 충전했으면 종료
+					return; 
 				}
 			}
 			UE_LOG(LogTemp, Error, TEXT("야후: 충전할 무기를 찾지 못했습니다!"));
@@ -811,7 +801,6 @@ void ACH4Character::Server_ThrowGrenade_Implementation()
 		UE_LOG(LogTemp,Error,TEXT("수류탄 쿨타임중"))
 		return;
 	}
-	bUSingGrenade = true;
 	if (GrenadeCount <= 0)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("수류탄 갯수 확인해 갯수 : %d"),GrenadeCount);
@@ -840,6 +829,7 @@ void ACH4Character::Server_ThrowGrenade_Implementation()
 		UE_LOG(LogTemp, Warning, TEXT("수류탄 스폰 성공 - 위치: %s / 속도: %s"),
 			*SpawnLocation.ToString(), *ThrowVelocity.ToString());
 		GetWorld()->GetTimerManager().SetTimer(ExplosionTimerHandle,Grenade,&AThorwbleItems::Explode,1.5f,false);
+		bUSingGrenade = true;
 	}
 	else
 	{

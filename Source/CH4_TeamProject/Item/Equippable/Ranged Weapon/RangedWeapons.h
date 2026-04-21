@@ -57,9 +57,6 @@ protected:
     
 	void TraceShoot();
 	
-	UPROPERTY(EditAnywhere,Category="DataAsset")
-	UWeaponData* GunDataAsset;
-  
 	virtual int32 GetMaxAmmo()const override;
 	virtual int32 GetMaxClip() const override;
     
