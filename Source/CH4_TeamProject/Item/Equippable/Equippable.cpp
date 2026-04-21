@@ -12,17 +12,10 @@
 AEquippable::AEquippable()
 {
 	PrimaryActorTick.bCanEverTick = false;
-
-	// 1. 투명하고 작은 SceneComponent를 가장 위에 (루트로) 만든다. ㅡㅡb
-	DefaultSceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
-	RootComponent = DefaultSceneRoot;
-
-	// 2. WeaponMesh는 이 루트 아래에 붙는 '자식'일 뿐이야.
-	WeaponMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WeaponMesh0"));
+	WeaponMesh = MeshComponent;
 	if (WeaponMesh)
 	{
-		WeaponMesh->SetupAttachment(RootComponent); // SetupAttachment를 써야 해!
-		WeaponMesh->SetIsReplicated(true); // 이 녀석도 복제되도록 명시 ㅡㅡ+
+		WeaponMesh->SetIsReplicated(true);
 	}
 
 	bReplicates = true;
@@ -30,24 +23,22 @@ AEquippable::AEquippable()
 }
 
 void AEquippable::OnRep_WeaponData()
-{
-	if (WeaponData && WeaponMesh)
-	{
+{	
+	UE_LOG(LogTemp, Error, TEXT("OnRep_WeaponData 호출됨! HasAuthority: %d"), HasAuthority());
+	if (!WeaponData || !WeaponMesh) return;
+	
 		WeaponMesh->SetStaticMesh(WeaponData->StaticMesh);
-        
-		// 위치 초기화
+		
 		WeaponMesh->SetRelativeLocation(FVector::ZeroVector);
 		WeaponMesh->SetRelativeRotation(FRotator::ZeroRotator);
 		WeaponMesh->SetRelativeScale3D(FVector(1.0f, 1.0f, 1.0f));
 		
 		WeaponMesh->SetVisibility(true, true);
 		WeaponMesh->SetHiddenInGame(false);
-		WeaponMesh->RegisterComponent(); // 컴포넌트를 월드에 다시 등록!
-        
 		WeaponMesh->MarkRenderStateDirty();
         
 		UE_LOG(LogTemp, Warning, TEXT("야후! [%s] 메쉬 강제 등록 완료!"), *WeaponData->StaticMesh->GetName());
-	}
+	
 }
 
 // Called when the game starts or when spawned
