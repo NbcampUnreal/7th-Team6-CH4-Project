@@ -22,7 +22,10 @@ void UEquippableComponent::Fire()
 	{
 		return;
 	}
-	CurrentWeapon->PlayWeaponShake();
+	if (CurrentWeapon->CurrentAmmo >= 0)
+	{
+		CurrentWeapon->PlayWeaponShake();
+	}
 
 	CurrentWeapon->Server_Attack();
 }

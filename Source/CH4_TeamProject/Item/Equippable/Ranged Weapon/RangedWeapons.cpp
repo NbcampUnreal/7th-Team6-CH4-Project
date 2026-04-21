@@ -203,21 +203,16 @@ void ARangedWeapons::TraceShoot()
 	FRotator ViewRotation;
 
 	PC->GetPlayerViewPoint(StartLocation, ViewRotation);
-
-
-	StartLocation = GetActorLocation();
 	FVector EndLocation = StartLocation + (ViewRotation.Vector() * WeaponData->GetRangedLength());
 
 	FHitResult Hit;
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(this);
 	Params.AddIgnoredActor(GetOwner());
-
-
+	
 	bool bIsHit = GetWorld()->LineTraceSingleByChannel(Hit, StartLocation, EndLocation, ECC_Visibility, Params);
 	FColor LineColor = bIsHit ? FColor::Red : FColor::Green; // 맞으면 빨강, 안 맞으면 초록
-
-
+	
 	if (bIsHit && Hit.GetActor())
 	{
 		Server_ApplyDamageToTarget(Hit.GetActor());

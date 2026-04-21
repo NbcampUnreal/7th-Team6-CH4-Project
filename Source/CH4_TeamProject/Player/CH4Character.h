@@ -314,6 +314,8 @@ public:
 	UPROPERTY()
 	FTimerHandle PickupMontageTimerHandle;
 	
-	UPROPERTY()
 	FTimerHandle PlayerDestroyTimerHandle;
+  
+  UPROPERTY()
+	USoundBase* StepSound;
 };
