@@ -53,6 +53,8 @@ public:
 	UPROPERTY(EditAnywhere)
 	USoundBase* CurrentSound;
 	
+	virtual void SetZombieStat(float NewHP, float NewDamage, float NewSpeed);
+	
 	float GetAttack() { return Damage; };
 	
 	FORCEINLINE ETeamID GetTeamID() const  { return TeamID; }

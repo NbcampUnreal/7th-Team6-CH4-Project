@@ -30,3 +30,8 @@ void ARunnerZombie::OnDeath()
 {
 	Super::OnDeath();
 }
+
+void ARunnerZombie::SetZombieStat(float NewHP, float NewDamage, float NewSpeed)
+{
+	Super::SetZombieStat(NewHP, NewDamage, NewSpeed);
+}

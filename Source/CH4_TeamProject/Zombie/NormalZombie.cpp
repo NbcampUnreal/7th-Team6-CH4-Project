@@ -30,3 +30,8 @@ void ANormalZombie::OnDeath()
 {
 	Super::OnDeath();
 }
+
+void ANormalZombie::SetZombieStat(float NewHP, float NewDamage, float NewSpeed)
+{
+	Super::SetZombieStat(NewHP, NewDamage, NewSpeed);
+}

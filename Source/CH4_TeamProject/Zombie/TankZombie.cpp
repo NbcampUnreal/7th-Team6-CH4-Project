@@ -30,3 +30,8 @@ void ATankZombie::OnDeath()
 {
 	Super::OnDeath();
 }
+
+void ATankZombie::SetZombieStat(float NewHP, float NewDamage, float NewSpeed)
+{
+	Super::SetZombieStat(NewHP, NewDamage, NewSpeed);
+}
