@@ -99,6 +99,8 @@ void UEquippableComponent::Server_EquipWeapon_Implementation(UWeaponData* NewWea
 		ACharacter* MyCharacter = Cast<ACharacter>(GetOwner());
 		if (MyCharacter)
 		{
+			UE_LOG(LogTemp, Warning, TEXT("PlayAnimMontage Called on: %s"), 
+				   MyCharacter->HasAuthority() ? TEXT("Server") : TEXT("Client"));
 			CurrentWeapon->AttachToComponent
 			(MyCharacter->GetMesh(),
 			FAttachmentTransformRules::SnapToTargetNotIncludingScale ,

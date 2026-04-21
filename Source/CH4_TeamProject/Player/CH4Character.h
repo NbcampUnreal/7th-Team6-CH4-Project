@@ -52,7 +52,10 @@ public:
 	void PlayDownAnimation();
 	void PlayDeathAnimation();
 	void PlayReviveAnimation();
-	void Multi_PlayAction_Implementation(EPlayerActionState NewState);
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void Multi_PlayAction(EPlayerActionState NewState);
+	
 
 	void OnDeath();
 
@@ -64,8 +67,6 @@ public:
 	void PlayPistolReloadAnimation();
 	void PlayRifleReloadAnimation();
 
-	UFUNCTION(NetMulticast, Reliable)
-	void Multi_PlayAction(EPlayerActionState NewState);
 
 	UFUNCTION(Server, Reliable)
 	void Server_Interact();
@@ -308,7 +309,12 @@ public:
 	void PlayerDestroy();
 
 	UFUNCTION(Server, Reliable)
+	void Server_UpdateCombatPose();
+	
+	UFUNCTION(NetMulticast, Reliable)
 	void UpdateCombatPose();
+	
+	
 	void ApplyItemEffect(class UConsumableDataAsset* Data);
 	
 	UFUNCTION(Server,Reliable)
@@ -344,4 +350,17 @@ public:
   
   UPROPERTY()
 	USoundBase* StepSound;
+	
+	UFUNCTION(Server, Reliable)
+	void Server_FireMontage();
+	
+	UFUNCTION()
+	void FireMontagePose();
+	
+	UFUNCTION(Server, Reliable)
+	void Server_ReloadMontage();
+	
+	UFUNCTION()
+	void ReloadMontage();
+	
 };
