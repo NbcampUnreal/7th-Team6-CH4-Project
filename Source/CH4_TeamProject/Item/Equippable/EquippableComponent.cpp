@@ -46,7 +46,7 @@ void UEquippableComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 	DOREPLIFETIME(UEquippableComponent, UsingWeapon); 
 }
 
-void UEquippableComponent::EquipWeapon_Implementation(UWeaponData* NewWeaponData)
+void UEquippableComponent::Server_EquipWeapon_Implementation(UWeaponData* NewWeaponData)
 {
 	if (!GetOwner()->HasAuthority() || !NewWeaponData)
 	{

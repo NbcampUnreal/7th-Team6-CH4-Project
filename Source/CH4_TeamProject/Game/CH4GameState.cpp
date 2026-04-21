@@ -9,6 +9,7 @@
 #include "Engine/DirectionalLight.h"
 #include "Components/LightComponent.h"
 #include "Components/SkyLightComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Engine/ExponentialHeightFog.h"
 #include "Engine/SkyLight.h"
 #include "Net/UnrealNetwork.h"
@@ -16,8 +17,10 @@
 
 ACH4GameState::ACH4GameState()
 {
-	bReplicates = true;
-	// PrimaryActorTick.bCanEverTick = false;
+	bReplicates = true;    
+	
+	PrimaryActorTick.bCanEverTick = true;
+	SetActorTickEnabled(false);
 	
 	GamePhase = EGamePhase::None;
 	GearPartsCount = 0;
@@ -47,6 +50,14 @@ void ACH4GameState::BeginPlay()
 	}
 	
 	FindLightAndFog();
+}
+
+void ACH4GameState::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	
+	 
+	
 }
 
 void ACH4GameState::UpdateLapsedTime()
@@ -215,7 +226,7 @@ void ACH4GameState::ApplyDayPhaseChanges(EDayPhase DP)
 		
 		return;
 	}
-
+ 
 	switch (DP)
 	{
 		case EDayPhase::None:
@@ -226,12 +237,14 @@ void ACH4GameState::ApplyDayPhaseChanges(EDayPhase DP)
 		case EDayPhase::Day:
 			{
 				UE_LOG(LogTemp, Warning, TEXT("DayPhase : Day"));
-		
+				
+				DayCount++;
+				
 				DirectionalLight->SetActorRotation(FRotator(-45.f, 0.f, 0.f)); // 높이
 				DirectionalLight->GetLightComponent()->SetLightColor(FLinearColor(1.0f, 0.95f, 0.8f));
 				DirectionalLight->GetLightComponent()->SetIntensity(1.f); // 밝기
 		
-				SkyLight->GetLightComponent()->SetIntensity(10.f);				
+				SkyLight->GetLightComponent()->SetIntensity(10.f);
 				Fog->GetComponent()->SetFogInscatteringColor(FLinearColor(0.7f, 0.8f, 1.0f));
 				
 				// 난이도 변경 함수
@@ -250,23 +263,24 @@ void ACH4GameState::ApplyDayPhaseChanges(EDayPhase DP)
 				Fog->GetComponent()->SetFogInscatteringColor(FLinearColor(1.0f, 0.4f, 0.2f));
 				
 				// 난이도 변경 함수
-				// UI알림 : "밤을 대비하세요!"
 				break;
 			}
 		
 		case EDayPhase::Night:
 			{
 				UE_LOG(LogTemp, Warning, TEXT("DayPhase : Night"));
-			
+								
 				DirectionalLight->SetActorRotation(FRotator(30.f, 0.f, 0.f));
 				DirectionalLight->GetLightComponent()->SetLightColor(FLinearColor(0.2f, 0.3f, 0.6f));
-				DirectionalLight->GetLightComponent()->SetIntensity(0.2f);
+				DirectionalLight->GetLightComponent()->SetIntensity(0.05f);
 		
 				SkyLight->GetLightComponent()->SetIntensity(0.2f);				
-				Fog->GetComponent()->SetFogInscatteringColor(FLinearColor(0.05f, 0.05f, 0.1f));
+				Fog->GetComponent()->SetFogInscatteringColor(FLinearColor(0.02f, 0.02f, 0.05f));
 				
 				// 난이도 변경 함수
-				// 좀비 비명소리 재생 함수
+				
+				PlayZombieSound();
+				
 				break;
 			}
 	}
@@ -312,22 +326,22 @@ void ACH4GameState::FindLightAndFog()
 	}
 }
 
+void ACH4GameState::PlayZombieSound()
+{
+	if (!ZombieSound) return;
+
+	UGameplayStatics::PlaySound2D(GetWorld(), ZombieSound);
+}
+
 void ACH4GameState::SetDayPhase(EDayPhase NewPhase)
 {
 	if (DayPhase == NewPhase) return;
-	DayPhase = NewPhase;
+	
+	RecentPhase = DayPhase; // 날씨 전환 시작점
+	DayPhase = NewPhase; // 날씨 전환 종료점
 	
 	if (HasAuthority()) // 서버에서 따로 실행
 	{
 		ApplyDayPhaseChanges(NewPhase);
 	}
 }
-
-// void ACH4GameState::SetLightsAndFogActor()
-// {
-// 	if (!GetWorld()) return;
-// 	
-//
-// 	
-//
-// } 
