@@ -1,4 +1,6 @@
 #include "MonsterAIController.h"
+
+#include "NavigationSystem.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "CH4_TeamProject/Zombie/ZombieBase.h"
 #include "Perception/AIPerceptionComponent.h"
@@ -11,12 +13,6 @@ AMonsterAIController::AMonsterAIController()
 {
 	// AI 감지 시스템 이용에 필요한 컴포넌트
 	AIPerceptionComp = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("AIPerception"));
-	SightConfigComp = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("SightConfig"));
-	
-	SightConfigComp->SightRadius = 1000.f;
-	SightConfigComp->LoseSightRadius = 1200.f;   
-	
-	SightConfigComp->PeripheralVisionAngleDegrees = 130.f;
 }
 
 void AMonsterAIController::BeginPlay()
@@ -80,8 +76,13 @@ void AMonsterAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus 
 		{
 			if (CurrentTarget == nullptr)
 			{
-				ClearHearTarget();
-				BlackboardComp->SetValueAsVector(TEXT("HearingLocation"), Stimulus.StimulusLocation);
+				FVector Prev = BlackboardComp->GetValueAsVector(TEXT("HearingLocation"));
+
+				if (FVector::Dist(Prev, Stimulus.StimulusLocation) > 100.0f)
+				{
+					ClearHearTarget();
+					BlackboardComp->SetValueAsVector(TEXT("HearingLocation"), Stimulus.StimulusLocation);
+				}
 			}
 		}
 		return;
@@ -148,12 +149,19 @@ void AMonsterAIController::ClearAttackTarget()
 	}
 }
 
-void AMonsterAIController::SetZombieDetectionRange_Implementation()
-{
-	SightConfigComp->SightRadius = 3000.f;
-	SightConfigComp->LoseSightRadius = 3500.f;   
-	
-	SightConfigComp->PeripheralVisionAngleDegrees = 180.f;
-	
-	AIPerceptionComp->RequestStimuliListenerUpdate();
-}
+// void AMonsterAIController::SetZombieDetectionRange_Implementation()
+// {
+// 	if (!SightConfigComp || !AIPerceptionComp)
+// 	{
+// 		UE_LOG(LogTemp, Warning, TEXT("SetZombieDetectionRange: Component is nullptr! Skipping."));
+// 		return;
+// 	}
+// 	
+// 	SightConfigComp->SightRadius = 3000.f;
+// 	SightConfigComp->LoseSightRadius = 3500.f;   
+// 	
+// 	SightConfigComp->PeripheralVisionAngleDegrees = 180.f;
+// 	
+// 	AIPerceptionComp->ConfigureSense(*SightConfigComp);
+// 	AIPerceptionComp->RequestStimuliListenerUpdate();
+// }

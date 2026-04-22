@@ -15,6 +15,8 @@ AZombieBase::AZombieBase()
 	AIControllerClass = AMonsterAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 	
+	GetCharacterMovement()->bUseRVOAvoidance = true;
+	
 	// 좀비끼리 충돌하는 문제를 해결하기 위한 충돌 설정
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
 	// 이동하는 방향으로 몸을 자동으로 돌림
