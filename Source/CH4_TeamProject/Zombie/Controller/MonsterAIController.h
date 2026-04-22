@@ -14,13 +14,16 @@ public:
 	AMonsterAIController();
 	
 	void BeginPlay();
-
-	virtual FGenericTeamId GetGenericTeamId() const override;
 	
 	UPROPERTY()
 	TObjectPtr<AZombieBase> ControlledCharacter;
 	
+	virtual FGenericTeamId GetGenericTeamId() const override { return static_cast<uint8>(TeamID); }
+	
 protected:
+	UPROPERTY(EditDefaultsOnly, Category="Team")
+	ETeamID TeamID = ETeamID::Monster;
+	
 	UFUNCTION()
 	void OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);
 	
