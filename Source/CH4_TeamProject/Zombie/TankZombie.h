@@ -11,10 +11,12 @@ class CH4_TEAMPROJECT_API ATankZombie : public AZombieBase
 	
 public:
 	ATankZombie();
+	
+	virtual void SetZombieStat(float NewHP, float NewDamage, float NewSpeed) override;
 
 protected:
 	void BeginPlay();
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 	virtual void OnDeath() override;
-	virtual void SetZombieStat(float NewHP, float NewDamage, float NewSpeed) override;
+
 };

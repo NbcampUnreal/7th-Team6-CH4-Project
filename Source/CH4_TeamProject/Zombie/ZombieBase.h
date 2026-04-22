@@ -5,6 +5,7 @@
 #include "NiagaraSystem.h"
 #include "CH4_TeamProject/DataBase/DataBase.h"
 #include "GameFramework/Character.h"
+#include "Iris/ReplicationSystem/ReplicationSystemTypes.h"
 #include "ZombieBase.generated.h"
 
 class UAnimMontage;
