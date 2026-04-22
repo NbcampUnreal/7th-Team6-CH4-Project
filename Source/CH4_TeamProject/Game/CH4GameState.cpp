@@ -33,8 +33,6 @@ ACH4GameState::ACH4GameState()
 	DirectionalLight = nullptr;
 	SkyLight = nullptr;
 	Fog = nullptr;
-	
-	FinalDefenceWaveSpawned = false;
 }
 
 void ACH4GameState::BeginPlay()
@@ -367,22 +365,23 @@ void ACH4GameState::StartFinalDefenceWave()
 		GM->FinalDefenceWaveSpawn(); 
 	
 	
-	if (FinalDefenceWaveSpawned == true)
-	{
-		TArray<AActor*> ZombieActors;
-		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AZombieBase::StaticClass(), ZombieActors);
-		
-		for (AActor* Actor : ZombieActors)
-		{
-			// AMonsterAIController* AC = Cast<AMonsterAIController>();
-			AZombieBase* Zombie = Cast<AZombieBase>(Actor);
-			if (!Zombie) continue;
-			
-			// AI 컨트롤러 캐스팅
-			AMonsterAIController* AC = Cast<AMonsterAIController>(Zombie->GetController());
-			if (!AC) continue;
-		
-			AC->SetZombieDetectionRange(); // 좀비 탐지 범위 증가
-		}
-	}
+	// if (FinalDefenceWaveSpawned == true)
+	// {
+	// 	TArray<AActor*> ZombieActors;
+	// 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AZombieBase::StaticClass(), ZombieActors);
+	// 	
+	// 	for (AActor* Actor : ZombieActors)
+	// 	{
+	// 		if (!IsValid(Actor)) continue;
+	// 		// AMonsterAIController* AC = Cast<AMonsterAIController>();
+	// 		AZombieBase* Zombie = Cast<AZombieBase>(Actor);
+	// 		if (!Zombie) continue;
+	// 		
+	// 		// AI 컨트롤러 캐스팅
+	// 		AMonsterAIController* AC = Cast<AMonsterAIController>(Zombie->GetController());
+	// 		if (!AC) continue;
+	// 	
+	// 		AC->SetZombieDetectionRange(); // 좀비 탐지 범위 증가
+	// 	}
+	// }
 }

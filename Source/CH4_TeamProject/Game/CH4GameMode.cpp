@@ -239,7 +239,7 @@ void ACH4GameMode::SetDayPhaseAtServer(EDayPhase NewPhase)
 			AZombieSpawnPoint* ZombieSpawnVolume = Cast<AZombieSpawnPoint>(Actor);
 			if (ZombieSpawnVolume)
 			{
-				ZombieSpawnVolume->SpawnZombie(5, 10, 4, 6, 0, 1);
+				ZombieSpawnVolume->SpawnZombie(4, 8, 3, 6, 0, 1);
 			}
 		}
 	}
@@ -262,7 +262,7 @@ void ACH4GameMode::SetDayPhaseAtServer(EDayPhase NewPhase)
 			AZombieSpawnPoint* ZombieSpawnVolume = Cast<AZombieSpawnPoint>(Actor);
 			if (ZombieSpawnVolume)
 			{
-				ZombieSpawnVolume->SpawnZombie(6, 12, 5, 8, 1, 2);
+				ZombieSpawnVolume->SpawnZombie(6, 12, 4, 8, 1, 2);
 			}
 		}
 	}
@@ -284,10 +284,7 @@ void ACH4GameMode::FinalDefenceWaveSpawn()
 		AZombieSpawnPoint* ZombieSpawnVolume = Cast<AZombieSpawnPoint>(Actor);
 		if (ZombieSpawnVolume)
 		{
-			ZombieSpawnVolume->SpawnZombie(6, 12, 5, 8, 1, 2);
+			ZombieSpawnVolume->SpawnZombie(10, 20, 10, 15, 2, 4);
 		}
 	}
-	
-	ACH4GameState* GS = Cast<ACH4GameState>(GetWorld()->GetGameState());
-	GS->FinalDefenceWaveSpawned = true;
 }

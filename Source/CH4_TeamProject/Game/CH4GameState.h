@@ -127,5 +127,5 @@ public:
 	void UpdateFinalDefenceTimerHandle();
 	void StartFinalDefenceWave();
 	
-	bool FinalDefenceWaveSpawned;
+	//bool FinalDefenceWaveSpawned;
 };
