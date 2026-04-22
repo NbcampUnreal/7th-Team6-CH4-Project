@@ -14,10 +14,9 @@
 #include "Engine/SkyLight.h"
 #include "Net/UnrealNetwork.h"
 #include <Misc\OutputDeviceNull.h>
-#include "CH4_TeamProject/Zombie/NormalZombie.h"
-#include "CH4_TeamProject/Zombie/RunnerZombie.h"
-#include "CH4_TeamProject/Zombie/TankZombie.h"
 #include "CH4_TeamProject/Zombie/ZombieSpawnPoint.h"
+#include "CH4_TeamProject/Zombie/Controller/MonsterAIController.h"
+#include "GameManagers/FinalDefenceManager.h"
 
 ACH4GameState::ACH4GameState()
 {
@@ -34,6 +33,8 @@ ACH4GameState::ACH4GameState()
 	DirectionalLight = nullptr;
 	SkyLight = nullptr;
 	Fog = nullptr;
+	
+	FinalDefenceWaveSpawned = false;
 }
 
 void ACH4GameState::BeginPlay()
@@ -103,7 +104,7 @@ void ACH4GameState::OnRep_GearPartsCount()
 	UE_LOG(LogTemp, Warning, TEXT("GearParts Count: %d"), GearPartsCount);
 }
 
-void ACH4GameState::OnRep_GamePhase() // 변경 시 자동 호출
+void ACH4GameState::OnRep_GamePhase()
 {
 	UE_LOG(LogTemp, Warning, TEXT("GamePhase Changed: %d"), GamePhase);
 	
@@ -121,6 +122,12 @@ void ACH4GameState::OnRep_GamePhase() // 변경 시 자동 호출
 	else if (GamePhase == EGamePhase::StartStage)
 	{
 		PC->StartGame();
+	}
+	else if (GamePhase == EGamePhase::FinalDefense)
+	{
+		// PC-> "%f / 60.f 동안 버티며 구조대를 기다리세요!" 라는 UI 띄우는 함수
+		// StartFinalDefenceWave();
+		UE_LOG(LogTemp, Warning, TEXT("DayPhase Changed: %d"), DayPhase);
 	}
 }
 
@@ -159,16 +166,11 @@ void ACH4GameState::SubtractAlivePlayerCount_Implementation()
 void ACH4GameState::AddGearPartsCount()
 {
 	GearPartsCount++;
-	if (GearPartsCount >= 3)
+	UE_LOG(LogTemp, Warning, TEXT("GearPartsCount: %d"), GearPartsCount);
+	
+	if (GearPartsCount >= 3 && HasAuthority())
 	{
-		
-		
-		if (HasAuthority())
-		{
-			ACH4GameMode* GM = Cast<ACH4GameMode>(GetWorld()->GetAuthGameMode());
-			GM->SetGameResult();
-			// GM->BeginFinalDefence();
-		}
+		StartFinalDefenceWave();
 	}; 
 }
 
@@ -194,6 +196,9 @@ void ACH4GameState::SetGamePhase(EGamePhase NewPhase)
 {
 	if (GamePhase == NewPhase) return;
 	GamePhase = NewPhase;
+	
+	if (HasAuthority() && NewPhase == EGamePhase::FinalDefense)
+		StartFinalDefenceWave();
 }
 
 void ACH4GameState::ApplyDayPhaseChanges(EDayPhase DP)
@@ -256,17 +261,6 @@ void ACH4GameState::ApplyDayPhaseChanges(EDayPhase DP)
 				SkyLight->GetLightComponent()->SetIntensity(0.2f);				
 				Fog->GetComponent()->SetFogInscatteringColor(FLinearColor(0.02f, 0.02f, 0.05f));
 				
-				// 난이도 변경 함수
-				TArray<AActor*> ZombieFoundVolumes;
-				for (AActor* Actor : ZombieFoundVolumes)
-				{
-					AZombieSpawnPoint* ZombieSpawnVolume = Cast<AZombieSpawnPoint>(Actor);
-					if (ZombieSpawnVolume)
-					{
-						ZombieSpawnVolume->SpawnZombie(7, 14, 6, 8, 1, 2);
-					}
-				}
-				
 				PlayZombieSound();
 				
 				break;
@@ -325,12 +319,70 @@ void ACH4GameState::SetDayPhase(EDayPhase NewPhase)
 {
 	if (DayPhase == NewPhase) return;
 	
-	UE_LOG(LogTemp, Warning, TEXT("SetDayPhase 호출됨! 이전: %d, 신규: %d"), (int32)DayPhase, (int32)NewPhase);
+	UE_LOG(LogTemp, Warning, TEXT("SetDayPhase 호출됨! 이전: %d, 신규: %d"), DayPhase, NewPhase);
 	
 	DayPhase = NewPhase;
 	
 	if (HasAuthority()) // 서버에서 따로 실행
 	{
 		ApplyDayPhaseChanges(NewPhase);
+	}
+}
+
+void ACH4GameState::UpdateFinalDefenceTimerHandle()
+{
+	FinalDefenceElapsedTime++;
+	UE_LOG(LogTemp, Error, TEXT("FinalDefenceElapsedTime : %d 초"), FinalDefenceElapsedTime)
+	
+	if (FinalDefenceElapsedTime >= 6 * 60)
+	{
+		ACH4GameMode* GM = Cast<ACH4GameMode>(GetWorld()->GetAuthGameMode());
+		if (!GM) return;
+		
+		GM->SetGameResult();
+		GetWorldTimerManager().ClearTimer(FinalDefenceTimerHandle);
+	}
+}
+
+void ACH4GameState::StartFinalDefenceWave()
+{
+	if (!HasAuthority()) return;
+	
+	UE_LOG(LogTemp, Error, TEXT("FinalDefenceWave() 호출 됨."))
+
+	GetWorldTimerManager().ClearTimer(ServerTimeHandle);
+	UE_LOG(LogTemp, Error, TEXT("ServerTimeHandle 꺼짐"))
+		
+	GetWorldTimerManager().SetTimer(
+		FinalDefenceTimerHandle,
+		this,
+		&ACH4GameState::UpdateFinalDefenceTimerHandle,
+		1.0f,   // 1초 단위
+		true);
+	
+	SetDayPhase(EDayPhase::Night); // 밤 상태로 전환(고정)
+	
+	ACH4GameMode* GM = Cast<ACH4GameMode>(GetWorld()->GetAuthGameMode());
+	if (GM) 
+		GM->FinalDefenceWaveSpawn(); 
+	
+	
+	if (FinalDefenceWaveSpawned == true)
+	{
+		TArray<AActor*> ZombieActors;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AZombieBase::StaticClass(), ZombieActors);
+		
+		for (AActor* Actor : ZombieActors)
+		{
+			// AMonsterAIController* AC = Cast<AMonsterAIController>();
+			AZombieBase* Zombie = Cast<AZombieBase>(Actor);
+			if (!Zombie) continue;
+			
+			// AI 컨트롤러 캐스팅
+			AMonsterAIController* AC = Cast<AMonsterAIController>(Zombie->GetController());
+			if (!AC) continue;
+		
+			AC->SetZombieDetectionRange(); // 좀비 탐지 범위 증가
+		}
 	}
 }

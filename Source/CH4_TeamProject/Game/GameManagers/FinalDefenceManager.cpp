@@ -3,6 +3,8 @@
 
 #include "FinalDefenceManager.h"
 
+#include "CH4_TeamProject/Game/CH4GameState.h"
+
 AFinalDefenceManager::AFinalDefenceManager()
 {
 }
@@ -11,12 +13,26 @@ AFinalDefenceManager::~AFinalDefenceManager()
 {
 }
 
-void AFinalDefenceManager::StartFinalDefenceTimerCountDown()
+void AFinalDefenceManager::StartFinalDefenceTimer()
 {
 	// todo : 
-	// FinalDefenceTimer 시작
-	// UI 갱신 명령
-	// FinalWave 생성 또는 주변의 좀비들이 몰려오도록 Behavier Tree 추가
+	// FinalDefenceWaveTimer 시작
 	
-	// + 타이머가 끝나면 타이머 종료 및 SetGameResult() 호출
+	// UI 갱신 명령
+	// 주변의 좀비들이 몰려오도록 좀비의 탐지 범위 증가
+	ACH4GameState* GS = Cast<ACH4GameState>(GetWorld()->GetGameState());
+	if (!GS) return;
+	
+	if (FinalDefenceWaveTimer >=  6.f * 60.f || GS->AlivePlayerCount <= 0)
+	{
+		SetGameResult();
+	}
+}
+
+void AFinalDefenceManager::StartFinalDefenceWave()
+{
+}
+
+void AFinalDefenceManager::SetZombieMoveToSpot()
+{
 }
