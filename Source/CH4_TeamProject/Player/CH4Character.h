@@ -52,7 +52,10 @@ public:
 	void PlayDownAnimation();
 	void PlayDeathAnimation();
 	void PlayReviveAnimation();
-	void Multi_PlayAction_Implementation(EPlayerActionState NewState);
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void Multi_PlayAction(EPlayerActionState NewState);
+	
 
 	void OnDeath();
 
@@ -64,8 +67,6 @@ public:
 	void PlayPistolReloadAnimation();
 	void PlayRifleReloadAnimation();
 
-	UFUNCTION(NetMulticast, Reliable)
-	void Multi_PlayAction(EPlayerActionState NewState);
 
 	UFUNCTION(Server, Reliable)
 	void Server_Interact();
@@ -151,6 +152,12 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = "Input")
 	class UInputAction* EquipAction2;
+	
+	UPROPERTY(VisibleAnywhere, Category = "Input")
+	class UInputAction* EquipAction3;
+
+	UPROPERTY(VisibleAnywhere, Category = "Input")
+	class UInputAction* EquipAction4;
 
 	UPROPERTY(VisibleAnywhere, Category = "Input")
 	class UInputAction* HealAction;
@@ -255,11 +262,23 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat|Weapon",Replicated)
 	class UWeaponData* PrimaryWeaponData2;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat|Weapon",Replicated)
+    class UWeaponData* PrimaryWeaponData3;
+    
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat|Weapon",Replicated)
+    class UWeaponData* PrimaryWeaponData4;
 	//장비장착 임렵함수
 	void OnEquipInput1();
 
 	void OnEquipInput2();
 
+	void OnEquipInput3();
+
+	void OnEquipInput4();
+	
+	
+	
 	UFUNCTION(Server, Reliable)
 	void Server_ApplyItemEffect(class AHealItem* HealItem);
 
@@ -290,7 +309,12 @@ public:
 	void PlayerDestroy();
 
 	UFUNCTION(Server, Reliable)
+	void Server_UpdateCombatPose();
+	
+	UFUNCTION(NetMulticast, Reliable)
 	void UpdateCombatPose();
+	
+	
 	void ApplyItemEffect(class UConsumableDataAsset* Data);
 	
 	UFUNCTION(Server,Reliable)
@@ -326,4 +350,17 @@ public:
   
   UPROPERTY()
 	USoundBase* StepSound;
+	
+	UFUNCTION(Server, Reliable)
+	void Server_FireMontage();
+	
+	UFUNCTION()
+	void FireMontagePose();
+	
+	UFUNCTION(Server, Reliable)
+	void Server_ReloadMontage();
+	
+	UFUNCTION()
+	void ReloadMontage();
+	
 };

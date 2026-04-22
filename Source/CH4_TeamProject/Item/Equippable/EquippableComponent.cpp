@@ -64,6 +64,7 @@ void UEquippableComponent::Server_EquipWeapon_Implementation(UWeaponData* NewWea
 		return;
 	}
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("월드 존재함"));
+
 	if (CurrentWeapon)
 	{	
 		WeaponAmmoMemory.Add(CurrentWeapon->GetClass(), CurrentWeapon->CurrentAmmo);
@@ -84,9 +85,13 @@ void UEquippableComponent::Server_EquipWeapon_Implementation(UWeaponData* NewWea
 	if (CurrentWeapon)
 	{
 		CurrentWeapon->SetOwner(GetOwner());
-		CurrentWeapon->WeaponData->SetGunDataAsset(NewWeaponData->GetGunDataAsset());
-		CurrentWeapon->WeaponData = NewWeaponData;
-		CurrentWeapon->OnRep_WeaponData();
+		CurrentWeapon->WeaponData = NewWeaponData;    
+		CurrentWeapon->OnRep_WeaponData();              
+		if (CurrentWeapon->WeaponMesh && NewWeaponData->StaticMesh)
+		{
+			CurrentWeapon->WeaponMesh->SetStaticMesh(NewWeaponData->StaticMesh);
+		}
+		CurrentWeapon->ForceNetUpdate();
 	}
 	
 	if (CurrentWeapon)	
@@ -94,6 +99,8 @@ void UEquippableComponent::Server_EquipWeapon_Implementation(UWeaponData* NewWea
 		ACharacter* MyCharacter = Cast<ACharacter>(GetOwner());
 		if (MyCharacter)
 		{
+			UE_LOG(LogTemp, Warning, TEXT("PlayAnimMontage Called on: %s"), 
+				   MyCharacter->HasAuthority() ? TEXT("Server") : TEXT("Client"));
 			CurrentWeapon->AttachToComponent
 			(MyCharacter->GetMesh(),
 			FAttachmentTransformRules::SnapToTargetNotIncludingScale ,

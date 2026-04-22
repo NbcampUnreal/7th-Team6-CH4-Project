@@ -42,6 +42,23 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	TObjectPtr<UMeleeWeaponData> MeelData;
 	
-
+	virtual void Attack_Implementation_Internal() override;
 	virtual void Attack();
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation",Replicated)
+	TObjectPtr<UAnimMontage> MeleeAttackMontage;
+	
+	UAnimMontage* GetAttackMontage() const { return MeleeAttackMontage; }
+	
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayAttackMontage(); 
+	
+	UFUNCTION(Server, Reliable)
+	void Server_EnableMeleeCollision();
+
+	UFUNCTION(Server, Reliable)
+	void Server_DisableMeleeCollision();
+	
 };
