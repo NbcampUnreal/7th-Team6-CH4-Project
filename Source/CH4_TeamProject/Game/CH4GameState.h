@@ -44,12 +44,18 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Sound")
 	USoundBase* ZombieSound;
 	
-public:		
-	const float TotalDayPhaseCycleTime = 7.f * 60.f;
+public:
+	UPROPERTY(BlueprintReadOnly)
+	float TotalDayPhaseCycleTime = 7.f * 60.f;
 	
-	const float DayTime = 2.5f * 60.f;
-	const float EveningTime = 0.5f * 60.f;
-	const float NightTime = 4.f * 60.f;
+	UPROPERTY(BlueprintReadOnly)
+	float DayTime = 2.5f * 60.f;
+	
+	UPROPERTY(BlueprintReadOnly)
+	float EveningTime = 0.5f * 60.f;
+	
+	UPROPERTY(BlueprintReadOnly)
+	float NightTime = 4.f * 60.f;
 		
 	EDayPhase FinalDefenceDayPhase = EDayPhase::Night;
 	
