@@ -55,7 +55,7 @@ public:
 	int32 MaxClip = 0;
 
 	// 현재 갯수GetLifetimeReplicatedProps
-	UPROPERTY(Replicated)
+	UPROPERTY(Replicated, BlueprintReadOnly)
 	int32 CurrentAmmo = 0;
 
 	// 장전된 갯수는 상속받은 총의 데이터 에셋에서 가져다 사용할것
@@ -67,8 +67,8 @@ public:
 	UPROPERTY(EditAnywhere,Category="DataAsset",Replicated)
 	class UWeaponData* DataAsset;
 	
+	// const int32 GetCurrentAmmo() { return CurrentAmmo; }
 	virtual void SetCurrentAmmo();
-
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Animation")
 	ECombatPose CombatPose = ECombatPose::Rifle;

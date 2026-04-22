@@ -60,6 +60,7 @@ void ACH4GameState::Tick(float DeltaTime)
 void ACH4GameState::UpdateLapsedTime()
 {
 	UE_LOG(LogTemp, Warning, TEXT("DayPhase 경과 시간 : %d"), ElapsedTime);
+	ServerTime++;
 	
 	ACH4GameMode* GM = Cast<ACH4GameMode>(GetWorld()->GetAuthGameMode());
 	GM->SetDayPhaseAtServer(DayPhase);

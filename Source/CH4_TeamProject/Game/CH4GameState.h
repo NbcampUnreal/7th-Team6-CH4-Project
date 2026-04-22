@@ -37,19 +37,26 @@ public:
 private:
 	FTimerHandle ServerTimeHandle;
 	
-	int32 DayCount = 0;
-	
 	EDayPhase RecentPhase;
 	
 	UPROPERTY(EditAnywhere, Category = "Sound")
 	USoundBase* ZombieSound;
 	
-public:		
-	const float TotalDayPhaseCycleTime = 7.f * 60.f;
+public:
+	UPROPERTY(BlueprintReadOnly)
+	int32 DayCount = 0;
 	
-	const float DayTime = 2.5f * 60.f;
-	const float EveningTime = 0.5f * 60.f;
-	const float NightTime = 4.f * 60.f;
+	UPROPERTY(BlueprintReadOnly)
+	float TotalDayPhaseCycleTime = 7.f * 60.f;
+	
+	UPROPERTY(BlueprintReadOnly)
+	float DayTime = 2.5f * 60.f;
+	
+	UPROPERTY(BlueprintReadOnly)
+	float EveningTime = 0.5f * 60.f;
+	
+	UPROPERTY(BlueprintReadOnly)
+	float NightTime = 4.f * 60.f;
 		
 	EDayPhase FinalDefenceDayPhase = EDayPhase::Night;
 	
@@ -65,7 +72,7 @@ public:
 	UPROPERTY(ReplicatedUsing = OnRep_GearPartsCount)
 	int32 GearPartsCount;
 	
-	UPROPERTY(ReplicatedUsing = OnRep_DayPhase)
+	UPROPERTY(ReplicatedUsing = OnRep_DayPhase, BlueprintReadOnly)
 	EDayPhase DayPhase = EDayPhase::None;
 
 	UPROPERTY()

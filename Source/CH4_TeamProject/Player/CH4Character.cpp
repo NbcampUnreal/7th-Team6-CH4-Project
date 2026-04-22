@@ -24,9 +24,9 @@
 #include "Components/CapsuleComponent.h"
 #include "DSP/AudioDebuggingUtilities.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "CH4_TeamProject/Item/Equippable/Equippable.h"
 
 
-//생성자
 ACH4Character::ACH4Character()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -1137,6 +1137,14 @@ void ACH4Character::ReloadMontage()
 		}
 	}
 }
+
+// const int32 ACH4Character::GetCurrentAmmoAtEquippableClass()
+// {
+// 	if (CurrentEquippable)
+// 	return CurrentEquippable->GetCurrentAmmo();
+// 	
+// 	return 0;
+// }
 
 void ACH4Character::Server_ReloadMontage_Implementation()
 {
