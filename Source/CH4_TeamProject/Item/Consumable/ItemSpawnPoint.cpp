@@ -40,8 +40,8 @@ void AItemSpawnPoint::SpawnItems()
 		for (int32 i = 0; i < Count; ++i)
 		{
 			FVector Location = GetActorLocation();
-			Location.X += FMath::RandRange(-200.f, 200.f);  
-			Location.Y += FMath::RandRange(-200.f, 200.f);  
+			Location.X += FMath::RandRange(-500.f, 500.f);  
+			Location.Y += FMath::RandRange(-500.f, 500.f);  
 			Location.Z += 5.f;
 
 			FRotator Rotation(0.f, FMath::RandRange(0.f, 360.f), 0.f);
