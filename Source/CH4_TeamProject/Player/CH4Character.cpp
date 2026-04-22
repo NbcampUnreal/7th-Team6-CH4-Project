@@ -667,6 +667,9 @@ void ACH4Character::Fires()
 
 void ACH4Character::OnReload()
 {
+	UE_LOG(LogTemp, Warning, TEXT(" 캐릭터 리리로드 호출됨"));
+		
+	
 	if (bIsDowned) return;
 
 	//컴포넌트 또는 현재 무기가 없으면 종료
@@ -688,7 +691,6 @@ void ACH4Character::OnReload()
 	if (!HasAuthority())
 	{
 		Server_ReloadMontage();
-		return;
 	}
 	ReloadMontage();
 	EquippableComponent->Reload();
