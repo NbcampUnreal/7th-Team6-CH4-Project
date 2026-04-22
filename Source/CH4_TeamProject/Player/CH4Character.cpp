@@ -208,16 +208,40 @@ float ACH4Character::TakeDamage(float DamageAmount, const FDamageEvent& DamageEv
 
 	const float Damage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	CurrentHP = CurrentHP = FMath::Clamp(CurrentHP - Damage, 0.0f, MaxHP);
-	if (CurrentHP <= 0)
+
+	if (CurrentHP <= 0 && !bIsDowned) //이미 다운된 상태가 아닐 때만
 	{
-		if (HasAuthority()) Multi_PlayAction(EPlayerActionState::Down);
+		if (HasAuthority()) //서버에서만 실행
+		{
+			bIsDowned = true; //기절 변수
+
+			//몽타주 재생
+			Multi_PlayAction(EPlayerActionState::Down);
+
+			//이동 속도 0으로
+			GetCharacterMovement()->MaxWalkSpeed = 0.f;
+		}
+
 		ACH4PlayerState* PS = GetPlayerState<ACH4PlayerState>();
-		if (PS->PlayerReviveCount <= 0)
+		if (PS && PS->PlayerReviveCount <= 0)
 		{
 			OnDeath();
 		}
 	}
 	return Damage;
+}
+
+//플레이어 다운!
+void ACH4Character::OnRep_IsDowned()
+{
+	if (bIsDowned)
+	{
+		//클라이언트에서도 속도를 0으로 맞춤
+		if (GetCharacterMovement())
+		{
+			GetCharacterMovement()->MaxWalkSpeed = 0.f;
+		}
+	}
 }
 
 //온데스
@@ -1117,6 +1141,7 @@ void ACH4Character::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	DOREPLIFETIME(ACH4Character, WalkSpeed);
 	DOREPLIFETIME(ACH4Character, SprintSpeed);
 	DOREPLIFETIME(ACH4Character, CurrentHP);
+	DOREPLIFETIME(ACH4Character, bIsDowned);
 	DOREPLIFETIME(ACH4Character, PrimaryWeaponData1);
 	DOREPLIFETIME(ACH4Character, PrimaryWeaponData2);
 	DOREPLIFETIME(ACH4Character, PrimaryWeaponData3);
