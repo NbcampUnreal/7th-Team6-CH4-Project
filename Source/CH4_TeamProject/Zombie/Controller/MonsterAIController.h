@@ -3,6 +3,8 @@
 #include "CoreMinimal.h"
 #include "CH4_TeamProject/Zombie/ZombieBase.h"
 #include "AIController.h"
+#include "BehaviorTree/BehaviorTree.h"
+#include "Perception/AISenseConfig_Sight.h"
 #include "MonsterAIController.generated.h"
 
 UCLASS()
@@ -19,6 +21,9 @@ public:
 	TObjectPtr<AZombieBase> ControlledCharacter;
 	
 	virtual FGenericTeamId GetGenericTeamId() const override { return static_cast<uint8>(TeamID); }
+  
+	UFUNCTION(Server, Reliable)
+	void SetZombieDetectionRange();
 	
 protected:
 	UPROPERTY(EditDefaultsOnly, Category="Team")
@@ -38,6 +43,9 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
 	TObjectPtr<UAIPerceptionComponent> AIPerceptionComp;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "AI")
+	TObjectPtr<UAISenseConfig_Sight> SightConfigComp;
 	
 	FTimerHandle LoseSightTargetTimerHandle;
 	FTimerHandle LoseAttackTargetTimerHandle;

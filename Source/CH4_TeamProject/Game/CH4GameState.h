@@ -50,6 +50,8 @@ public:
 	const float DayTime = 2.5f * 60.f;
 	const float EveningTime = 0.5f * 60.f;
 	const float NightTime = 4.f * 60.f;
+		
+	EDayPhase FinalDefenceDayPhase = EDayPhase::Night;
 	
 	UPROPERTY(Replicated)
 	int32 AlivePlayerCount = 0;
@@ -116,4 +118,14 @@ public:
 	
 	EDayPhase GetDayPhase() const {  return DayPhase; }
 	void SetDayPhase(EDayPhase NewPhase);
+	
+private:
+	FTimerHandle FinalDefenceTimerHandle;
+	int32 FinalDefenceElapsedTime = 0;
+
+public:
+	void UpdateFinalDefenceTimerHandle();
+	void StartFinalDefenceWave();
+	
+	bool FinalDefenceWaveSpawned;
 };

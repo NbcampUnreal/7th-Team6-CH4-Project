@@ -1,6 +1,7 @@
 ﻿#include "ZombieBase.h"
 
 #include "NiagaraFunctionLibrary.h"
+#include "CH4_TeamProject/Item/Consumable/GearItem.h"
 #include "Controller/MonsterAIController.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -105,6 +106,21 @@ void AZombieBase::OnDeath()
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);\
 	// 메쉬 콜리전 지움
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	FVector SpawnLocation = GetActorLocation(); 
+	FRotator SpawnRotation = FRotator::ZeroRotator;
+	
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this; 
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+	
+	if (ItemClass && GetWorld())
+	{
+		int32 spawnpersent = FMath::RandRange(1.f, 100.f);
+		if (spawnpersent <= 3)
+		{
+			GetWorld()->SpawnActor<AActor>(ItemClass, SpawnLocation, SpawnRotation, SpawnParams);
+		}
+	}
 }
 
 void AZombieBase::Multi_PlayDeathMontage_Implementation(UAnimMontage* MontageToPlay)
