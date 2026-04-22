@@ -31,16 +31,6 @@ void AMonsterAIController::BeginPlay()
 	}
 }
 
-FGenericTeamId AMonsterAIController::GetGenericTeamId() const
-{
-	if (IGenericTeamAgentInterface* TeamAgentInterface = Cast<IGenericTeamAgentInterface>(GetPawn()))
-	{
-		return TeamAgentInterface->GetGenericTeamId();
-	}
-	
-	return FGenericTeamId();
-}
-
 void AMonsterAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 {
 	// 블랙보트 컴포넌트 정보 저장
