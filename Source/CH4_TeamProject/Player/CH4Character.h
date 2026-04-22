@@ -185,6 +185,17 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player Stat",Replicated)
 	float CurrentHP = 100.0f;//현재 체력
 
+	
+	UPROPERTY(ReplicatedUsing = OnRep_IsDowned, VisibleAnywhere, BlueprintReadOnly, Category = "Player Stat")
+	bool bIsDowned = false;
+
+	UFUNCTION()
+	void OnRep_IsDowned();
+
+	
+	UFUNCTION(BlueprintCallable, Category = "Player Stat")
+	bool GetIsDowned() const { return bIsDowned; }
+
 	//마우스 감도
 	UPROPERTY(EditAnywhere)
 	float mouseSpeed = 45.0f;
