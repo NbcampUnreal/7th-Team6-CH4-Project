@@ -37,14 +37,15 @@ public:
 private:
 	FTimerHandle ServerTimeHandle;
 	
-	int32 DayCount = 0;
-	
 	EDayPhase RecentPhase;
 	
 	UPROPERTY(EditAnywhere, Category = "Sound")
 	USoundBase* ZombieSound;
 	
 public:
+	UPROPERTY(BlueprintReadOnly)
+	int32 DayCount = 0;
+	
 	UPROPERTY(BlueprintReadOnly)
 	float TotalDayPhaseCycleTime = 7.f * 60.f;
 	

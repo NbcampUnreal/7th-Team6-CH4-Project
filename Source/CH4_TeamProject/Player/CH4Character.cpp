@@ -27,7 +27,6 @@
 #include "CH4_TeamProject/Item/Equippable/Equippable.h"
 
 
-//생성자
 ACH4Character::ACH4Character()
 {
 	PrimaryActorTick.bCanEverTick = true;

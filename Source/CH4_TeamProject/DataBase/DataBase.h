@@ -36,7 +36,7 @@ UENUM(BlueprintType)
 enum class EDayPhase : uint8
 {
 	None UMETA(DisplayName = "None"),
-	Day UMETA(DisplayName = "DayPhase"),
+	Day UMETA(DisplayName = "Day"),
 	Evening UMETA(DisplayName = "Evening"),
 	Night UMETA(DisplayName = "Night")
 };
