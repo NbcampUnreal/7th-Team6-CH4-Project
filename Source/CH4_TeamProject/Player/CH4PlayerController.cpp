@@ -258,14 +258,19 @@ void ACH4PlayerController::Client_DisablePlayerInput_Implementation()
 {
 	SetIgnoreMoveInput(true);
 	SetIgnoreLookInput(true);
-	// SetIgnoreJumpInput(true); -> 점프 구현 시 주석 풀기
+	
+	APawn* MyPawn = Cast<APawn>(GetPawn()); 
+	if (MyPawn)
+	{
+		// MyPawn->SetIgnoreJumpInput(false); // APawn의 함수
+	}
 }
 
 void ACH4PlayerController::Client_EnablePlayerInput_Implementation()
 {
 	SetIgnoreMoveInput(false);
 	SetIgnoreLookInput(false);
-	// SetIgnoreJumpInput(false); -> 점프 구현 시 주석 풀기
+	// SetIgnoreJumpInput(false);
 }
 
 void ACH4PlayerController::Client_PlayDownAnim_Implementation()

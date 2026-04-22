@@ -32,10 +32,12 @@ public:
 	void RequestReturnToLobby();
 	
 	void SetDayPhaseAtServer(EDayPhase NewPhase);
+	void FinalDefenceWaveSpawn();
+	
+	// void StartFinalDefenceAtServer();
 	
 private:
-	// void UpdateMainServerTime() const;
-	
 	bool bGameStarted = false;
 	bool bIsReturningToLobby = false;
+
 };

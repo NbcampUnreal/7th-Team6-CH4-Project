@@ -2,6 +2,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "CH4_TeamProject/Zombie/ZombieBase.h"
 #include "Perception/AIPerceptionComponent.h"
+#include "Perception/AISenseConfig_Sight.h"
 #include "Perception/AISense_Damage.h"
 #include "Perception/AISense_Hearing.h"
 #include "Perception/AISense_Sight.h"
@@ -10,6 +11,12 @@ AMonsterAIController::AMonsterAIController()
 {
 	// AI 감지 시스템 이용에 필요한 컴포넌트
 	AIPerceptionComp = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("AIPerception"));
+	SightConfigComp = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("SightConfig"));
+	
+	SightConfigComp->SightRadius = 1000.f;
+	SightConfigComp->LoseSightRadius = 1200.f;   
+	
+	SightConfigComp->PeripheralVisionAngleDegrees = 130.f;
 }
 
 void AMonsterAIController::BeginPlay()
@@ -149,4 +156,14 @@ void AMonsterAIController::ClearAttackTarget()
 	{
 		BlackboardComp->ClearValue(TEXT("AttackActor"));
 	}
+}
+
+void AMonsterAIController::SetZombieDetectionRange_Implementation()
+{
+	SightConfigComp->SightRadius = 3000.f;
+	SightConfigComp->LoseSightRadius = 3500.f;   
+	
+	SightConfigComp->PeripheralVisionAngleDegrees = 180.f;
+	
+	AIPerceptionComp->RequestStimuliListenerUpdate();
 }

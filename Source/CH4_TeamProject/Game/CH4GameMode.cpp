@@ -9,6 +9,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "CH4_TeamProject/Item/Consumable/ItemSpawnPoint.h"
 #include "CH4_TeamProject/Zombie/ZombieSpawnPoint.h"
+#include "GameManagers/FinalDefenceManager.h"
 
 ACH4GameMode::ACH4GameMode()
 {	
@@ -107,7 +108,6 @@ void ACH4GameMode::EndGame(EGamePhase GP)
 	if (GS)
 	{
 		GS->SetGamePhase(GP);
-		GS->SetDayPhase(EDayPhase::None);
 	}
 	
 	// 현재 월드에 존재하는 모든 PlayerController를 순회(반복)하기 위한 반복자(iterator)
@@ -191,7 +191,7 @@ void ACH4GameMode::SetGameResult()
 	{ 
 		EndGame(EGamePhase::Lose);
 	}
-	else if (GS && GS->AlivePlayerCount > 0 && GS->GearPartsCount == 3)
+	else if (GS && GS->AlivePlayerCount > 0 && GS->GearPartsCount >= 3)
 	{
 		EndGame(EGamePhase::Clear);
 	}
@@ -231,8 +231,6 @@ void ACH4GameMode::SetDayPhaseAtServer(EDayPhase NewPhase)
 		
 		if (GS->DayPhase == NewPhase) return;
 		
-		UE_LOG(LogTemp, Error, TEXT("Day 아님.(%hhd)"), GS->DayPhase)
-		
 		TArray<AActor*> ZombieFoundVolumes;
 		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AZombieSpawnPoint::StaticClass(), ZombieFoundVolumes);
 	
@@ -250,14 +248,11 @@ void ACH4GameMode::SetDayPhaseAtServer(EDayPhase NewPhase)
 		GS->SetDayPhase(EDayPhase::Evening);
 		
 		if (GS->DayPhase == NewPhase) return;
-		UE_LOG(LogTemp, Error, TEXT("Evening 아님.(%hhd)"), GS->DayPhase)
 	}
 	else
 	{
 		GS->SetDayPhase(EDayPhase::Night);
 		if (GS->DayPhase == NewPhase) return;
-		
-		UE_LOG(LogTemp, Error, TEXT("Night 아님.(%hhd)"), GS->DayPhase)
 		
 		TArray<AActor*> ZombieFoundVolumes;
 		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AZombieSpawnPoint::StaticClass(), ZombieFoundVolumes);
@@ -271,4 +266,28 @@ void ACH4GameMode::SetDayPhaseAtServer(EDayPhase NewPhase)
 			}
 		}
 	}
+	
+	if (GS->AlivePlayerCount >= 0 && GS->GearPartsCount >=3) // 액터 활성화 기믹은 넣지 않고 좀비 인식 범위만 증가시키기
+	{
+		SetGameResult();
+		GS->SetGamePhase(EGamePhase::FinalDefense);
+	}
+}
+
+void ACH4GameMode::FinalDefenceWaveSpawn()
+{
+	TArray<AActor*> ZombieFoundVolumes;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AZombieSpawnPoint::StaticClass(), ZombieFoundVolumes);
+		
+	for (AActor* Actor : ZombieFoundVolumes)
+	{
+		AZombieSpawnPoint* ZombieSpawnVolume = Cast<AZombieSpawnPoint>(Actor);
+		if (ZombieSpawnVolume)
+		{
+			ZombieSpawnVolume->SpawnZombie(6, 12, 5, 8, 1, 2);
+		}
+	}
+	
+	ACH4GameState* GS = Cast<ACH4GameState>(GetWorld()->GetGameState());
+	GS->FinalDefenceWaveSpawned = true;
 }
