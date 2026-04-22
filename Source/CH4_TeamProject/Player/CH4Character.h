@@ -9,10 +9,12 @@
 #include "CH4_TeamProject/DataBase/DataBase.h"
 #include "CH4_TeamProject/Player/PlayerAnimInstance.h"
 #include "CH4_TeamProject/DataBase/DataBase.h"
+#include "CH4_TeamProject/Item/Equippable/Equippable.h"
 #include "CH4Character.generated.h"
 class UEquippableComponent;
 class UPlayerAnimInstance;
 class ACH4GameState;
+class Equippable;
 
 UCLASS()
 class CH4_TEAMPROJECT_API ACH4Character : public ACharacter, public IGenericTeamAgentInterface
@@ -300,11 +302,11 @@ public:
 	void OnApplyItemEffect();
 	
 
-	UPROPERTY(Replicated)
+	UPROPERTY(Replicated, BlueprintReadOnly)
 	int HealItemCount = 0;
 
-	UPROPERTY(Replicated)
-	int GrenadeCount=0;
+	UPROPERTY(Replicated, BlueprintReadOnly)
+	int GrenadeCount = 0;
 	
 	UPROPERTY()
 	ACH4GameState* GamsState;
@@ -374,4 +376,10 @@ public:
 	UFUNCTION()
 	void ReloadMontage();
 	
+	// UPROPERTY(BlueprintReadOnly)
+	// AEquippable* CurrentEquippable;
+	//
+	// UFUNCTION(BlueprintCallable)
+	// const int32 GetCurrentAmmoAtEquippableClass();
+	//
 };

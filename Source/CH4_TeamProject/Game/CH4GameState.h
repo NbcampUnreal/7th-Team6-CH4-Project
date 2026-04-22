@@ -71,7 +71,7 @@ public:
 	UPROPERTY(ReplicatedUsing = OnRep_GearPartsCount)
 	int32 GearPartsCount;
 	
-	UPROPERTY(ReplicatedUsing = OnRep_DayPhase)
+	UPROPERTY(ReplicatedUsing = OnRep_DayPhase, BlueprintReadOnly)
 	EDayPhase DayPhase = EDayPhase::None;
 
 	UPROPERTY()
