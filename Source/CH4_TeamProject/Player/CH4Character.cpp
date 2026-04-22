@@ -220,6 +220,15 @@ float ACH4Character::TakeDamage(float DamageAmount, const FDamageEvent& DamageEv
 
 			//이동 속도 0으로
 			GetCharacterMovement()->MaxWalkSpeed = 0.f;
+			GetCharacterMovement()->DisableMovement();
+			ACH4PlayerController* PC = Cast<ACH4PlayerController>(GetController());
+			if (PC)
+			{
+				// 클라이언트에게 입력 중단 명령 (RPC)
+				PC->Client_DisablePlayerInput();
+				// 클라이언트에게 다운 UI 표시 명령 (RPC)
+				PC->Client_SetPlayerDownedUI(true);
+			}
 		}
 
 		ACH4PlayerState* PS = GetPlayerState<ACH4PlayerState>();
@@ -427,6 +436,8 @@ void ACH4Character::InitializationInput()
 //무브
 void ACH4Character::Move(const FInputActionValue& Value)
 {
+	if (bIsDowned) return;
+
 	const FVector2D Movement = Value.Get<FVector2D>();
 
 	FRotator MoveBasisRotation = FRotator::ZeroRotator;
@@ -453,6 +464,8 @@ void ACH4Character::Move(const FInputActionValue& Value)
 //뛰기시작
 void ACH4Character::StartSprint()
 {
+	if (bIsDowned) return;
+
 	bIsSprinting = true;
 	GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
 	
@@ -519,6 +532,8 @@ void ACH4Character::PlayerInputStop()
 //시점
 void ACH4Character::Look(const FInputActionValue& Value)
 {
+	if (bIsDowned) return;
+
 	FVector2D LookAxisVector = Value.Get<FVector2D>();
 	AddControllerYawInput(LookAxisVector.X * GetWorld()->DeltaTimeSeconds * mouseSpeed);
 	AddControllerPitchInput(LookAxisVector.Y * GetWorld()->DeltaTimeSeconds * mouseSpeed);
@@ -527,6 +542,7 @@ void ACH4Character::Look(const FInputActionValue& Value)
 //정조준 시작
 void ACH4Character::StartAim()
 {
+	if (bIsDowned) return;
 	bIsFreeLook = false;
 	bIsAiming = true;
 
@@ -615,6 +631,8 @@ void ACH4Character::Fires()
 		return;
 	}
 
+	if (bIsDowned) return;
+
 	//현재 무기가 없으면 종료
 	if (EquippableComponent->CurrentWeapon == nullptr)
 	{
@@ -649,6 +667,8 @@ void ACH4Character::Fires()
 
 void ACH4Character::OnReload()
 {
+	if (bIsDowned) return;
+
 	//컴포넌트 또는 현재 무기가 없으면 종료
 	if (EquippableComponent == nullptr || EquippableComponent->CurrentWeapon == nullptr)
 	{
@@ -1150,6 +1170,8 @@ void ACH4Character::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 
 void ACH4Character::Server_UseHealItem_Implementation()
 {
+
+	if (bIsDowned) return;
 	UE_LOG(LogTemp, Error, TEXT("서버 힐요청됨"))
 	if (DefaultHealData && HealItemCount > 0)
 	{
