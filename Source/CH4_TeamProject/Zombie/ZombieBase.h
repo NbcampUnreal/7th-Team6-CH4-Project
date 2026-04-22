@@ -7,6 +7,7 @@
 #include "GameFramework/Character.h"
 #include "ZombieBase.generated.h"
 
+class AGearItem;
 class UAnimMontage;
 
 UCLASS()
@@ -74,7 +75,8 @@ protected:
 	
 	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Team")
 	//ETeamID TeamID = ETeamID::NoTeam;
-	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+	TSubclassOf<AGearItem> ItemClass;
 private:
 	void DestroyZombie();
 };
