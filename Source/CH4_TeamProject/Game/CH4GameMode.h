@@ -31,6 +31,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "GameFlow")
 	void RequestReturnToLobby();
 	
+	void SetDayPhaseAtServer(EDayPhase NewPhase);
+	
 private:
 	// void UpdateMainServerTime() const;
 	

@@ -14,15 +14,16 @@
 #include "Engine/SkyLight.h"
 #include "Net/UnrealNetwork.h"
 #include <Misc\OutputDeviceNull.h>
+#include "CH4_TeamProject/Zombie/NormalZombie.h"
+#include "CH4_TeamProject/Zombie/RunnerZombie.h"
+#include "CH4_TeamProject/Zombie/TankZombie.h"
+#include "CH4_TeamProject/Zombie/ZombieSpawnPoint.h"
 
 ACH4GameState::ACH4GameState()
 {
 	bReplicates = true;    
+	PrimaryActorTick.bCanEverTick = false;
 	
-	PrimaryActorTick.bCanEverTick = true;
-	SetActorTickEnabled(false);
-	
-	GamePhase = EGamePhase::None;
 	GearPartsCount = 0;
 	
 	// 기본값 초기화 (예: Score 초기화)
@@ -55,38 +56,14 @@ void ACH4GameState::BeginPlay()
 void ACH4GameState::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	
-	 
-	
 }
 
 void ACH4GameState::UpdateLapsedTime()
 {
-	// ElapsedTime += 1.f;
 	UE_LOG(LogTemp, Warning, TEXT("DayPhase 경과 시간 : %d"), ElapsedTime);
 	
-	if (ElapsedTime >= TotalDayPhaseCycleTime)
-		ElapsedTime = 0;
-	
-	EDayPhase NewPhase = DayPhase;
-	
-	// 단계 판별 로직
-	if (ElapsedTime < DayTime) NewPhase = EDayPhase::Day;
-	else if (ElapsedTime < DayTime + EveningTime) NewPhase = EDayPhase::Evening;
-	else NewPhase = EDayPhase::Night;
-
-	// 단계가 바뀌었을 때만 실행
-	if (DayPhase != NewPhase)
-	{
-		// 핵심: 서버에서 값을 변경합니다. 
-		// ReplicatedUsing 설정 덕분에 클라이언트들은 자동으로 OnRep_DayPhase를 호출합니다.
-		DayPhase = NewPhase;
-
-		// 서버(호스트)는 OnRep이 자동으로 실행되지 않으므로 직접 호출해줍니다.
-		OnRep_DayPhase();
-
-		UE_LOG(LogTemp, Warning, TEXT("서버: DayPhase 단계 변경 -> %d"), (int32)DayPhase);
-	}
+	ACH4GameMode* GM = Cast<ACH4GameMode>(GetWorld()->GetAuthGameMode());
+	GM->SetDayPhaseAtServer(DayPhase);
 }
 
 
@@ -184,6 +161,8 @@ void ACH4GameState::AddGearPartsCount()
 	GearPartsCount++;
 	if (GearPartsCount >= 3)
 	{
+		
+		
 		if (HasAuthority())
 		{
 			ACH4GameMode* GM = Cast<ACH4GameMode>(GetWorld()->GetAuthGameMode());
@@ -247,7 +226,6 @@ void ACH4GameState::ApplyDayPhaseChanges(EDayPhase DP)
 				SkyLight->GetLightComponent()->SetIntensity(10.f);
 				Fog->GetComponent()->SetFogInscatteringColor(FLinearColor(0.7f, 0.8f, 1.0f));
 				
-				// 난이도 변경 함수
 				break;
 			}
 		
@@ -263,6 +241,7 @@ void ACH4GameState::ApplyDayPhaseChanges(EDayPhase DP)
 				Fog->GetComponent()->SetFogInscatteringColor(FLinearColor(1.0f, 0.4f, 0.2f));
 				
 				// 난이도 변경 함수
+	
 				break;
 			}
 		
@@ -278,6 +257,15 @@ void ACH4GameState::ApplyDayPhaseChanges(EDayPhase DP)
 				Fog->GetComponent()->SetFogInscatteringColor(FLinearColor(0.02f, 0.02f, 0.05f));
 				
 				// 난이도 변경 함수
+				TArray<AActor*> ZombieFoundVolumes;
+				for (AActor* Actor : ZombieFoundVolumes)
+				{
+					AZombieSpawnPoint* ZombieSpawnVolume = Cast<AZombieSpawnPoint>(Actor);
+					if (ZombieSpawnVolume)
+					{
+						ZombieSpawnVolume->SpawnZombie(7, 14, 6, 8, 1, 2);
+					}
+				}
 				
 				PlayZombieSound();
 				
@@ -337,8 +325,9 @@ void ACH4GameState::SetDayPhase(EDayPhase NewPhase)
 {
 	if (DayPhase == NewPhase) return;
 	
-	RecentPhase = DayPhase; // 날씨 전환 시작점
-	DayPhase = NewPhase; // 날씨 전환 종료점
+	UE_LOG(LogTemp, Warning, TEXT("SetDayPhase 호출됨! 이전: %d, 신규: %d"), (int32)DayPhase, (int32)NewPhase);
+	
+	DayPhase = NewPhase;
 	
 	if (HasAuthority()) // 서버에서 따로 실행
 	{

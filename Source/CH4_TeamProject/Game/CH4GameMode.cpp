@@ -60,8 +60,6 @@ void ACH4GameMode::BeginPlay()
 		ACH4PlayerController* PC = Cast<ACH4PlayerController>(It->Get());
 		PC->Client_EnablePlayerInput();
 	}
-	
-	
 }
 
 void ACH4GameMode::PostLogin(APlayerController* NewPlayer)
@@ -219,12 +217,58 @@ void ACH4GameMode::RequestReturnToLobby()
 	GetWorld()->ServerTravel(LobbyMapPath);
 }
 
-// void ACH4GameMode::UpdateMainServerTime() const
-// {
-// 	if (ACH4GameState* GS = GetGameState<ACH4GameState>())
-// 	{
-// 		GS->SetServerTime(GetWorld()->GetTimeSeconds());
-// 	}
-// }
-
-
+void ACH4GameMode::SetDayPhaseAtServer(EDayPhase NewPhase)
+{
+	ACH4GameState* GS = Cast<ACH4GameState>(GetWorld()->GetGameState());
+	if (!GS) return;
+	
+	if (GS->ElapsedTime >= GS->TotalDayPhaseCycleTime)
+		GS->ElapsedTime = 0;
+	
+	if (GS->ElapsedTime < GS->DayTime)
+	{
+		GS->SetDayPhase(EDayPhase::Day);
+		
+		if (GS->DayPhase == NewPhase) return;
+		
+		UE_LOG(LogTemp, Error, TEXT("Day 아님.(%hhd)"), GS->DayPhase)
+		
+		TArray<AActor*> ZombieFoundVolumes;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AZombieSpawnPoint::StaticClass(), ZombieFoundVolumes);
+	
+		for (AActor* Actor : ZombieFoundVolumes)
+		{
+			AZombieSpawnPoint* ZombieSpawnVolume = Cast<AZombieSpawnPoint>(Actor);
+			if (ZombieSpawnVolume)
+			{
+				ZombieSpawnVolume->SpawnZombie(5, 10, 4, 6, 0, 1);
+			}
+		}
+	}
+	else if (GS->ElapsedTime < GS->DayTime + GS->EveningTime)
+	{
+		GS->SetDayPhase(EDayPhase::Evening);
+		
+		if (GS->DayPhase == NewPhase) return;
+		UE_LOG(LogTemp, Error, TEXT("Evening 아님.(%hhd)"), GS->DayPhase)
+	}
+	else
+	{
+		GS->SetDayPhase(EDayPhase::Night);
+		if (GS->DayPhase == NewPhase) return;
+		
+		UE_LOG(LogTemp, Error, TEXT("Night 아님.(%hhd)"), GS->DayPhase)
+		
+		TArray<AActor*> ZombieFoundVolumes;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AZombieSpawnPoint::StaticClass(), ZombieFoundVolumes);
+		
+		for (AActor* Actor : ZombieFoundVolumes)
+		{
+			AZombieSpawnPoint* ZombieSpawnVolume = Cast<AZombieSpawnPoint>(Actor);
+			if (ZombieSpawnVolume)
+			{
+				ZombieSpawnVolume->SpawnZombie(6, 12, 5, 8, 1, 2);
+			}
+		}
+	}
+}

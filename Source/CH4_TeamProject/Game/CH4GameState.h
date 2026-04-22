@@ -37,12 +37,6 @@ public:
 private:
 	FTimerHandle ServerTimeHandle;
 	
-	const float TotalDayPhaseCycleTime = 7.f * 60.f;
-	
-	const float DayTime = 2.5f * 60.f;
-	const float EveningTime = 0.5f * 60.f;
-	const float NightTime = 4.f * 60.f;
-	
 	int32 DayCount = 0;
 	
 	EDayPhase RecentPhase;
@@ -50,7 +44,13 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Sound")
 	USoundBase* ZombieSound;
 	
-public:	
+public:		
+	const float TotalDayPhaseCycleTime = 7.f * 60.f;
+	
+	const float DayTime = 2.5f * 60.f;
+	const float EveningTime = 0.5f * 60.f;
+	const float NightTime = 4.f * 60.f;
+	
 	UPROPERTY(Replicated)
 	int32 AlivePlayerCount = 0;
 	
