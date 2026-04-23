@@ -43,11 +43,6 @@ void AItemSpawnPoint::SpawnItems()
 
 			FRotator Rotation(0.f, FMath::RandRange(0.f, 360.f), 0.f);
 			AActor* Spawned = GetWorld()->SpawnActor<AActor>(Class, Location, Rotation, SpawnParams);
-
-			if (Spawned)
-			{
-				UE_LOG(LogTemp, Log, TEXT("%s 스폰 성공!"), *Class->GetName());
-			}
 		}
 	};	
 
