@@ -150,8 +150,6 @@ void UZombieAttackAnimNotify::PerformSphereOverlap(USkeletalMeshComponent* MeshC
 			OwnerCharacter,
 			UDamageType::StaticClass()
 			);
-		
-		UE_LOG(LogTemp, Warning, TEXT("Hit"));
 	}
 }
 

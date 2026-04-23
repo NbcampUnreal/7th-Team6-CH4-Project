@@ -148,20 +148,3 @@ void AMonsterAIController::ClearAttackTarget()
 		BlackboardComp->ClearValue(TEXT("AttackActor"));
 	}
 }
-
-// void AMonsterAIController::SetZombieDetectionRange_Implementation()
-// {
-// 	if (!SightConfigComp || !AIPerceptionComp)
-// 	{
-// 		UE_LOG(LogTemp, Warning, TEXT("SetZombieDetectionRange: Component is nullptr! Skipping."));
-// 		return;
-// 	}
-// 	
-// 	SightConfigComp->SightRadius = 3000.f;
-// 	SightConfigComp->LoseSightRadius = 3500.f;   
-// 	
-// 	SightConfigComp->PeripheralVisionAngleDegrees = 180.f;
-// 	
-// 	AIPerceptionComp->ConfigureSense(*SightConfigComp);
-// 	AIPerceptionComp->RequestStimuliListenerUpdate();
-// }
