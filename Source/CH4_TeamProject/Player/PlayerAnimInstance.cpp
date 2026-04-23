@@ -2,6 +2,7 @@
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Animation/AnimMontage.h"
+#include "CH4Character.h"
 
 //생성자
 UPlayerAnimInstance::UPlayerAnimInstance()
@@ -40,6 +41,12 @@ void UPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		Velocity = Movement->Velocity;
 		MoveSpeed = Velocity.Size2D();
 		bIsFalling = Movement->IsFalling();
+	}
+
+	if (ACH4Character* CH4Char = Cast<ACH4Character>(Owner))
+	{
+		
+		bIsDown = CH4Char->bIsDowned;
 	}
 }
 
