@@ -688,7 +688,7 @@ void ACH4Character::OnReload()
 
 	
 	if (CurrentAmmo >= MaxAmmo)return;
-	
+	if (EquippableComponent->CurrentWeapon->MaxClip <= 0)  return;
 
 
 
