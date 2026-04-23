@@ -35,8 +35,6 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multi_PlayDeathMontage(UAnimMontage* MontageToPlay);
 	
-	//virtual FGenericTeamId GetGenericTeamId() const override { return static_cast<uint8>(TeamID); }
-	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
 	float CurrentHP;
 	
@@ -74,8 +72,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Montage")
 	UAnimMontage* DeathMontage;
 	
-	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Team")
-	//ETeamID TeamID = ETeamID::NoTeam;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
 	TSubclassOf<AGearItem> ItemClass;
 private:

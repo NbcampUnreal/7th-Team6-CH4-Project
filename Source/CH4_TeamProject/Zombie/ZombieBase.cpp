@@ -70,7 +70,6 @@ float AZombieBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEven
 	
 	// 받은 데미지 계산 후 체력에 적용
 	CurrentHP = CurrentHP = FMath::Clamp(CurrentHP - ActualDamage, 0.0f, MaxHP);
-	UE_LOG(LogTemp, Warning, TEXT("Hit damage: %f / %f"), CurrentHP, MaxHP);
 
 	// 실제로 받은 데미지 리턴
 	return ActualDamage;

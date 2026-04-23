@@ -21,9 +21,6 @@ public:
 	TObjectPtr<AZombieBase> ControlledCharacter;
 	
 	virtual FGenericTeamId GetGenericTeamId() const override { return static_cast<uint8>(TeamID); }
-  
-	// UFUNCTION(Server, Reliable)
-	// void SetZombieDetectionRange();
 	
 protected:
 	UPROPERTY(EditDefaultsOnly, Category="Team")
