@@ -27,7 +27,7 @@ public:
 	void Server_EquipWeapon(class UWeaponData* WeaponClass);
 
 	//착용중인 무기	
-	UPROPERTY(Replicated)
+	UPROPERTY(Replicated, BlueprintReadWrite)
 	TObjectPtr<AEquippable> CurrentWeapon;
 
 	UPROPERTY(Replicated)
