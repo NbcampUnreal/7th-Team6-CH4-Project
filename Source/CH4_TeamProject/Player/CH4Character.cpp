@@ -647,6 +647,8 @@ void ACH4Character::Fires()
 		return;
 	}
 
+	if (EquippableComponent->CurrentWeapon->CurrentAmmo <= 0) return;
+
 	UE_LOG(LogTemp, Warning, TEXT("Weapon: %s"),
 		EquippableComponent->CurrentWeapon ? TEXT("있음") : TEXT("없음"));
 
@@ -678,6 +680,17 @@ void ACH4Character::OnReload()
 		UE_LOG(LogTemp, Warning, TEXT("장전 실패 - 무기 또는 컴포넌트가 없음"));
 		return;
 	}
+
+	
+	int32 MaxAmmo = EquippableComponent->CurrentWeapon->WeaponData->GetMaxAmmo();
+	
+	int32 CurrentAmmo = EquippableComponent->CurrentWeapon->CurrentAmmo;
+
+	
+	if (CurrentAmmo >= MaxAmmo)return;
+	
+
+
 
 	//이미 장전 중이면 다시 장전 막기
 	if (IsReloading())
