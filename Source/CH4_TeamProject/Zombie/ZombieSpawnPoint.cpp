@@ -33,8 +33,8 @@ void AZombieSpawnPoint::SpawnZombie(
 		for (int32 i = 0; i < Count; ++i)
 		{
 			FVector Location = GetActorLocation();
-			Location.X += FMath::RandRange(-1200.f, 1200.f);  
-			Location.Y += FMath::RandRange(-1200.f, 1200.f);  
+			Location.X += FMath::RandRange(-1500.f, 1500.f);  
+			Location.Y += FMath::RandRange(-1500.f, 1500.f);  
 			Location.Z += 60.f;
 
 			FRotator Rotation(0.f, FMath::RandRange(0.f, 360.f), 0.f);
