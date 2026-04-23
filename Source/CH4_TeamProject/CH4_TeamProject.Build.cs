@@ -18,6 +18,7 @@ public class CH4_TeamProject : ModuleRules
       "NavigationSystem",
       "AIModule",
       "GameplayTasks",
+      "InterchangeCore",
       "Niagara"
 		});
 
