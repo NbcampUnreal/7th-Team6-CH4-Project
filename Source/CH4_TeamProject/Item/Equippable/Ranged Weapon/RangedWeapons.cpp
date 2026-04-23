@@ -75,14 +75,10 @@ void ARangedWeapons::BeginPlay()
 	Super::BeginPlay();
 	if (WeaponData)
 	{
-		//CurrentAmmo = Data->GetMaxAmmo();
 		CurrentAmmo = WeaponData->GetMaxAmmo();
-
 		UE_LOG(LogTemp, Warning, TEXT("MaxAmmo: %d"), WeaponData-> GetMaxAmmo());
 		UE_LOG(LogTemp, Warning, TEXT("CurrentAmmo: %d"), CurrentAmmo);
-		UE_LOG(LogTemp, Warning, TEXT("GetMaxAmmo(): %d"), GetMaxAmmo());
 	}
-	else { UE_LOG(LogTemp, Warning, TEXT("데이터 없다")) }
 }
 
 // Called every frame
@@ -130,7 +126,6 @@ void ARangedWeapons::Multicast_PlayEffects_Implementation(FVector TraceStart, FV
 	{
 		if (!WeaponMesh)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("컴포넌트 없음"));
 			return;
 		}
 
@@ -149,18 +144,14 @@ void ARangedWeapons::Multicast_PlayEffects_Implementation(FVector TraceStart, FV
 // 시작점
 void ARangedWeapons::Attack()
 {
-	UE_LOG(LogTemp, Error, TEXT("무조건 찍혀야 하는 로그!"));
 	if (bIsCoolingDown || CurrentAmmo <= 0)
 	{
-		UE_LOG(LogTemp, Error, TEXT("총알이 부족해 혹은 딜레이중이야 현재 총알 :%d"), CurrentAmmo);
 		return;
 	}
 	if (GetOwner() == nullptr)
 	{
-		UE_LOG(LogTemp, Error, TEXT("사격 실패: 이 무기의 Owner가 설정되지 않았습니다!"));
 		return;
 	}
-	UE_LOG(LogTemp, Warning, TEXT("1. Fire Called on Client"));
 	Attack_Implementation();
 }
 
@@ -188,12 +179,10 @@ void ARangedWeapons::TraceShoot()
 	// 서버 권한이 없으면 실행하지 않음 (이중 보안)
 	if (!HasAuthority())
 	{
-		UE_LOG(LogTemp, Error, TEXT("서버가 아님"))
 		return;
 	}
 	if (!WeaponData)
 	{
-		UE_LOG(LogTemp, Error, TEXT(" 데이터가 유효하지않음 "))
 		return;
 	}
 	APlayerController* PC = Cast<APlayerController>(GetInstigatorController());
@@ -247,8 +236,6 @@ void ARangedWeapons::OnRep_FireReady()
 void ARangedWeapons::ResetCoolTime()
 {
 	bIsCoolingDown = false;
-
-	UE_LOG(LogTemp, Error, TEXT("Yahoo: 쿨다운 해제됨!"));
 }
 
 void ARangedWeapons::AddMaxClip(int32 AmmoItem)
@@ -265,26 +252,22 @@ void ARangedWeapons::Reload_Implementation_Internal()
 {
 	if (MaxClip <= 0)
 	{
-		UE_LOG(LogTemp, Error, TEXT("MaxClip 없어서 리턴됨")) // ← 추가
 		return;
 	}
 	ProcessReload();
-	UE_LOG(LogTemp, Error, TEXT(" 자식 장전 호출됨"))
 }
 
 void ARangedWeapons::Attack_Implementation()
 {
 	if (!WeaponData)
 	{
-		UE_LOG(LogTemp, Error, TEXT(" 데이터 유호하지않음"))
 		return;
 	}
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Server_Fire 실행됨!"));
+	
 
 
 	if (bIsCoolingDown || CurrentAmmo <= 0)
 	{
-		GEngine->AddOnScreenDebugMessage(1, 1.f, FColor::Red, FString::Printf(TEXT("총알이없습니다")));
 		return;
 	}
 	bIsCoolingDown = true;
@@ -293,13 +276,7 @@ void ARangedWeapons::Attack_Implementation()
 	{
 		CurrentAmmo--;
 	}
-	GEngine->AddOnScreenDebugMessage(-1,
-	                                 10, FColor::Red,
-	                                 FString::Printf(
-		                                 TEXT("남은 총알 %d"), CurrentAmmo)
-	                                 , false);
-	// 총알 감소및
-	// 쿨타임 초기화 등등
+	
 	GetWorldTimerManager().SetTimer
 	(TimerHandle_FireDelay,
 	 this,

@@ -112,9 +112,6 @@ void AMeleeWeapons::Multicast_PlayAttackMontage_Implementation()
 	if (OwnerCharacter && MeleeAttackMontage)
 	{
 		OwnerCharacter->PlayAnimMontage(MeleeAttackMontage,1.5);
-		UE_LOG(LogTemp, Warning, TEXT("PlayAnimMontage Called on: %s"), 
-			   OwnerCharacter->HasAuthority() ? TEXT("Server") : TEXT("Client"));
-		UE_LOG(LogTemp,Error,TEXT("근접공격 실행됨"))
 	}
 }
 

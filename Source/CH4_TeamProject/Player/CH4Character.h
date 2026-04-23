@@ -182,10 +182,10 @@ private:
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Stat",Replicated)
-	float MaxHP = 100.0f;//최대체력
+	float MaxHP = 150.0f;//최대체력
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player Stat",Replicated)
-	float CurrentHP = 100.0f;//현재 체력
+	float CurrentHP = 150;//현재 체력
 
 	
 	UPROPERTY(ReplicatedUsing = OnRep_IsDowned, VisibleAnywhere, BlueprintReadOnly, Category = "Player Stat")

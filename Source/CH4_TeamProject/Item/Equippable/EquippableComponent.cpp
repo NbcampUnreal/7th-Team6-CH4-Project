@@ -18,8 +18,6 @@ UEquippableComponent::UEquippableComponent()
 
 void UEquippableComponent::Fire()
 {
-	UE_LOG(LogTemp, Error, TEXT("CurrentAmmo: %d"), CurrentWeapon->CurrentAmmo);
-    
 	CurrentWeapon->Server_Attack();	
 	if (CurrentWeapon == nullptr)
 	{
@@ -56,18 +54,16 @@ void UEquippableComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 void UEquippableComponent::Server_EquipWeapon_Implementation(UWeaponData* NewWeaponData)
 {
 	if (!GetOwner()->HasAuthority() || !NewWeaponData)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("EquipWeapon Called!"));
+	{;
 		return;
 	}
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("함수 호출 성공"));
+
 
 	UWorld* World = GetWorld();
 	if (!World)
 	{
 		return;
 	}
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("월드 존재함"));
 
 	if (CurrentWeapon)
 	{  
@@ -105,8 +101,6 @@ void UEquippableComponent::Server_EquipWeapon_Implementation(UWeaponData* NewWea
 		ACharacter* MyCharacter = Cast<ACharacter>(GetOwner());
 		if (MyCharacter)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("PlayAnimMontage Called on: %s"), 
-				   MyCharacter->HasAuthority() ? TEXT("Server") : TEXT("Client"));
 			CurrentWeapon->AttachToComponent
 			(MyCharacter->GetMesh(),
 			FAttachmentTransformRules::SnapToTargetNotIncludingScale ,

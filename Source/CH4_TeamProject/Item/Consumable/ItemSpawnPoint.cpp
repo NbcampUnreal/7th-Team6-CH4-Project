@@ -18,12 +18,10 @@ void AItemSpawnPoint::SpawnItems()
 {
 	if (!SpawnItemData)
 	{
-		UE_LOG(LogTemp, Error, TEXT("데이터가 없다"));
 		return;
 	}
 	if (!GetWorld())
 	{
-		UE_LOG(LogTemp, Error, TEXT("월드가 없다"));
 		return;
 	}
 
@@ -34,7 +32,6 @@ void AItemSpawnPoint::SpawnItems()
 
 	auto SpawnHelper = [&](TSubclassOf<AActor> Class, int32 Min, int32 Max)
 	{
-		int32 SpawnFalseCount = 0;
 		if (!Class) return;
 		int32 Count = FMath::RandRange(Min, Max);
 		for (int32 i = 0; i < Count; ++i)
@@ -51,16 +48,6 @@ void AItemSpawnPoint::SpawnItems()
 			{
 				UE_LOG(LogTemp, Log, TEXT("%s 스폰 성공!"), *Class->GetName());
 			}
-			else
-			{
-				SpawnFalseCount++;
-				UE_LOG(LogTemp, Error, TEXT("%s 스폰 실패"), *Class->GetName());
-			}
-		}
-		
-		for (int32 i = 0; i < SpawnFalseCount; ++i)
-		{
-			// 스폰 실패한 아이템종류 구해서 다시스폰??
 		}
 	};	
 
