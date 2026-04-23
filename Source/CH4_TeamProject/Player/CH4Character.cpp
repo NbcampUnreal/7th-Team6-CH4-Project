@@ -1054,9 +1054,7 @@ void ACH4Character::Server_ThrowGrenade_Implementation()
 
 		FVector ThrowVelocity = GetControlRotation().Vector() * 1500.0f;
 		Grenade->ProjectileMovement->Velocity = ThrowVelocity;
-
 		
-		       *SpawnLocation.ToString(), *ThrowVelocity.ToString());
 		GetWorld()->GetTimerManager().SetTimer(ExplosionTimerHandle, Grenade, &AThorwbleItems::Explode, 1.5f, false);
 		bUSingGrenade = true;
 	}
