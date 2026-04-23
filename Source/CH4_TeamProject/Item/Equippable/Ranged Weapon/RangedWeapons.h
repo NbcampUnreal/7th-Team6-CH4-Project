@@ -58,6 +58,7 @@ protected:
 	void TraceShoot();
 	
 	virtual int32 GetMaxAmmo()const override;
+	UFUNCTION(BlueprintPure)
 	virtual int32 GetMaxClip() const override;
     
 	void ProcessReload();

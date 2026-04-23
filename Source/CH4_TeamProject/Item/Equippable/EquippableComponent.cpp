@@ -66,8 +66,10 @@ void UEquippableComponent::Server_EquipWeapon_Implementation(UWeaponData* NewWea
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("월드 존재함"));
 
 	if (CurrentWeapon)
-	{	
-		WeaponAmmoMemory.Add(CurrentWeapon->GetClass(), CurrentWeapon->CurrentAmmo);
+	{  
+		UWeaponData* OldWeaponData = CurrentWeapon->WeaponData;
+		WeaponAmmoMemory.Add(OldWeaponData, CurrentWeapon->CurrentAmmo); // 탄창은 총마다 저장
+		SharedMaxClip = CurrentWeapon->MaxClip; // 주운 총알은 공유
 		CurrentWeapon->Destroy();
 	}
 	
@@ -114,13 +116,14 @@ void UEquippableComponent::Server_EquipWeapon_Implementation(UWeaponData* NewWea
 	}
 	if (CurrentWeapon)
 	{
-		if (WeaponAmmoMemory.Contains(NewWeaponData->WeaponClass))
+		CurrentWeapon->MaxClip = SharedMaxClip; 
+		if (WeaponAmmoMemory.Contains(NewWeaponData))
 		{
-			CurrentWeapon->CurrentAmmo = (WeaponAmmoMemory[NewWeaponData->WeaponClass]);
+			CurrentWeapon->CurrentAmmo = WeaponAmmoMemory[NewWeaponData];
 		}
 		else
 		{
-			CurrentWeapon->SetCurrentAmmo();
+			CurrentWeapon->SetCurrentAmmo(); 
 		}
 	}
 	
