@@ -73,8 +73,6 @@ void ACH4GameMode::PostLogin(APlayerController* NewPlayer)
 		GS->AddAlivePlayerCount();
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("Player Joined: %d"), GS->AlivePlayerCount);
-
 	if (!bGameStarted && GS->AlivePlayerCount >= 4)
 	{
 		bGameStarted = true;
@@ -88,8 +86,6 @@ void ACH4GameMode::PostLogin(APlayerController* NewPlayer)
 
 void ACH4GameMode::PlayGame()
 {
-	UE_LOG(LogTemp, Warning, TEXT("PlayGame CALLED"));
-	
 	ACH4GameState* GS = Cast<ACH4GameState>(GetWorld()->GetGameState());
 	if (GS)
 	{
@@ -103,14 +99,12 @@ void ACH4GameMode::PlayGame()
 void ACH4GameMode::EndGame(EGamePhase GP)
 {	
 	bGameStarted = false;
-	// GameState에 반영
 	ACH4GameState* GS = Cast<ACH4GameState>(GetWorld()->GetGameState());
 	if (GS)
 	{
 		GS->SetGamePhase(GP);
 	}
 	
-	// 현재 월드에 존재하는 모든 PlayerController를 순회(반복)하기 위한 반복자(iterator)
 	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
 	{
 		ACH4PlayerController* PC = Cast<ACH4PlayerController>(It->Get());
@@ -125,8 +119,6 @@ void ACH4GameMode::EndGame(EGamePhase GP)
 
 void ACH4GameMode::OnPlayerDowned(ACH4PlayerState* PlayerState)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Player Downed"));
-	
 	if (PlayerState->PlayerReviveCount <= 0) // 데카 0
 	{
 		PlayerState->SetLifeState(EPlayerLifeState::Dead);
@@ -138,12 +130,12 @@ void ACH4GameMode::OnPlayerDowned(ACH4PlayerState* PlayerState)
 	ACH4GameState* GS = Cast<ACH4GameState>(GetWorld()->GetGameState());
 	if (GS)
 	{
-		GS->SubtractAlivePlayerCount(); // 생존자 수 감소
+		GS->SubtractAlivePlayerCount();
 	}
 	
 	if (GS->AlivePlayerCount > 0)
 	{
-		ACH4PlayerController* PC = Cast<ACH4PlayerController>(PlayerState->GetOwner()); // 해당 컨트롤러를 소유한 객체를 ()에서 불러오기
+		ACH4PlayerController* PC = Cast<ACH4PlayerController>(PlayerState->GetOwner());
 		if (PC)
 		{
 			PC->Client_DisablePlayerInput();
@@ -151,7 +143,7 @@ void ACH4GameMode::OnPlayerDowned(ACH4PlayerState* PlayerState)
 			PC->Client_SetPlayerDownedUI(true);
 		}
 	}
-	else // 모든 플레이어 다운 시
+	else
 	{
 		SetGameResult();
 	}
@@ -159,8 +151,6 @@ void ACH4GameMode::OnPlayerDowned(ACH4PlayerState* PlayerState)
 
 void ACH4GameMode::OnPlayerRevived(ACH4PlayerState* PlayerState)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Player Revived"));
-	
 	if (PlayerState->PlayerReviveCount <= 0)
 		return;
 
@@ -176,7 +166,6 @@ void ACH4GameMode::OnPlayerRevived(ACH4PlayerState* PlayerState)
 	ACH4PlayerController* PC = Cast<ACH4PlayerController>(PlayerState->GetPlayerController());
 	if (PC)
 	{
-		/*PC->Client_EnablePlayerInput();*/
 		PC->Client_PlayReviveAnim();
 		PC->Client_SetPlayerDownedUI(false);
 	}
@@ -204,8 +193,6 @@ void ACH4GameMode::RequestReturnToLobby()
 	{
 		return;
 	}
-	
-	UE_LOG(LogTemp, Warning, TEXT("=== 게임 종료: 모든 플레이어를 로비로 보냅니다. ==="));
 	
 	if (bIsReturningToLobby)
 	{
@@ -239,7 +226,7 @@ void ACH4GameMode::SetDayPhaseAtServer(EDayPhase NewPhase)
 			AZombieSpawnPoint* ZombieSpawnVolume = Cast<AZombieSpawnPoint>(Actor);
 			if (ZombieSpawnVolume)
 			{
-				ZombieSpawnVolume->SpawnZombie(4, 8, 3, 6, 0, 1);
+				ZombieSpawnVolume->SpawnZombie(2, 4, 2, 3, 0, 1);
 			}
 		}
 	}
@@ -262,12 +249,12 @@ void ACH4GameMode::SetDayPhaseAtServer(EDayPhase NewPhase)
 			AZombieSpawnPoint* ZombieSpawnVolume = Cast<AZombieSpawnPoint>(Actor);
 			if (ZombieSpawnVolume)
 			{
-				ZombieSpawnVolume->SpawnZombie(6, 12, 4, 8, 1, 2);
+				ZombieSpawnVolume->SpawnZombie(4, 8, 2, 6, 1, 2);
 			}
 		}
 	}
 	
-	if (GS->AlivePlayerCount >= 0 && GS->GearPartsCount >=3) // 액터 활성화 기믹은 넣지 않고 좀비 인식 범위만 증가시키기
+	if (GS->AlivePlayerCount >= 0 && GS->GearPartsCount >=3)
 	{
 		SetGameResult();
 		GS->SetGamePhase(EGamePhase::FinalDefense);

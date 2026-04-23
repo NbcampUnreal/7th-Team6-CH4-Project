@@ -24,14 +24,13 @@ public:
 	int32 PlayerReviveCount;
 	
 	UPROPERTY(Replicated)
-	int32 SpawnPointIndex; // 배정된 스폰 포인트
+	int32 SpawnPointIndex;
 
 	
 	UFUNCTION()
 	void OnRep_LifeState();
 
 	void SetLifeState(EPlayerLifeState NewState);
-	
 	
 	void SetPlayerLifeState(EPlayerLifeState PL);
 };

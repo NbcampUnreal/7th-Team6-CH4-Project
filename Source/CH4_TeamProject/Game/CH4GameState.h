@@ -133,6 +133,4 @@ private:
 public:
 	void UpdateFinalDefenceTimerHandle();
 	void StartFinalDefenceWave();
-	
-	//bool FinalDefenceWaveSpawned;
 };

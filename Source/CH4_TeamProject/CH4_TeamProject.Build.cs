@@ -15,11 +15,11 @@ public class CH4_TeamProject : ModuleRules
 			"InputCore", 
 			"EnhancedInput",
 			"UMG",
-      "NavigationSystem",
-      "AIModule",
-      "GameplayTasks",
-      "InterchangeCore",
-      "Niagara"
+      	    "NavigationSystem",
+        	"AIModule",
+     		"GameplayTasks",
+      		"Niagara",
+			"InterchangeCore",
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
