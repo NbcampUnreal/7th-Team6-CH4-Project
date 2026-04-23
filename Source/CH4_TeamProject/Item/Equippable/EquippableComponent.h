@@ -27,7 +27,7 @@ public:
 	void Server_EquipWeapon(class UWeaponData* WeaponClass);
 
 	//착용중인 무기	
-	UPROPERTY(Replicated)
+	UPROPERTY(Replicated,BlueprintReadWrite)
 	TObjectPtr<AEquippable> CurrentWeapon;
 
 	UPROPERTY(Replicated)
@@ -45,13 +45,13 @@ public:
 
 	//기억할 총알갯수
 	UPROPERTY()
-	TMap<TSubclassOf<AEquippable>, int32> WeaponAmmoMemory;
-
-	UFUNCTION(BlueprintPure)
-	int32 GetAmmoForUI(TSubclassOf<AEquippable> WeaponClass)const
-	{
-		return WeaponAmmoMemory.FindRef(WeaponClass);
-	}
+	TMap<UWeaponData*, int32> WeaponAmmoMemory;
+	
+	UPROPERTY()
+	TMap<UWeaponData*, int32> WeaponMaxClipMemory;
+		
+	UPROPERTY()
+	int32 SharedMaxClip = 0;
 	
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	FTransform GetLeftHandSocketTransform() const;

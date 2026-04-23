@@ -51,8 +51,8 @@ public:
 	TObjectPtr<UStaticMeshComponent> WeaponMesh;
 
 	// 최대 총알갯수
-	UPROPERTY(Replicated)
-	int32 MaxClip = 0;
+	UPROPERTY(Replicated,BlueprintReadWrite)
+	int32 MaxClip;
 
 	// 현재 갯수GetLifetimeReplicatedProps
 	UPROPERTY(Replicated, BlueprintReadOnly)
