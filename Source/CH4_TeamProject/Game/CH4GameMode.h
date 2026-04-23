@@ -34,8 +34,6 @@ public:
 	void SetDayPhaseAtServer(EDayPhase NewPhase);
 	void FinalDefenceWaveSpawn();
 	
-	// void StartFinalDefenceAtServer();
-	
 private:
 	bool bGameStarted = false;
 	bool bIsReturningToLobby = false;

@@ -9,8 +9,7 @@ ACH4PlayerState::ACH4PlayerState()
 {
 	bReplicates = true;
 	
-	
-	PlayerReviveCount = 2;//원래2였음
+	PlayerReviveCount = 2;
 }
 
 void ACH4PlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -29,8 +28,6 @@ void ACH4PlayerState::SetLifeState(EPlayerLifeState NewState)
 {
 	LifeState = NewState;
 }
-
-
 
 void ACH4PlayerState::SetPlayerLifeState(EPlayerLifeState PL)
 {
