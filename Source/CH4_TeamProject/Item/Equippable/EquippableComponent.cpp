@@ -18,10 +18,14 @@ UEquippableComponent::UEquippableComponent()
 
 void UEquippableComponent::Fire()
 {
+	UE_LOG(LogTemp, Error, TEXT("CurrentAmmo: %d"), CurrentWeapon->CurrentAmmo);
+    
+	CurrentWeapon->Server_Attack();	
 	if (CurrentWeapon == nullptr)
 	{
 		return;
 	}
+	
 	if (CurrentWeapon->CurrentAmmo > 0)
 	{
 		CurrentWeapon->PlayWeaponShake();
