@@ -32,9 +32,9 @@ ACH4Character::ACH4Character()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	InitializationPlayerMesh(); //메쉬 함수 호출
-	InitializationCamera(); //카메라 함수 호출
-	InitializationInput(); //인풋 함수
+	InitializationPlayerMesh(); 
+	InitializationCamera(); 
+	InitializationInput(); 
 
 	StimuliSource = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("StimuliSource"));
 
@@ -50,11 +50,11 @@ ACH4Character::ACH4Character()
 	bReplicates = true;
 }
 
-//비긴 플레이
+
 void ACH4Character::BeginPlay()
 {
 	Super::BeginPlay();
-	//맵핑 불러오기
+	
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* SubSystem = ULocalPlayer::GetSubsystem<
@@ -65,11 +65,11 @@ void ACH4Character::BeginPlay()
 	}
 	if (IsLocallyControlled())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("내 이름은 %s이고, 로컬 컨트롤러가 나를 조종 중이다!"), *GetName());
+		
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("%s: 난 그냥 원격 캐릭터일 뿐이야."), *GetName());
+		
 	}
 	GamsState = Cast<ACH4GameState>(GetWorld()->GetGameState());
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
@@ -84,7 +84,7 @@ void ACH4Character::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	UpdateAimCamera(DeltaTime); //조준 카메라 상태 업데이트
+	UpdateAimCamera(DeltaTime);
 }
 
 //포즈 상태 업데이트 
@@ -95,7 +95,7 @@ void ACH4Character::Server_UpdateCombatPose_Implementation()
 		CurrentCombatPose = ECombatPose::Normal;
 		return;
 	}
-	UE_LOG(LogTemp, Error, TEXT("서버에서 포즈변경 실행됨"))
+	
 	ECombatPose Data = EquippableComponent->CurrentWeapon->WeaponData->GetGunDataAsset();
 	CurrentCombatPose = Data;
 	UpdateCombatPose();
@@ -103,14 +103,14 @@ void ACH4Character::Server_UpdateCombatPose_Implementation()
 
 void ACH4Character::UpdateCombatPose_Implementation()
 {
-	UE_LOG(LogTemp, Error, TEXT("수동온랩함수 호출완료"))
+	
 	OnRep_CombatPose();
 }
 
 void ACH4Character::OnRep_CombatPose()
 {
-	//CurrentCombatPose = EquippableComponent->AllCurrentWeapon->CombatPose;
-	UE_LOG(LogTemp, Warning, TEXT("CombatPose changed: %d"), (int32)CurrentCombatPose);
+	
+	
 }
 
 void ACH4Character::OnEquipInput1()
@@ -118,7 +118,7 @@ void ACH4Character::OnEquipInput1()
 	if (EquippableComponent && PrimaryWeaponData1)
 	{
 		EquippableComponent->Server_EquipWeapon(PrimaryWeaponData1);
-		UE_LOG(LogTemp, Warning, TEXT("장착 성공! 서버 함수 호출함."));
+		
 		Server_UpdateCombatPose();
 	}
 }
@@ -159,15 +159,15 @@ void ACH4Character::Server_ApplyItemEffect_Implementation(AHealItem* HealItem)
 
 void ACH4Character::HealLog_Implementation()
 {
-	UE_LOG(LogTemp, Warning, TEXT("힐 추가"));
+	
 }
 
 void ACH4Character::OnApplyItemEffect()
 {
-	UE_LOG(LogTemp, Warning, TEXT("야후: 4번 키 눌림!"));
+	
 	if (HealItemCount > 0)
 	{
-		Server_UseHealItem(); // 서버에 힐 요청
+		Server_UseHealItem();
 	}
 }
 
@@ -483,9 +483,7 @@ void ACH4Character::StartSprint()
 //뛰기 멈출때
 void ACH4Character::StopSprint()
 {
-	// SimulatedProxy : 
-	// 리플리케이티드 변수를 수정한다고해서, 서버가 알지 못함.
-	// -> Server-> RPC호출.
+
 
 	bIsSprinting = false;
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
@@ -500,7 +498,7 @@ void ACH4Character::StopSprint()
 
 void ACH4Character::Server_SetSprinting_Implementation(bool bSprint)
 {
-	bIsSprinting = bSprint; // Replicated → 타 클라에 전파
+	bIsSprinting = bSprint;
 	GetCharacterMovement()->MaxWalkSpeed = bSprint ? SprintSpeed : WalkSpeed;
 }
 
@@ -630,7 +628,7 @@ void ACH4Character::Fires()
 	// 컴포넌트가 없으면 종료
 	if (EquippableComponent == nullptr)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, TEXT("컴포넌트 자체가 널입니다!"));
+		
 		return;
 	}
 
@@ -639,26 +637,25 @@ void ACH4Character::Fires()
 	//현재 무기가 없으면 종료
 	if (EquippableComponent->CurrentWeapon == nullptr)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, TEXT("컴포넌트는 있는데 총이 없습니다!"));
+		
 		return;
 	}
 
 	//장전 중이면 발사 막기
 	if (IsReloading())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("장전 중이라 발사 불가"));
+		
 		return;
 	}
 	ARangedWeapons* Firearm = Cast<ARangedWeapons>(EquippableComponent->CurrentWeapon);
 	if (Firearm && Firearm->CurrentAmmo <= 0) return;
 	
-	UE_LOG(LogTemp, Warning, TEXT("Weapon: %s"),
-	       EquippableComponent->CurrentWeapon ? TEXT("있음") : TEXT("없음"));
+	
 	//현재 전투 포즈 확인용 로그
-	UE_LOG(LogTemp, Warning, TEXT("CurrentCombatPose: %d"), (int32)CurrentCombatPose);
+	
 	//실제 발사
 	EquippableComponent->Fire();
-	UE_LOG(LogTemp, Error, TEXT("현재 총알개수:%d"), EquippableComponent->CurrentWeapon->CurrentAmmo)
+	
 	if (!HasAuthority())
 	{
 		Server_FireMontage();
@@ -670,7 +667,7 @@ void ACH4Character::Fires()
 
 void ACH4Character::OnReload()
 {
-	UE_LOG(LogTemp, Warning, TEXT(" 캐릭터 리리로드 호출됨"));
+	
 
 
 	if (bIsDowned) return;
@@ -678,7 +675,7 @@ void ACH4Character::OnReload()
 	//컴포넌트 또는 현재 무기가 없으면 종료
 	if (EquippableComponent == nullptr || EquippableComponent->CurrentWeapon == nullptr)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("장전 실패 - 무기 또는 컴포넌트가 없음"));
+		
 		return;
 	}
 
@@ -695,12 +692,12 @@ void ACH4Character::OnReload()
 	//이미 장전 중이면 다시 장전 막기
 	if (IsReloading())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("이미 장전 중"));
+		
 		return;
 	}
 
 	//현재 전투 포즈 확인용 로그
-	UE_LOG(LogTemp, Warning, TEXT("Reload CurrentCombatPose: %d"), (int32)CurrentCombatPose);
+	
 	if (!HasAuthority())
 	{
 		Server_ReloadMontage();
@@ -830,7 +827,7 @@ void ACH4Character::Multi_PlayAction_Implementation(EPlayerActionState NewState)
 			break;
 		}
 	}
-	UE_LOG(LogTemp, Warning, TEXT("%d"), (int32)NewState);
+	
 }
 
 //상호작용(소생>줍기)->우선순위
@@ -889,7 +886,7 @@ bool ACH4Character::TryReviveNearbyPlayer()
 		//다운된 플레이어를 태그로 구분 다운된 플레이어 BP 또는 캐릭터에 "DownedPlayer" 태그를 넣어두면 됨
 		if (OtherCharacter->ActorHasTag(TEXT("DownedPlayer")))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("%s 를 소생합니다."), *OtherCharacter->GetName());
+			
 
 			//다운된 플레이어의 부활 애니메이션 재생
 			OtherCharacter->PlayReviveAnimation();
@@ -947,7 +944,7 @@ bool ACH4Character::TryPickupNearbyItem()
 				}
 				else
 				{
-					UE_LOG(LogTemp, Error, TEXT("야후: %s의 상속된 ItemData가 비어있어!"), *Actor->GetName());
+					
 				}
 			}
 			UE_LOG(LogTemp, Warning, TEXT("%s 아이템을 줍습니다."), *Actor->GetName());
@@ -966,12 +963,8 @@ void ACH4Character::ApplyItemEffect(UConsumableDataAsset* Data)
 {
 	if (!Data)
 	{
-		UE_LOG(LogTemp, Error, TEXT("야후: 전달된 데이터가 없습니다!"));
 		return;
 	}
-
-	// 💡 디버깅용: 어떤 타입이 들어왔는지 입구에서 확인!
-	UE_LOG(LogTemp, Log, TEXT("야후: ApplyItemEffect 호출됨. 타입: %d"), (int32)Data->Type);
 
 	switch (Data->Type)
 	{
@@ -986,45 +979,42 @@ void ACH4Character::ApplyItemEffect(UConsumableDataAsset* Data)
 				{
 					FoundWeapon->AddMaxClip(Data->Value);
 
-					UE_LOG(LogTemp, Warning, TEXT("야후: 무기 충전 완료! 현재 총알: %d,%f"), FoundWeapon->GetMaxClip(),
-					       Data->Value);
 					return;
 				}
 			}
-			UE_LOG(LogTemp, Error, TEXT("야후: 충전할 무기를 찾지 못했습니다!"));
+			
 		}
 		break;
 
 	case EEffectType::Health:
 		{
 			HealItemCount++;
-			UE_LOG(LogTemp, Warning, TEXT("야후: 체력 회복 아이템획득 갯수: %d"), HealItemCount);
 		}
 		break;
 
 	case EEffectType::Gear:
 		{
-			UE_LOG(LogTemp, Error, TEXT("야후: 기어 아이템 주움 로직 진입!"));
+			
 
 			if (ACH4GameState* GS = GetWorld()->GetGameState<ACH4GameState>())
 			{
 				GS->AddGearPartsCount();
-				UE_LOG(LogTemp, Warning, TEXT("야후: 게임 스테이트에 기어 부품 추가 완료!"));
+				
 			}
 			else
 			{
-				UE_LOG(LogTemp, Error, TEXT("야후: GameState를 찾을 수 없거나 ACH4GameState가 아닙니다!"));
+				
 			}
 		}
 		break;
 	case EEffectType::Grenade:
 		{
 			GrenadeCount++;
-			UE_LOG(LogTemp, Warning, TEXT("야후: 수류탄 아이템획득 갯수: %d"), GrenadeCount);
+			
 		}
 
 	default:
-		UE_LOG(LogTemp, Warning, TEXT("야후: 정의되지 않은 아이템 타입입니다."));
+		
 		break;
 	}
 }
@@ -1033,19 +1023,19 @@ void ACH4Character::Server_ThrowGrenade_Implementation()
 {
 	if (bUSingGrenade)
 	{
-		UE_LOG(LogTemp, Error, TEXT("수류탄 쿨타임중"))
+		
 		return;
 	}
 
 	if (GrenadeCount <= 0)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("수류탄 갯수 확인해 갯수 : %d"), GrenadeCount);
+		
 		return;
 	}
 
 	if (!GrenadeClass)
 	{
-		UE_LOG(LogTemp, Error, TEXT("서버아님 수류탄 생성 불가"))
+		
 		return;
 	}
 
@@ -1065,15 +1055,14 @@ void ACH4Character::Server_ThrowGrenade_Implementation()
 		FVector ThrowVelocity = GetControlRotation().Vector() * 1500.0f;
 		Grenade->ProjectileMovement->Velocity = ThrowVelocity;
 
-		UE_LOG(LogTemp, Warning, TEXT("수류탄 스폰 성공 - 위치: %s / 속도: %s"),
+		
 		       *SpawnLocation.ToString(), *ThrowVelocity.ToString());
 		GetWorld()->GetTimerManager().SetTimer(ExplosionTimerHandle, Grenade, &AThorwbleItems::Explode, 1.5f, false);
 		bUSingGrenade = true;
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("수류탄 스폰 실패 - GrenadeClass: %s"),
-		       *GrenadeClass->GetName());
+		    
 	}
 	GetWorld()->GetTimerManager().SetTimer(GrenadeTimer, this, &ACH4Character::CanUSingGrenade, 5.f, false);
 }
@@ -1085,7 +1074,7 @@ void ACH4Character::ThrowGrenade()
 
 void ACH4Character::OnThrowGrenade()
 {
-	UE_LOG(LogTemp, Error, TEXT("G키 입력 성공"))
+	
 	ThrowGrenade();
 }
 
@@ -1099,23 +1088,23 @@ void ACH4Character::FireMontagePose()
 	switch (CurrentCombatPose)
 	{
 	case ECombatPose::Pistol:
-		UE_LOG(LogTemp, Warning, TEXT("PistolFire Multi_PlayAction"));
+		
 		Multi_PlayAction(EPlayerActionState::PistolFire);
 		break;
 
 	case ECombatPose::Rifle:
 	case ECombatPose::MuchineGun:
-		UE_LOG(LogTemp, Warning, TEXT("RifleFire Multi_PlayAction"));
+		
 		Multi_PlayAction(EPlayerActionState::RifleFire);
 		break;
 
 	case ECombatPose::Shotgun:
-		UE_LOG(LogTemp, Warning, TEXT("ShotgunFire Multi_PlayAction"));
+		
 		Multi_PlayAction(EPlayerActionState::ShotgunFire);
 		break;
 
 	default:
-		UE_LOG(LogTemp, Warning, TEXT("발사 몽타주 분기 실패 - CurrentCombatPose 확인"));
+		
 		break;
 	}
 }
@@ -1128,33 +1117,27 @@ void ACH4Character::ReloadMontage()
 		switch (CurrentCombatPose)
 		{
 		case ECombatPose::Pistol:
-			UE_LOG(LogTemp, Warning, TEXT("PistolReload Multi_PlayAction"));
+			
 			Multi_PlayAction(EPlayerActionState::PistolReload);
 			break;
 
 		case ECombatPose::Rifle:
-			UE_LOG(LogTemp, Warning, TEXT("RifleReload Multi_PlayAction"));
+			
 			Multi_PlayAction(EPlayerActionState::RifleReload);
 			break;
 		case ECombatPose::Shotgun:
-			UE_LOG(LogTemp, Warning, TEXT("ShotgunReload Multi_PlayAction"));
+			
 			Multi_PlayAction(EPlayerActionState::ShotgunReload);
 			break;
 
 		default:
-			UE_LOG(LogTemp, Warning, TEXT("장전 몽타주 분기 실패 - CurrentCombatPose 확인"));
+			
 			break;
 		}
 	}
 }
 
-// const int32 ACH4Character::GetCurrentAmmoAtEquippableClass()
-// {
-// 	if (CurrentEquippable)
-// 	return CurrentEquippable->GetCurrentAmmo();
-// 	
-// 	return 0;
-// }
+
 
 void ACH4Character::Server_ReloadMontage_Implementation()
 {
@@ -1191,18 +1174,13 @@ void ACH4Character::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 void ACH4Character::Server_UseHealItem_Implementation()
 {
 	if (bIsDowned) return;
-	UE_LOG(LogTemp, Error, TEXT("서버 힐요청됨"))
+	
 	if (DefaultHealData && HealItemCount > 0)
 	{
 		CurrentHP = FMath::Clamp(CurrentHP + DefaultHealData->Value, 0.0f, MaxHP);
 		HealItemCount--;
-		UE_LOG(LogTemp, Log, TEXT("야후: 힐 사용! 남은 체력: %f, 남은 개수: %d,힐량:%f"), CurrentHP, HealItemCount,
-		       DefaultHealData->Value);
 	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT(" 데이터 에셋이 유호하지않거나 힐아이템부족"))
-	}
+	
 }
 
 void ACH4Character::PlayerDestroy()
