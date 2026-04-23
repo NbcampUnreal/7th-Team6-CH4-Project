@@ -47,6 +47,12 @@ public:
 	UPROPERTY()
 	TMap<TSubclassOf<AEquippable>, int32> WeaponAmmoMemory;
 
+	UFUNCTION(BlueprintPure)
+	int32 GetAmmoForUI(TSubclassOf<AEquippable> WeaponClass)const
+	{
+		return WeaponAmmoMemory.FindRef(WeaponClass);
+	}
+	
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	FTransform GetLeftHandSocketTransform() const;
 
