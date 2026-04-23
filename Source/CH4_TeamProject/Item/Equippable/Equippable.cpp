@@ -23,22 +23,18 @@ AEquippable::AEquippable()
 }
 
 void AEquippable::OnRep_WeaponData()
-{	
-	UE_LOG(LogTemp, Error, TEXT("OnRep_WeaponData 호출됨! HasAuthority: %d"), HasAuthority());
-	if (!WeaponData || !WeaponMesh) return;
-	
-		WeaponMesh->SetStaticMesh(WeaponData->StaticMesh);
-		
-		WeaponMesh->SetRelativeLocation(FVector::ZeroVector);
-		WeaponMesh->SetRelativeRotation(FRotator::ZeroRotator);
-		WeaponMesh->SetRelativeScale3D(FVector(1.0f, 1.0f, 1.0f));
-		
-		WeaponMesh->SetVisibility(true, true);
-		WeaponMesh->SetHiddenInGame(false);
-		WeaponMesh->MarkRenderStateDirty();
-        
-		UE_LOG(LogTemp, Warning, TEXT("야후! [%s] 메쉬 강제 등록 완료!"), *WeaponData->StaticMesh->GetName());
-	
+{
+	if (!WeaponData || !WeaponMesh) { return; }
+
+	WeaponMesh->SetStaticMesh(WeaponData->StaticMesh);
+
+	WeaponMesh->SetRelativeLocation(FVector::ZeroVector);
+	WeaponMesh->SetRelativeRotation(FRotator::ZeroRotator);
+	WeaponMesh->SetRelativeScale3D(FVector(1.0f, 1.0f, 1.0f));
+
+	WeaponMesh->SetVisibility(true, true);
+	WeaponMesh->SetHiddenInGame(false);
+	WeaponMesh->MarkRenderStateDirty();
 }
 
 // Called when the game starts or when spawned
@@ -63,14 +59,12 @@ void AEquippable::Reload_Implementation_Internal()
 
 void AEquippable::Server_Reload_Implementation()
 {
-	UE_LOG(LogTemp, Warning, TEXT("실제 클래스: %s"), *GetClass()->GetName());
 	Reload_Implementation_Internal();
 }
 
 void AEquippable::Server_Attack_Implementation()
 {
 	Attack_Implementation_Internal();
-	UE_LOG(LogTemp, Error, TEXT("자식꺼 공격 오버라이드 가능?"))
 }
 
 

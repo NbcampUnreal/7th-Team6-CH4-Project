@@ -44,13 +44,10 @@ void AAmmoItem::NotifyActorBeginOverlap(AActor* OtherActor)
 			if (FoundWeapon)
 			{
 				FoundWeapon->AddMaxClip(DataAsset->Value);
-                
-				UE_LOG(LogTemp, Warning, TEXT("야후: 플레이어는 몰랐지만 무기를 찾아내서 충전 완료!%d:총알"),FoundWeapon->GetMaxClip());
 				Destroy();
 				return; 
 			}
 		}
         
-		UE_LOG(LogTemp, Error, TEXT("야후: 플레이어 주변에 무기가 안 보여!"));
 	}
 }
