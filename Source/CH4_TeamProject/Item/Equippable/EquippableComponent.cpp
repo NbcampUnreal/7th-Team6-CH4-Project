@@ -18,7 +18,6 @@ UEquippableComponent::UEquippableComponent()
 
 void UEquippableComponent::Fire()
 {
-	CurrentWeapon->Server_Attack();	
 	if (CurrentWeapon == nullptr)
 	{
 		return;
