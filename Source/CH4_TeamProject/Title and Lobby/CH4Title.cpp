@@ -11,5 +11,5 @@ void ACH4Title::EnjoyToServerLobby()
 {
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();
 	if (!PC) return;
-	PC->ClientTravel(TEXT("127.0.0.1:7777"), TRAVEL_Absolute);
+	PC->ClientTravel(TEXT("43.200.5.254:7777"), TRAVEL_Absolute);
 }

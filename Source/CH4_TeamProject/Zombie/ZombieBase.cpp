@@ -117,7 +117,7 @@ void AZombieBase::OnDeath()
 	if (ItemClass && GetWorld())
 	{
 		int32 spawnpersent = FMath::RandRange(1.f, 100.f);
-		if (spawnpersent <= 3)
+		if (spawnpersent <= 10)
 		{
 			GetWorld()->SpawnActor<AActor>(ItemClass, SpawnLocation, SpawnRotation, SpawnParams);
 		}

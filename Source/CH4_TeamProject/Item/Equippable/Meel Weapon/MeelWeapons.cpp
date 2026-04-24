@@ -28,7 +28,7 @@ void AMeleeWeapons::BeginPlay()
 	if (MeelData && MeleeDetector)
 	{
 		MeleeDetector->SetSphereRadius(MeelData->AttackRadius);
-		MeleeDetector->SetHiddenInGame(false); 
+		MeleeDetector->SetHiddenInGame(true); 
 	}
 }
 
