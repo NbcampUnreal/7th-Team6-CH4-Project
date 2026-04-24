@@ -34,10 +34,10 @@ public:
 	class UStaticMeshComponent* MeshComp;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Explosion")
-	float ExplosionDamage = 100.0f;
+	float ExplosionDamage = 150.0f;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Explosion")
-	float ExplosionRadius = 300.0f;
+	float ExplosionRadius = 1500.0f;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Explosion")
 	UNiagaraSystem* ExplosionEffect;
