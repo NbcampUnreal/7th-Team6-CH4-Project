@@ -1,14 +1,14 @@
 @echo off
 setlocal enabledelayedexpansion
 chcp 65001
-title [Development] 프로젝트 빌드
+title [Shipping] 프로젝트 빌드
 
 :: ============================
 :: 프로젝트, 엔진 위치 등 빌드 관련 설정
 :: ============================
 set PROJECT_NAME=CH4_TeamProject
 set ENGINE_PATH="C:\UE_5.6_Custom\Engine"
-set CONFIG=Development
+set CONFIG=Shipping
 set BUILD_PLATFORM=Win64
 set PROJECT_PATH=%~dp0%PROJECT_NAME%.uproject
 set UAT_PATH=%ENGINE_PATH%\Build\BatchFiles\RunUAT.bat
@@ -34,18 +34,18 @@ echo ============================
 echo 임시 파일 제거(Binaries, Intermediate)
 if exist "%~dp0Binaries" rd /s /q "%~dp0Binaries"
 if exist "%~dp0Intermediate" rd /s /q "%~dp0Intermediate"
-echo 빌드 시작: %PROJECT_NAME%
+echo 빌드 시작: %PROJECT_NAME% [%CONFIG%]
 echo ============================
 
 echo 에디터 빌드 중...
-call %BUILD_PATH% %PROJECT_NAME%Editor %BUILD_PLATFORM% %CONFIG% -project="%PROJECT_PATH%" -waitmutex
+call %BUILD_PATH% %PROJECT_NAME%Editor %BUILD_PLATFORM% Development -project="%PROJECT_PATH%" -waitmutex
 if errorlevel 1 (
     echo [오류] 에디터 빌드 실패!
     pause
     exit /b !ERRORLEVEL!
 )
 
-echo Client 빌드 중...
+echo Client 빌드 중... [%CONFIG%]
 call %BUILD_PATH% %PROJECT_NAME%Client %BUILD_PLATFORM% %CONFIG% -project="%PROJECT_PATH%" -waitmutex
 if errorlevel 1 (
     echo [오류] Client 빌드 실패!
@@ -53,7 +53,7 @@ if errorlevel 1 (
     exit /b !ERRORLEVEL!
 )
 
-echo Server 빌드 중...
+echo Server 빌드 중... [%CONFIG%]
 call %BUILD_PATH% %PROJECT_NAME%Server %BUILD_PLATFORM% %CONFIG% -project="%PROJECT_PATH%" -waitmutex
 if errorlevel 1 (
     echo [오류] Server 빌드 실패!
@@ -61,7 +61,7 @@ if errorlevel 1 (
     exit /b !ERRORLEVEL!
 )
 
-echo 컨텐츠 쿠킹 및 패키징 중...
+echo 컨텐츠 쿠킹 및 패키징 중... [%CONFIG%]
 call %UAT_PATH% BuildCookRun ^
     -project="%PROJECT_PATH%" ^
     -noP4 ^
@@ -80,7 +80,7 @@ if errorlevel 1 (
 )
 
 echo ============================
-echo 모든 작업 완료!
+echo 모든 작업 완료! [%CONFIG%]
 echo   출력: %~dp0BuildOutput\%CONFIG%
 echo ============================
 pause
